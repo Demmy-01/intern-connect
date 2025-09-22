@@ -1,0 +1,89 @@
+.prof-experience-item {
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.prof-experience-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.prof-experience-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.prof-company-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prof-company-logo img {
+  width: 50%;
+  height: 50%;
+  object-fit: contain;
+}
+
+.prof-experience-content {
+  flex: 1;
+}
+
+.prof-experience-content h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.prof-company-name {
+  font-size: 16px;
+  color: #4285f4;
+  margin-bottom: 4px;
+}
+
+.prof-duration {
+  font-size: 14px;
+  color: #5f6368;
+  margin-bottom: 12px;
+}
+
+.prof-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3c4043;
+  margin: 0;
+}
+
+[data-theme="dark"] .prof-experience-item {
+  background: var(--card-bg);
+}
+
+[data-theme="dark"] .prof-experience-content h3 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .prof-company-name {
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .prof-duration {
+  color: #9aa0a6;
+}
+
+[data-theme="dark"] .prof-description {
+  color: #d1d1d1;
+}
+
+[data-theme="dark"] .prof-company-logo {
+  background: #1f1f1f;
+}

@@ -1,7 +1,9 @@
+@import './typography.css';
+
 .meet-the-team {
             width: 100%;
             padding: 60px 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
             min-height: 100vh;
             padding-top: 150px;
             padding-bottom: 50px;
@@ -15,14 +17,14 @@
         .team-header h1 {
             font-size: 3.2rem;
             font-weight: 700;
-            color: #2c3e50;
+            color: var(--text-primary);
             margin-bottom: 16px;
             letter-spacing: -0.02em;
         }
 
         .team-header p {
             font-size: 1.2rem;
-            color: #7f8c8d;
+            color: var(--text-secondary);
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.6;
@@ -38,13 +40,14 @@
         }
 
         .team-member {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             border-radius: 20px;
             padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 12px 24px rgba(0, 0, 0, 0.05);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(229, 231, 235, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
@@ -101,8 +104,7 @@
         }
 
         .team-info h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            /* Removed font-size and font-weight to use global typography */
             color: #2c3e50;
             margin-bottom: 8px;
             transition: color 0.3s ease;

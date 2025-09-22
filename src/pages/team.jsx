@@ -81,7 +81,7 @@ export function Team() {
                 <img src={member.image} alt={member.name} />
               </div>
               <div className="team-info">
-                <h3>{member.name}</h3>
+                <h5>{member.name}</h5>
                 <div className="duty">{member.duty}</div>
                 <div className="role">{member.role}</div>
                 <a

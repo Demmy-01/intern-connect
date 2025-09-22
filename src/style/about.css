@@ -1,3 +1,5 @@
+@import './typography.css';
+@import '../index.css';
         .section-1 {
             position: relative;
             height: 60vh;
@@ -12,7 +14,7 @@
             overflow: hidden;
             padding-top: 25px;
         }
-
+        
         .section-1::before {
             content: '';
             position: absolute;
@@ -20,8 +22,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(7, 22, 44, 0.85) 0%, rgba(8, 70, 158, 0.75) 100%);
+            background: #0066ccad;
+            opacity: 0.9;
             z-index: 1;
+        }
+        .section-1 Link{
+          text-decoration: none;
         }
 
         .content {
@@ -40,6 +46,7 @@
             margin-bottom: 30px;
             letter-spacing: -0.02em;
             line-height: 1.1;
+            color: var(--text-on-primary) !important;
         }
 
         .content p {
@@ -48,7 +55,7 @@
             margin-bottom: 40px;
             opacity: 0.95;
             font-weight: 400;
-            color: white;
+            color: var(--text-on-primary) !important;
         }
 
         @keyframes fadeInUp {
@@ -63,7 +70,7 @@
         }
 
 .section-2 {
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
   padding: 120px 20px;
   display: flex;
   align-items: center;
@@ -71,6 +78,7 @@
   position: relative;
   overflow: hidden;
   min-height: 80vh;
+  transition: background 0.3s ease;
 }
 
 .section-2::before {
@@ -125,15 +133,15 @@
   padding: 40px;
   position: relative;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--card-bg);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.05),
-    0 1px 3px rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(37, 99, 235, 0.1);
+    0 20px 40px var(--shadow-light),
+    0 1px 3px var(--shadow-light);
+  border: 1px solid var(--card-border);
   transform: translateY(0);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .mission-container:hover {
@@ -178,16 +186,16 @@
   letter-spacing: -0.02em;
 }
 
-.mission-description {
-  font-size: 1.25rem;
-  line-height: 1.8;
-  color: #4b5563;
-  margin: 0;
-  font-weight: 400;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  max-width: 90%;
-  margin: 0 auto;
-}
+        .mission-description {
+            /* Removed font-size and font-weight to use global typography */
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 90%;
+            margin: 0 auto;
+            transition: color 0.3s ease;
+        }
 .section-3 {
   background: linear-gradient(135deg, #29448d, #2563eb);
   padding: 100px 20px;
@@ -220,19 +228,19 @@
   align-items: center;
   gap: 60px;
   margin-bottom: 80px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card-bg);
   border-radius: 16px;
   padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px var(--card-shadow);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--card-border);
 }
 
 .feature-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 30px 60px var(--shadow-medium);
+  background: var(--card-bg);
 }
 
 .feature-card:last-child {
@@ -248,22 +256,22 @@
   padding: 20px 0;
 }
 
-.card-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 16px 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+        .card-title {
+            /* Removed font-size and font-weight to use global typography */
+            color: var(--text-primary);
+            margin: 0 0 16px 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: color 0.3s ease;
+        }
 
-.card-description {
-  font-size: 1.125rem;
-  line-height: 1.7;
-  color: #4b5563;
-  margin: 0;
-  font-weight: 400;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+        .card-description {
+            /* Removed font-size and font-weight to use global typography */
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: color 0.3s ease;
+        }
 
 .card-image {
   flex: 1;
@@ -525,11 +533,12 @@
     opacity: 1;
   }
 }
-.section-4 {
+    .section-4 {
       position: relative;
       padding: 80px 0;
-      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eff6ff 100%);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-tertiary) 100%);
       overflow: hidden;
+      transition: background 0.3s ease;
     }
 
     /* Animated Background Elements */
@@ -641,17 +650,19 @@
     .header-section h2 {
       font-size: 3rem;
       font-weight: bold;
-      color: #111827;
+      color: var(--text-primary);
       margin-bottom: 16px;
       letter-spacing: -0.025em;
+      transition: color 0.3s ease;
     }
 
     .header-section p {
       font-size: 1.25rem;
-      color: #6b7280;
+      color: var(--text-secondary);
       max-width: 512px;
       margin: 0 auto;
       line-height: 1.7;
+      transition: color 0.3s ease;
     }
 
     /* Values Grid */
@@ -669,17 +680,17 @@
 
     /* Value Cards */
     .value-card {
-      background: white;
+      background: var(--card-bg);
       border-radius: 16px;
       padding: 32px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border: 1px solid #f3f4f6;
+      box-shadow: 0 10px 15px -3px var(--card-shadow), 0 4px 6px -2px var(--shadow-light);
+      border: 1px solid var(--card-border);
       transition: all 0.5s ease;
       transform: translateZ(0);
     }
 
     .value-card:hover {
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 25px 50px -12px var(--shadow-heavy);
       transform: translateY(-12px) scale(1.05);
     }
 
@@ -782,7 +793,7 @@
     .value-card h3 {
       font-size: 1.5rem;
       font-weight: bold;
-      color: #111827;
+      color: var(--text-primary);
       margin-bottom: 16px;
       transition: color 0.3s ease;
     }
@@ -800,13 +811,13 @@
     }
 
     .value-card p {
-      color: #6b7280;
+      color: var(--text-secondary);
       line-height: 1.7;
       transition: color 0.3s ease;
     }
 
     .value-card:hover p {
-      color: #374151;
+      color: var(--text-primary);
     }
 
     .accent-line {
@@ -1018,12 +1029,12 @@
 
     /* Cards */
     .section-5-card {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--card-bg);
       backdrop-filter: blur(20px);
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 25px -5px var(--card-shadow), 0 10px 10px -5px var(--shadow-light);
+      border: 1px solid var(--card-border);
       transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       transform: translateZ(0);
       position: relative;
@@ -1054,8 +1065,8 @@
 
     .section-5-card:hover {
       transform: translateY(-20px) scale(1.02);
-      box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
-      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 35px 60px -12px var(--shadow-heavy);
+      border-color: var(--card-border);
     }
 
     /* Image Container */
@@ -1134,7 +1145,7 @@
     .section-5-content h3 {
       font-size: 1.5rem;
       font-weight: bold;
-      color: #1f2937;
+      color: var(--text-primary);
       margin: 0;
       transition: color 0.3s ease;
     }
@@ -1145,7 +1156,7 @@
 
     .section-5-arrow {
       font-size: 1.5rem;
-      color: #6b7280;
+      color: var(--text-secondary);
       transition: all 0.3s ease;
       transform: translateX(0);
     }
@@ -1156,14 +1167,14 @@
     }
 
     .section-5-content p {
-      color: #6b7280;
+      color: var(--text-secondary);
       line-height: 1.6;
       margin: 0;
       transition: color 0.3s ease;
     }
 
     .section-5-card:hover p {
-      color: #4b5563;
+      color: var(--text-primary);
     }
 
     /* Card specific animations */
@@ -1429,9 +1440,10 @@
 .join-us {
       position: relative;
       padding: 100px 0;
-      background: #ffffff;
+      background: var(--bg-primary);
       overflow: hidden;
       text-align: center;
+      transition: background-color 0.3s ease;
     }
 
     /* Animated Background Elements */
@@ -1662,11 +1674,12 @@
     .join-us-content h2 {
       font-size: 4rem;
       font-weight: bold;
-      color: #1f2937;
+      color: var(--text-primary);
       margin-bottom: 24px;
       letter-spacing: -0.025em;
       position: relative;
       animation: join-us-fadeInUp 1s ease-out;
+      transition: color 0.3s ease;
     }
 
     .join-us-content h2::after {
@@ -1684,11 +1697,12 @@
 
     .join-us-content p {
       font-size: 1.25rem;
-      color: #6b7280;
+      color: var(--text-secondary);
       line-height: 1.7;
       max-width: 700px;
       margin: 0 auto;
       animation: join-us-fadeInUp 1s ease-out 0.3s both;
+      transition: color 0.3s ease;
     }
 
     /* Hover effect for the entire section */
@@ -1818,3 +1832,45 @@
         line-height: 1.6;
       }
     }
+
+/* Fade-in animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered animation delays for different sections */
+.section-2.fade-in {
+  transition-delay: 0.2s;
+}
+
+.section-3.fade-in {
+  transition-delay: 0.4s;
+}
+
+.section-4.fade-in {
+  transition-delay: 0.6s;
+}
+
+.section-5.fade-in {
+  transition-delay: 0.8s;
+}
+
+.join-us.fade-in {
+  transition-delay: 1s;
+}
+
+/* Smooth animation for reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

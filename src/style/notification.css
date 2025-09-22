@@ -1,0 +1,272 @@
+/* Notification Modal Styles
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  width: 480px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px var(--shadow-medium),
+    0 10px 10px -5px var(--shadow-light);
+  font-family: system-ui, sans-serif;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-primary);
+  background-color: var(--bg-secondary);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-title {
+  font-size: clamp(1.2rem, 1.5vw + 0.4rem, 1.6rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check-status {
+  font-size: 14px;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #6b7280;
+}
+
+.notifications-section {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.icon-container {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.intern-icon,
+.reminder-icon {
+  font-size: 16px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.notification-title {
+  font-size: clamp(1rem, 1vw + 0.3rem, 1.2rem);
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.time-ago {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+}
+
+.notification-description {
+  font-size: clamp(0.8rem, 0.8vw + 0.4rem, 1rem);
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.application-status-section {
+  border-top: 1px solid #e5e7eb;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.section-title {
+  font-size: clamp(1rem, 1vw + 0.3rem, 1.2rem);
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  padding: 16px 20px 8px;
+}
+
+.application-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.logo-container {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.quickee-logo {
+  width: 48px;
+  height: 48px;
+  background-color: #dc2626;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quickee-text {
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.great-learning-logo {
+  width: 48px;
+  height: 48px;
+  background-color: #1e40af;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.g-text {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  position: absolute;
+  left: 6px;
+}
+
+.great-learning-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 16px;
+}
+
+.great-text,
+.learning-text {
+  color: white;
+  font-size: 6px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.power-text {
+  color: #fbbf24;
+  font-size: 4px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.application-content {
+  flex: 1;
+}
+
+.application-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.company-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.company-details {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 2px 0;
+}
+
+.location {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-label {
+  font-size: 13px;
+  color: #111827;
+}
+
+.status-text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.additional-info {
+  font-size: 13px;
+  color: #6b7280;
+  margin-left: 8px;
+} */

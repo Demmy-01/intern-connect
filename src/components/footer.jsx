@@ -43,7 +43,7 @@ const Footer = () => {
 
           {/* Quick Links Section */}
           <div className="section">
-            <h4 className="section-title h4">Quick Links</h4>
+            <h4 className="section-title-ft h4">Quick Links</h4>
             <ul className="link-list">
               <li className="link-item">
                 <Link to="/" className="link">
@@ -75,7 +75,7 @@ const Footer = () => {
 
           {/* Contact Section */}
           <div className="section">
-            <h4 className="section-title h4">Contact Us</h4>
+            <h4 className="section-title-ft h4">Contact Us</h4>
             <div className="contact-info">
               <div className="contact-item">
                 <div className="contact-icon">
@@ -126,20 +126,36 @@ const Footer = () => {
             © {new Date().getFullYear()} Intern Connect. All rights reserved.
           </p>
           <div className="social-links">
-            <a href="#" className="social-link" aria-label="Facebook">
+            <a
+              href="#"
+              className="social-link"
+              aria-label="Facebook"
+              target="_blank"
+            >
               <Facebook size={18} />
             </a>
-            <a href="#" className="social-link" aria-label="Twitter">
+            <a
+              href="#"
+              className="social-link"
+              aria-label="Twitter"
+              target="_blank"
+            >
               <Twitter size={18} />
             </a>
             <a
               href="https://www.linkedin.com/company/dandem-intern-connect/posts/?feedView=all"
               className="social-link"
               aria-label="LinkedIn"
+              target="_blank"
             >
               <Linkedin size={18} />
             </a>
-            <a href="#" className="social-link" aria-label="Instagram">
+            <a
+              href="https://www.instagram.com/intern_connects?igsh=MW0yY3pvajczOHBvYQ=="
+              className="social-link"
+              aria-label="Instagram"
+              target="_blank"
+            >
               <Instagram size={18} />
             </a>
           </div>

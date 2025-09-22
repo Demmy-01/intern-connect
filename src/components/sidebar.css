@@ -1,0 +1,59 @@
+.side-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 4px 8px;
+}
+
+.side-nav-item:hover {
+  background-color: #f3f4f6;
+}
+
+.side-nav-item.active {
+  background-color: #ebf5ff;
+  color: #2563eb;
+}
+
+.side-nav-item.active .side-nav-link {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Rest of your existing sidebar styles */
+.sidebar {
+  background-color: #ffffff;
+  width: 280px;
+  min-width: 280px;
+  border-right: 1px solid #e5e7eb;
+  padding: 0;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+}
+
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.side-nav-link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+}

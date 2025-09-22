@@ -1,0 +1,130 @@
+/* Applications table styles */
+.applications-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.applications-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px; /* Ensures table doesn't get too squished */
+}
+
+.applications-table th,
+.applications-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.applications-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+/* Column widths */
+.applications-table th:nth-child(1),
+.applications-table td:nth-child(1) {
+  width: 25%;
+}
+
+.applications-table th:nth-child(2),
+.applications-table td:nth-child(2) {
+  width: 25%;
+}
+
+.applications-table th:nth-child(3),
+.applications-table td:nth-child(3) {
+  width: 15%;
+}
+
+.applications-table th:nth-child(4),
+.applications-table td:nth-child(4) {
+  width: 15%;
+}
+
+.applications-table th:nth-child(5),
+.applications-table td:nth-child(5) {
+  width: 20%;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.decision-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .applications-header {
+    padding: 0 16px;
+  }
+  
+  .applications-table-container {
+    margin: 16px;
+    border-radius: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .applications-header h1 {
+    font-size: 24px;
+  }
+
+  .applications-table th,
+  .applications-table td {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .decision-buttons button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Card view for very small screens */
+@media (max-width: 480px) {
+  .applications-table-container {
+    margin: 12px;
+  }
+
+  /* Add horizontal scroll indicator */
+  .applications-table-container::after {
+    content: "←  Scroll to see more  →";
+    display: block;
+    text-align: center;
+    padding: 8px;
+    color: #6b7280;
+    font-size: 14px;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .status-badge {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+}

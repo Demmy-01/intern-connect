@@ -1,0 +1,328 @@
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import "../style/internship-details.css";
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
+import studentService from "../lib/studentService.js";
+
+const InternshipDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [internshipData, setInternshipData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [applicationStatus, setApplicationStatus] = useState({ hasApplied: false, application: null });
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      loadInternshipDetails();
+      checkApplicationStatus();
+    }
+  }, [id]);
+
+  const loadInternshipDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data, error } = await studentService.getInternshipById(id);
+      
+      if (error) {
+        setError(error);
+      } else {
+        setInternshipData(data);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkApplicationStatus = async () => {
+    try {
+      const { hasApplied, application } = await studentService.checkApplicationStatus(id);
+      setApplicationStatus({ hasApplied, application });
+    } catch (err) {
+      console.error('Error checking application status:', err);
+    }
+  };
+
+  const handleApplyNow = () => {
+    if (applicationStatus.hasApplied) {
+      alert('You have already applied for this internship');
+      return;
+    }
+    navigate(`/apply/${id}`);
+  };
+
+  const handleViewProfile = () => {
+    if (internshipData?.organizations?.id) {
+      navigate(`/organizations-profile/${internshipData.organizations.id}`);
+    }
+  };
+
+  const formatWorkType = (type) => {
+    return type?.charAt(0).toUpperCase() + type?.slice(1) || 'Not specified';
+  };
+
+  const formatCompensation = (comp) => {
+    return comp?.charAt(0).toUpperCase() + comp?.slice(1) || 'Not specified';
+  };
+
+  const formatDuration = (min, max) => {
+    return `${min || 0} - ${max || 0} months`;
+  };
+
+  const formatRequirements = (requirements) => {
+    if (!requirements) return [];
+    
+    return requirements.split('\n').map((req, index) => (
+      <li key={index}>{req.replace(/^[•\-\*]\s*/, '')}</li>
+    ));
+  };
+
+  const formatPostedDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="internship-details-page">
+          <div className="it-container">
+            <div className="loading-state">
+              <div className="spinner"></div>
+              <p>Loading internship details...</p>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !internshipData) {
+    return (
+      <>
+        <Navbar />
+        <div className="internship-details-page">
+          <div className="it-container">
+            <div className="error-state">
+              <h2>Internship Not Found</h2>
+              <p>{error || 'The internship you are looking for could not be found.'}</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate('/internships')}
+              >
+                Back to Internships
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+      <div className="internship-details-page">
+        <div className="it-container">
+          {/* Header Section */}
+          <div className="header-section">
+            <div className="header-top">
+              <img 
+                src={internshipData.organizations?.logo_url || "https://via.placeholder.com/80x80/3498db/ffffff?text=ORG"} 
+                alt={`${internshipData.organizations?.company_name || 'Organization'} logo`}
+                className="org-logo"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/80x80/3498db/ffffff?text=ORG";
+                }}
+              />
+              <div className="header-info">
+                <h1 className="position-title">{internshipData.position_title}</h1>
+                <h2 className="org-name">{internshipData.organizations?.organization_name || 'Unknown Organization'}</h2>
+                <p className="department">{internshipData.department} Department</p>
+              </div>
+            </div>
+
+            <div className="meta-info">
+              <div className="meta-item">
+                <span className="meta-label">Location</span>
+                <span className="meta-value">{internshipData.location || 'Not specified'}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">Work Type</span>
+                <span className="work-type-badge">{formatWorkType(internshipData.work_type)}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">Duration</span>
+                <span className="duration-badge">{formatDuration(internshipData.min_duration, internshipData.max_duration)}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">Compensation</span>
+                <span className="compensation-badge">{formatCompensation(internshipData.compensation)}</span>
+              </div>
+            </div>
+
+            {/* Application Status */}
+            {applicationStatus.hasApplied && (
+              <div className="application-status">
+                <div className="status-badge applied">
+                  ✓ Applied on {new Date(applicationStatus.application?.applied_at).toLocaleDateString()}
+                </div>
+                <p>Status: {applicationStatus.application?.status?.charAt(0).toUpperCase() + applicationStatus.application?.status?.slice(1) || 'Pending'}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Description Section */}
+          <div className="content-section">
+            <h3 className="section-title">About This Internship</h3>
+            <p className="description-text">{internshipData.description || 'No description provided.'}</p>
+          </div>
+
+          {/* Requirements Section */}
+          {internshipData.requirements && (
+            <div className="content-section">
+              <h3 className="section-title">Requirements</h3>
+              <ul className="requirements-list">
+                {formatRequirements(internshipData.requirements)}
+              </ul>
+            </div>
+          )}
+
+          {/* Organization Info Section */}
+          <div className="content-section">
+            <h3 className="section-title">About {internshipData.organizations?.company_name}</h3>
+            <div className="org-info">
+              <div className="org-details">
+                <p><strong>Industry:</strong> {internshipData.organizations?.industry || 'Not specified'}</p>
+                <p><strong>Company Type:</strong> {internshipData.organizations?.company_type || 'Not specified'}</p>
+                <p><strong>Location:</strong> {internshipData.organizations?.org_location || internshipData.organizations?.location || 'Not specified'}</p>
+                {internshipData.organizations?.website && (
+                  <p><strong>Website:</strong> <a href={internshipData.organizations.website} target="_blank" rel="noopener noreferrer">{internshipData.organizations.website}</a></p>
+                )}
+              </div>
+              {internshipData.organizations?.company_description && (
+                <p className="org-description">{internshipData.organizations.company_description}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button 
+              className={`btn btn-primary ${applicationStatus.hasApplied ? 'disabled' : ''}`}
+              onClick={handleApplyNow}
+              disabled={applicationStatus.hasApplied || applying}
+            >
+              {applying ? 'Applying...' : applicationStatus.hasApplied ? 'Already Applied' : 'Apply Now'}
+            </button>
+            <button className="btn btn-secondary" onClick={handleViewProfile}>
+              View Organization Profile
+            </button>
+          </div>
+
+          <div className="posted-date">
+            Posted {formatPostedDate(internshipData.created_at)}
+          </div>
+        </div>
+      </div>
+      <Footer />
+      
+      <style jsx>{`
+        .loading-state, .error-state {
+          text-align: center;
+          padding: 3rem;
+        }
+        
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #1070e5;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        .application-status {
+          background: #f0f9ff;
+          border: 1px solid #0ea5e9;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 1rem;
+        }
+        
+        .status-badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+        
+        .status-badge.applied {
+          background: #dcfce7;
+          color: #166534;
+          border: 1px solid #bbf7d0;
+        }
+        
+        .org-info {
+          background: #f8fafc;
+          padding: 1.5rem;
+          border-radius: 8px;
+          margin-top: 1rem;
+        }
+        
+        .org-details p {
+          margin: 0.5rem 0;
+        }
+        
+        .org-description {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #e2e8f0;
+        }
+        
+        .btn.disabled {
+          background: #94a3b8;
+          cursor: not-allowed;
+        }
+        
+        .btn.disabled:hover {
+          background: #94a3b8;
+        }
+        
+        .error-state h2 {
+          color: #dc2626;
+          margin-bottom: 1rem;
+        }
+        
+        .error-state p {
+          color: #64748b;
+          margin-bottom: 2rem;
+        }
+      `}</style>
+    </>
+  );
+};
+
+export default InternshipDetails;

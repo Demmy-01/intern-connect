@@ -1,0 +1,33 @@
+.prof-skill-tag {
+  display: inline-block;
+  background-color: #e8f0fe;
+  color: #1967d2;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 4px;
+}
+
+.prof-add-skill {
+  background-color: #fff;
+  border: 2px dashed #dadce0;
+  color: #5f6368;
+  cursor: pointer;
+}
+
+.prof-add-skill:hover {
+  border-color: #1967d2;
+  color: #1967d2;
+  background-color: #f8f9fa;
+}
+
+[data-theme="dark"] .prof-skill-tag {
+  background-color: #1f1f1f;
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .prof-add-skill {
+  border-color: #5f6368;
+  color: #9aa0a6;
+}

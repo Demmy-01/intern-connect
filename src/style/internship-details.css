@@ -1,0 +1,325 @@
+        :root {
+          /* Base colors */
+          --bg-primary: #ffffff;
+          --bg-secondary: #f8fafc;
+          --bg-tertiary: #f1f5f9;
+          
+          /* Text colors */
+          --text-primary: #1e293b;
+          --text-secondary: #64748b;
+          --text-tertiary: #94a3b8;
+          --text-on-primary: #ffffff;
+          
+          /* Card and surface colors */
+          --card-bg: #ffffff;
+          --card-border: rgba(229, 231, 235, 0.3);
+          --card-shadow: rgba(0, 0, 0, 0.1);
+          --shadow-medium: rgba(0, 0, 0, 0.08);
+          --shadow-heavy: rgba(0, 0, 0, 0.15);
+          
+          /* Brand colors */
+          --primary: #1070e58f;
+          --primary-dark: #2980b9;
+          --secondary: #2c3e50;
+          --accent: #e74c3c;
+          
+          /* Status colors */
+          --success: #22c55e;
+          --warning: #f59e0b;
+          --error: #ef4444;
+          --info: #3b82f6;
+          
+          /* Font family */
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        /* Dark mode theme */
+        [data-theme="dark"] {
+          /* Base colors */
+          --bg-primary: #0f172a;
+          --bg-secondary: #1e293b;
+          --bg-tertiary: #334155;
+          
+          /* Text colors */
+          --text-primary: #f1f5f9;
+          --text-secondary: #cbd5e1;
+          --text-tertiary: #94a3b8;
+          --text-on-primary: #ffffff;
+          
+          /* Card and surface colors */
+          --card-bg: #1e293b;
+          --card-border: rgba(255, 255, 255, 0.1);
+          --card-shadow: rgba(0, 0, 0, 0.3);
+          --shadow-medium: rgba(0, 0, 0, 0.25);
+          --shadow-heavy: rgba(0, 0, 0, 0.4);
+          
+          /* Brand colors - slightly adjusted for dark mode */
+          --primary: #17365c8f;
+          --primary-dark: #2980b9;
+          --secondary: #34495e;
+          --accent: #e74c3c;
+          
+          /* Status colors - slightly adjusted for dark mode */
+          --success: #22c55e;
+          --warning: #f59e0b;
+          --error: #ef4444;
+          --info: #3b82f6;
+        }
+
+        .internship-details-page {
+          min-height: 100vh;
+          background: var(--bg-secondary);
+          padding: 24px;
+          font-family: var(--font-family);
+        }
+
+        .it-container {
+          max-width: 900px;
+          margin: 80px auto;
+        }
+
+        .header-section {
+          background: var(--card-bg);
+          border-radius: 12px;
+          padding: 32px;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 6px var(--shadow-medium);
+          border: 1px solid var(--card-border);
+        }
+
+        .header-top {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+
+        .org-logo {
+          width: 80px;
+          height: 80px;
+          border-radius: 12px;
+          object-fit: cover;
+          border: 2px solid var(--card-border);
+        }
+
+        .header-info {
+          flex: 1;
+        }
+
+        .position-title {
+          font-size: 28px;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin: 0 0 8px 0;
+          line-height: 1.2;
+        }
+
+        .org-name {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--primary);
+          margin: 0 0 4px 0;
+        }
+
+        .department {
+          font-size: 16px;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .meta-info {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 24px;
+          margin-top: 20px;
+        }
+
+        .meta-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .meta-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--text-tertiary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+          font-size: 16px;
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+
+        .content-section {
+          background: var(--card-bg);
+          border-radius: 12px;
+          padding: 32px;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 6px var(--shadow-medium);
+          border: 1px solid var(--card-border);
+        }
+
+        .section-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin: 0 0 16px 0;
+          padding-bottom: 8px;
+          border-bottom: 2px solid var(--primary);
+          display: inline-block;
+        }
+
+        .description-text {
+          font-size: 16px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .requirements-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .requirements-list li {
+          font-size: 16px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          padding: 8px 0;
+          position: relative;
+          padding-left: 24px;
+        }
+
+        .requirements-list li:before {
+          content: "✓";
+          position: absolute;
+          left: 0;
+          color: var(--success);
+          font-weight: bold;
+        }
+
+        .action-buttons {
+          background: var(--card-bg);
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 4px 6px var(--shadow-medium);
+          border: 1px solid var(--card-border);
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .btn {
+          padding: 16px 32px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: none;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 160px;
+        }
+
+        .btn-primary {
+          background: var(--primary);
+          color: var(--text-on-primary);
+        }
+
+        .btn-primary:hover {
+          background: var(--primary-dark);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px var(--shadow-heavy);
+        }
+
+        .btn-secondary {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          border: 2px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+          background: var(--bg-secondary);
+          border-color: var(--primary);
+          color: var(--primary);
+          transform: translateY(-2px);
+        }
+
+        .posted-date {
+          font-size: 14px;
+          color: var(--text-tertiary);
+          margin-top: 16px;
+          text-align: center;
+        }
+
+        .duration-badge {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .compensation-badge {
+          background: var(--success);
+          color: white;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+          font-weight: 500;
+          text-transform: capitalize;
+        }
+
+        .work-type-badge {
+          background: var(--info);
+          color: white;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+          font-weight: 500;
+          text-transform: capitalize;
+        }
+
+        @media (max-width: 768px) {
+          .internship-details-page {
+            padding: 16px;
+          }
+
+          .header-section,
+          .content-section,
+          .action-buttons {
+            padding: 24px;
+          }
+
+          .position-title {
+            font-size: 24px;
+          }
+
+          .header-top {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+
+          .meta-info {
+            gap: 16px;
+          }
+
+          .action-buttons {
+            flex-direction: column;
+          }
+
+          .btn {
+            width: 100%;
+            min-width: auto;
+          }
+        }

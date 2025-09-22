@@ -1,0 +1,237 @@
+/* OrganizationSignup.css */
+
+.org-signup-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+  padding: 48px 16px;
+}
+
+@media (min-width: 640px) {
+  .org-signup-container {
+    padding: 48px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .org-signup-container {
+    padding: 48px 32px;
+  }
+}
+
+.org-signup-card {
+  max-width: 448px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.org-signup-header {
+  text-align: center;
+}
+
+.org-signup-title {
+  margin-top: 24px;
+  font-size: 30px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 0;
+}
+
+.org-signup-subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 0;
+}
+
+.org-signup-form {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.org-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.org-input-container {
+  position: relative;
+}
+
+.org-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.org-input-field {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #111827;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.org-input-field::placeholder {
+  color: #9ca3af;
+}
+
+.org-input-field:focus {
+  outline: none;
+  border-color: #6366f1;
+  z-index: 10;
+}
+
+.org-input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 640px) {
+  .org-input-field {
+    font-size: 14px;
+  }
+}
+
+.org-error-message {
+  border-radius: 6px;
+  background-color: #fef2f2;
+  padding: 16px;
+}
+
+.org-error-text {
+  font-size: 14px;
+  color: #b91c1c;
+}
+
+.org-success-message {
+  border-radius: 6px;
+  background-color: #f0fdf4;
+  padding: 16px;
+}
+
+.org-success-text {
+  font-size: 14px;
+  color: #15803d;
+}
+
+.org-submit-container {
+  width: 100%;
+}
+
+.org-submit-button {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  color: white;
+  background-color: #4f46e5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.org-submit-button:hover {
+  background-color: #4338ca;
+}
+
+.org-submit-button:focus {
+  outline: none;
+}
+
+.org-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.org-login-links {
+  text-align: center;
+}
+
+.org-login-text {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0;
+}
+
+.org-login-link {
+  font-weight: 500;
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.org-login-link:hover {
+  color: #6366f1;
+}
+
+.org-student-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 0;
+}
+
+.org-student-link {
+  font-weight: 500;
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.org-student-link:hover {
+  color: #6366f1;
+}
+
+.org-terms-section {
+  margin-top: 24px;
+}
+
+.org-terms-divider {
+  position: relative;
+}
+
+.org-terms-line {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+
+.org-terms-line::before {
+  content: "";
+  width: 100%;
+  border-top: 1px solid #d1d5db;
+}
+
+.org-terms-text {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.org-terms-span {
+  padding: 0 8px;
+  background-color: #f9fafb;
+  color: #6b7280;
+}

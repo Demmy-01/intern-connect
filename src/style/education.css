@@ -1,0 +1,84 @@
+.prof-education-item {
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.prof-education-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.prof-education-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.prof-institution-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.prof-education-content {
+  flex: 1;
+}
+
+.prof-education-content h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.prof-degree-name {
+  font-size: 16px;
+  color: #4285f4;
+  margin-bottom: 4px;
+}
+
+.prof-duration {
+  font-size: 14px;
+  color: #5f6368;
+  margin-bottom: 12px;
+}
+
+.prof-coursework {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3c4043;
+  margin: 0;
+}
+
+[data-theme="dark"] .prof-education-item {
+  background: var(--card-bg);
+}
+
+[data-theme="dark"] .prof-education-content h3 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .prof-degree-name {
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .prof-duration {
+  color: #9aa0a6;
+}
+
+[data-theme="dark"] .prof-coursework {
+  color: #d1d1d1;
+}
+
+[data-theme="dark"] .prof-institution-logo {
+  background: #1f1f1f;
+}

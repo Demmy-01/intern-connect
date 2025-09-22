@@ -1,0 +1,274 @@
+.profile-page{
+    min-height: 100vh;
+}
+.prof-container {
+  padding: 20px;
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+  padding-top: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+.prof-card {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+}
+
+.prof-left-panel {
+  background: var(--card-bg);
+  padding: 30px;
+  text-align: center;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px var(--card-shadow);
+  border: 1px solid var(--card-border);
+  height: fit-content;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.prof-image {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--primary);
+  transition: border-color 0.3s ease;
+}
+
+.prof-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prof-name {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.prof-username {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  font-size: 15px;
+  transition: color 0.3s ease;
+}
+
+.prof-bio {
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.prof-edit-button {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
+.prof-edit-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow-medium);
+}
+
+.prof-contact-info {
+  text-align: left;
+  border-top: 1px solid var(--card-border);
+  padding-top: 20px;
+  width: 100%;
+}
+
+.prof-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.prof-contact-icon {
+  width: 18px;
+  font-size: 16px;
+  color: var(--primary);
+  transition: color 0.3s ease;
+}
+
+.prof-right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.prof-section {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px var(--card-shadow);
+  border: 1px solid var(--card-border);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.prof-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.prof-section-icon {
+  font-size: 20px;
+  color: var(--primary);
+  transition: color 0.3s ease;
+}
+
+.prof-section h2, .prof-section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.prof-skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.prof-container {
+  transition: background-color 0.3s ease;
+}
+
+.prof-left-panel,
+.prof-section {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.prof-name {
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .prof-username,
+[data-theme="dark"] .prof-contact-item {
+  color: #a0a0a0;
+}
+
+[data-theme="dark"] .prof-bio {
+  color: #d1d1d1;
+}
+
+[data-theme="dark"] .prof-section h2,
+[data-theme="dark"] .prof-section-title {
+  color: #ffffff;
+}
+
+.prof-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.prof-stat-card {
+  flex: 1;
+  min-width: 200px;
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--card-shadow);
+  border: 1px solid var(--card-border);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.prof-stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.prof-stat-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .prof-container {
+    padding: 15px;
+    padding-top: 100px !important;
+  }
+
+  .prof-card {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .prof-left-panel {
+    padding: 24px;
+  }
+
+  .prof-section {
+    padding: 20px;
+  }
+
+  .prof-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .prof-name {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .prof-container {
+    padding: 10px;
+  }
+
+  .prof-left-panel,
+  .prof-section {
+    padding: 16px;
+  }
+
+  .prof-skills-list {
+    gap: 8px;
+  }
+
+  .prof-bio {
+    font-size: 13px;
+  }
+
+  .prof-section h2,
+  .prof-section-title {
+    font-size: 18px;
+  }
+}
