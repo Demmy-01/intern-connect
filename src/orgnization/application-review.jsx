@@ -10,13 +10,13 @@ import email from "../assets/email.png";
 import location from "../assets/location.png";
 import time from "../assets/time.png";
 import school from "../assets/school.png";
-// import profile from "../assets/profile.png";
+import profile from "../assets/profile.png";
 import organizationService from "../lib/organizationService.js";
 
 const ApplicationDetails = () => {
   const { id: applicationId } = useParams();
   const navigate = useNavigate();
-  
+
   const [applicationData, setApplicationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,8 +31,10 @@ const ApplicationDetails = () => {
   const loadApplicationDetails = async () => {
     try {
       setLoading(true);
-      const { data, error } = await organizationService.getApplicationDetails(applicationId);
-      
+      const { data, error } = await organizationService.getApplicationDetails(
+        applicationId
+      );
+
       if (error) {
         setError(error);
       } else {
@@ -47,24 +49,34 @@ const ApplicationDetails = () => {
 
   const handleStatusUpdate = async (status) => {
     if (!applicationData) return;
-    
-    const confirmMessage = status === 'accepted' 
-      ? 'Are you sure you want to accept this application?'
-      : 'Are you sure you want to reject this application?';
-    
+
+    const confirmMessage =
+      status === "accepted"
+        ? "Are you sure you want to accept this application?"
+        : "Are you sure you want to reject this application?";
+
     if (window.confirm(confirmMessage)) {
       try {
         setUpdating(true);
-        const { data, error } = await organizationService.updateApplicationStatus(
-          applicationId, 
-          status
-        );
-        
+        const { data, error } =
+          await organizationService.updateApplicationStatus(
+            applicationId,
+            status
+          );
+
         if (error) {
-          alert(`Error ${status === 'accepted' ? 'accepting' : 'rejecting'} application: ${error}`);
+          alert(
+            `Error ${
+              status === "accepted" ? "accepting" : "rejecting"
+            } application: ${error}`
+          );
         } else {
-          alert(`Application ${status === 'accepted' ? 'accepted' : 'rejected'} successfully!`);
-          setApplicationData(prev => ({ ...prev, status }));
+          alert(
+            `Application ${
+              status === "accepted" ? "accepted" : "rejected"
+            } successfully!`
+          );
+          setApplicationData((prev) => ({ ...prev, status }));
         }
       } catch (err) {
         alert(`Error updating application: ${err.message}`);
@@ -76,10 +88,10 @@ const ApplicationDetails = () => {
 
   const downloadDocument = (documentUrl, fileName) => {
     if (documentUrl) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = documentUrl;
-      link.download = fileName || 'document';
-      link.target = '_blank';
+      link.download = fileName || "document";
+      link.target = "_blank";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -87,13 +99,15 @@ const ApplicationDetails = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Not provided';
+    if (!dateString) return "Not provided";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).replace(/\//g, ' - ');
+    return date
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, " - ");
   };
 
   const parseApplicationNotes = (notes) => {
@@ -102,11 +116,15 @@ const ApplicationDetails = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'accepted': return '#22c55e';
-      case 'rejected': return '#ef4444';
-      case 'reviewed': return '#f59e0b';
-      case 'pending':
-      default: return '#6b7280';
+      case "accepted":
+        return "#22c55e";
+      case "rejected":
+        return "#ef4444";
+      case "reviewed":
+        return "#f59e0b";
+      case "pending":
+      default:
+        return "#6b7280";
     }
   };
 
@@ -126,10 +144,10 @@ const ApplicationDetails = () => {
       <DashboardLayout>
         <div className="error-container">
           <h2>Unable to Load Application</h2>
-          <p>{error || 'Application not found'}</p>
-          <button 
+          <p>{error || "Application not found"}</p>
+          <button
             className="btn btn-primary"
-            onClick={() => navigate('/applications')}
+            onClick={() => navigate("/applications")}
           >
             Back to Applications
           </button>
@@ -140,8 +158,9 @@ const ApplicationDetails = () => {
 
   const student = applicationData.students;
   const internship = applicationData.internships;
-  const education = applicationData.student_education?.[0];
-  const applicationNotes = parseApplicationNotes(applicationData.notes);
+  const applicationNotes =
+    applicationData.parsed_application_data ||
+    parseApplicationNotes(applicationData.notes);
   const profile = student?.profiles;
 
   return (
@@ -152,44 +171,50 @@ const ApplicationDetails = () => {
           <div className="appl-profile-card">
             <div className="appl-profile-image">
               {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.display_name}
-                />
+                <img src={profile.avatar_url} alt={profile.display_name} />
               ) : (
                 <div className="default-avatar">
-                  {profile?.display_name?.charAt(0) || 'U'}
+                  {profile?.display_name?.charAt(0) || "U"}
                 </div>
               )}
             </div>
 
-            <h2 className="appl-profile-name">{profile?.display_name || 'Unknown Student'}</h2>
+            <h2 className="appl-profile-name">
+              {profile?.display_name || "Unknown Student"}
+            </h2>
             <p className="appl-applying-text">Applying for</p>
 
             <div className="appl-position-container">
-              <span className="appl-position">{internship?.position_title}</span>
-              <span 
-                className="appl-status" 
-                style={{ backgroundColor: getStatusColor(applicationData.status) }}
+              <span className="appl-position">
+                {internship?.position_title}
+              </span>
+              <span
+                className="appl-status"
+                style={{
+                  backgroundColor: getStatusColor(applicationData.status),
+                }}
               >
-                {applicationData.status.charAt(0).toUpperCase() + applicationData.status.slice(1)}
+                {applicationData.status.charAt(0).toUpperCase() +
+                  applicationData.status.slice(1)}
               </span>
             </div>
 
             <div className="appl-buttons">
-              <button 
+              <button
                 className="appl-accept-button"
-                onClick={() => handleStatusUpdate('accepted')}
-                disabled={updating || applicationData.status === 'accepted'}
+                onClick={() => handleStatusUpdate("accepted")}
+                disabled={updating || applicationData.status === "accepted"}
               >
-                <span>✓</span> {applicationData.status === 'accepted' ? 'Accepted' : 'Accept'}
+                <span>✓</span>{" "}
+                {applicationData.status === "accepted" ? "Accepted" : "Accept"}
               </button>
-              <button 
+              <button
                 className="appl-reject-button"
-                onClick={() => handleStatusUpdate('rejected')}
-                disabled={updating || applicationData.status === 'rejected'}
+                onClick={() => handleStatusUpdate("rejected")}
+                disabled={updating || applicationData.status === "rejected"}
               >
-                <span>✕</span> {applicationData.status === 'rejected' ? 'Rejected' : 'Reject'}
+                <span>✗</span>{" "}
+                {applicationData.status === "rejected" ? "Rejected" : "Reject"}
               </button>
             </div>
           </div>
@@ -198,24 +223,47 @@ const ApplicationDetails = () => {
           <div className="appl-documents">
             <div className="appl-documents-header">
               <h3>Documents</h3>
-              <span className="appl-download-text">Click to download</span>
+              <span className="appl-download-text">
+                Click to download or view
+              </span>
             </div>
-            {applicationData.document_url || applicationNotes.cvFileUrl ? (
-              <div 
-                className="appl-document-file"
-                onClick={() => downloadDocument(
-                  applicationData.document_url || applicationNotes.cvFileUrl,
-                  `${profile?.display_name}_CV.pdf`
-                )}
-              >
-                <div className="appl-file-icon">
-                  <img
-                    src={cv}
-                    alt="CV Document"
-                    className="appl-icon-img"
-                  />
+            {applicationData.document_url ? (
+              <div className="document-actions">
+                <div
+                  className="appl-document-file"
+                  onClick={() =>
+                    downloadDocument(
+                      applicationData.document_url,
+                      `${profile?.display_name || "Student"}_CV.pdf`
+                    )
+                  }
+                >
+                  <div className="appl-file-icon">
+                    <img src={cv} alt="CV Document" className="appl-icon-img" />
+                  </div>
+                  <span>{profile?.display_name || "Student"}_CV</span>
                 </div>
-                <span>{profile?.display_name || 'Student'}_CV</span>
+                <div className="document-buttons">
+                  <button
+                    className="view-document-btn"
+                    onClick={() =>
+                      window.open(applicationData.document_url, "_blank")
+                    }
+                  >
+                    View Document
+                  </button>
+                  <button
+                    className="download-document-btn"
+                    onClick={() =>
+                      downloadDocument(
+                        applicationData.document_url,
+                        `${profile?.display_name || "Student"}_CV.pdf`
+                      )
+                    }
+                  >
+                    Download CV
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="no-documents">
@@ -237,12 +285,6 @@ const ApplicationDetails = () => {
 
         <div className="appl-right-section">
           <div className="appl-header-with-back">
-            <button 
-              className="back-button"
-              onClick={() => navigate('/applications')}
-            >
-              ← Back to Applications
-            </button>
             <h1 className="appl-main-title">Application Details</h1>
           </div>
 
@@ -253,28 +295,24 @@ const ApplicationDetails = () => {
               <div className="appl-detail-row">
                 <div className="appl-detail-item">
                   <div className="appl-icon">
-                    <img
-                      src={person}
-                      alt="Name"
-                      className="appl-icon-img"
-                    />
+                    <img src={person} alt="Name" className="appl-icon-img" />
                   </div>
                   <div>
                     <div className="appl-label">Full Name</div>
-                    <div className="appl-value">{profile?.display_name || 'Not provided'}</div>
+                    <div className="appl-value">
+                      {profile?.display_name || "Unknown Student"}
+                    </div>
                   </div>
                 </div>
                 <div className="appl-detail-item">
                   <div className="appl-icon">
-                    <img
-                      src={email}
-                      alt="Email"
-                      className="appl-icon-img"
-                    />
+                    <img src={email} alt="Email" className="appl-icon-img" />
                   </div>
                   <div>
                     <div className="appl-label">Email</div>
-                    <div className="appl-value">{profile?.username || 'Not provided'}</div>
+                    <div className="appl-value">
+                      {applicationData.student_email || "Not provided"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -282,11 +320,17 @@ const ApplicationDetails = () => {
               <div className="appl-detail-row">
                 <div className="appl-detail-item">
                   <div className="appl-icon">
-                    <img src={calendar} alt="Applied Date" className="appl-icon-img" />
+                    <img
+                      src={calendar}
+                      alt="Applied Date"
+                      className="appl-icon-img"
+                    />
                   </div>
                   <div>
                     <div className="appl-label">Date Applied</div>
-                    <div className="appl-value">{formatDate(applicationData.applied_at)}</div>
+                    <div className="appl-value">
+                      {formatDate(applicationData.applied_at)}
+                    </div>
                   </div>
                 </div>
                 <div className="appl-detail-item">
@@ -295,17 +339,49 @@ const ApplicationDetails = () => {
                   </div>
                   <div>
                     <div className="appl-label">Phone</div>
-                    <div className="appl-value">{profile?.phone || 'Not provided'}</div>
+                    <div className="appl-value">
+                      {profile?.phone || "Not provided"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="appl-detail-row">
+                <div className="appl-detail-item">
+                  <div className="appl-icon">
+                    <img
+                      src={calendar}
+                      alt="Date of Birth"
+                      className="appl-icon-img"
+                    />
+                  </div>
+                  <div>
+                    <div className="appl-label">Date of Birth</div>
+                    <div className="appl-value">
+                      {applicationNotes.dateOfBirth || "Not provided"}
+                    </div>
+                  </div>
+                </div>
+                <div className="appl-detail-item">
+                  <div className="appl-icon">
+                    <img src={person} alt="Gender" className="appl-icon-img" />
+                  </div>
+                  <div>
+                    <div className="appl-label">Gender</div>
+                    <div className="appl-value">
+                      {applicationNotes.gender || "Not provided"}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Educational Background */}
-          {education && (
+          {/* Educational Background from Application */}
+          {applicationNotes.education && (
             <div className="appl-section">
-              <h3 className="appl-section-title">Educational Background</h3>
+              <h3 className="appl-section-title">
+                Educational Background (Application)
+              </h3>
               <div className="appl-details-grid">
                 <div className="appl-detail-row">
                   <div className="appl-detail-item">
@@ -318,7 +394,9 @@ const ApplicationDetails = () => {
                     </div>
                     <div>
                       <div className="appl-label">Institution Name</div>
-                      <div className="appl-value">{education.institution}</div>
+                      <div className="appl-value">
+                        {applicationNotes.education.institution}
+                      </div>
                     </div>
                   </div>
                   <div className="appl-detail-item">
@@ -331,7 +409,9 @@ const ApplicationDetails = () => {
                     </div>
                     <div>
                       <div className="appl-label">Course of Study</div>
-                      <div className="appl-value">{education.degree}</div>
+                      <div className="appl-value">
+                        {applicationNotes.education.degree}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -341,13 +421,15 @@ const ApplicationDetails = () => {
                     <div className="appl-icon">
                       <img
                         src={calendar}
-                        alt="Study Duration"
+                        alt="Year of Study"
                         className="appl-icon-img"
                       />
                     </div>
                     <div>
-                      <div className="appl-label">Study Period</div>
-                      <div className="appl-value">{education.duration}</div>
+                      <div className="appl-label">Current Year of Study</div>
+                      <div className="appl-value">
+                        {applicationNotes.education.yearOfStudy}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -370,20 +452,20 @@ const ApplicationDetails = () => {
                   </div>
                   <div>
                     <div className="appl-label">Preferred Start Date</div>
-                    <div className="appl-value">{applicationNotes.preferredStartDate || 'Not specified'}</div>
+                    <div className="appl-value">
+                      {applicationNotes.preferredStartDate || "Not specified"}
+                    </div>
                   </div>
                 </div>
                 <div className="appl-detail-item">
                   <div className="appl-icon">
-                    <img
-                      src={time}
-                      alt="Duration"
-                      className="appl-icon-img"
-                    />
+                    <img src={time} alt="Duration" className="appl-icon-img" />
                   </div>
                   <div>
                     <div className="appl-label">Preferred Duration</div>
-                    <div className="appl-value">{applicationNotes.duration || 'Not specified'}</div>
+                    <div className="appl-value">
+                      {applicationNotes.duration || "Not specified"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -399,7 +481,9 @@ const ApplicationDetails = () => {
                   </div>
                   <div>
                     <div className="appl-label">Work Type</div>
-                    <div className="appl-value">{internship?.work_type || 'Not specified'}</div>
+                    <div className="appl-value">
+                      {internship?.work_type || "Not specified"}
+                    </div>
                   </div>
                 </div>
                 <div className="appl-detail-item">
@@ -412,7 +496,9 @@ const ApplicationDetails = () => {
                   </div>
                   <div>
                     <div className="appl-label">Location</div>
-                    <div className="appl-value">{internship?.location || 'Not specified'}</div>
+                    <div className="appl-value">
+                      {internship?.location || "Not specified"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -463,8 +549,12 @@ const ApplicationDetails = () => {
         }
 
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         .btn {
@@ -578,6 +668,60 @@ const ApplicationDetails = () => {
 
         .appl-buttons button:disabled:hover {
           transform: none;
+        }
+        .document-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .document-buttons {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .view-document-btn,
+        .download-document-btn {
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: all 0.2s;
+          flex: 1;
+          min-width: 120px;
+        }
+
+        .view-document-btn {
+          background: #3b82f6;
+          color: white;
+        }
+
+        .view-document-btn:hover {
+          background: #2563eb;
+        }
+
+        .download-document-btn {
+          background: #10b981;
+          color: white;
+        }
+
+        .download-document-btn:hover {
+          background: #059669;
+        }
+
+        .appl-documents-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .appl-download-text {
+          font-size: 0.75rem;
+          color: #64748b;
         }
       `}</style>
     </DashboardLayout>

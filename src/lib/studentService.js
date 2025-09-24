@@ -238,7 +238,8 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-  // Submit internship application
+  // FIXED: Submit internship application - properly stores document URL
+// FIXED: Submit internship application - properly stores document URL and email
   async submitApplication(applicationData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -247,6 +248,8 @@ async searchInternships(searchParams = {}) {
         throw new Error('You must be logged in to apply');
       }
 
+      console.log('Submitting application with data:', applicationData);
+
       const { data, error } = await supabase
         .from('internship_applications')
         .insert([{
@@ -254,6 +257,8 @@ async searchInternships(searchParams = {}) {
           student_id: user.id,
           status: 'pending',
           notes: applicationData.notes || null,
+          document_url: applicationData.documentUrl || null,
+          applicant_email: applicationData.applicantEmail || user.email, // SAVE EMAIL HERE
           applied_at: new Date().toISOString()
         }])
         .select('*')
@@ -263,6 +268,7 @@ async searchInternships(searchParams = {}) {
         throw error;
       }
 
+      console.log('Application submitted successfully:', data);
       return { data, error: null };
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -340,41 +346,55 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-  // Upload application document (CV/Resume)
-  async uploadDocument(file, studentId, internshipId) {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${studentId}_${internshipId}_${Date.now()}.${fileExt}`;
-      const filePath = `applications/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents')
-        .getPublicUrl(filePath);
-
-      return { 
-        data: { 
-          path: filePath, 
-          url: publicUrl,
-          fileName: file.name
-        }, 
-        error: null 
-      };
-    } catch (error) {
-      console.error('Error uploading document:', error);
-      return { data: null, error: error.message };
+// FIXED: Upload application document (CV/Resume) with proper file handling
+async uploadDocument(file, studentId, internshipId) {
+  try {
+    if (!file) {
+      throw new Error('No file provided');
     }
-  }
 
-  // Create or update student profile
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${studentId}_${internshipId}_${Date.now()}.${fileExt}`;
+    const filePath = `applications/${fileName}`;
+
+    console.log('Uploading document:', { fileName, filePath, fileSize: file.size });
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw uploadError;
+    }
+
+    // Get public URL for viewing
+    const { data: { publicUrl } } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+
+    console.log('Document uploaded successfully:', { publicUrl, filePath });
+
+    return { 
+      data: { 
+        path: filePath, 
+        url: publicUrl,
+        fileName: file.name,
+        size: file.size,
+        type: file.type
+      }, 
+      error: null 
+    };
+  } catch (error) {
+    console.error('Error uploading document:', error);
+    return { data: null, error: error.message };
+  }
+}
+
+  // FIXED: Create or update student profile - DON'T overwrite username with email
   async createOrUpdateStudentProfile(profileData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -383,16 +403,34 @@ async searchInternships(searchParams = {}) {
         throw new Error('User not authenticated');
       }
 
-      // Upsert profile in profiles table
-      const { data: profileData, error: profileError } = await supabase
+      // Get current profile to preserve existing username
+      const { data: currentProfile } = await supabase
         .from('profiles')
-        .upsert([{
-          id: user.id,
-          user_type: 'student',
-          username: profileData.email || user.email,
-          display_name: profileData.fullName || user.user_metadata?.full_name || 'Student',
-          phone: profileData.phone || null
-        }])
+        .select('username, display_name')
+        .eq('id', user.id)
+        .single();
+
+      // Only update display_name and phone, preserve existing username
+      const updateData = {
+        id: user.id,
+        user_type: 'student',
+        display_name: profileData.fullName || currentProfile?.display_name || user.user_metadata?.full_name || 'Student',
+        phone: profileData.phone || null,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only update username if it doesn't exist (new user) and don't use email
+      if (!currentProfile?.username) {
+        // Generate a username from display name or use a default
+        const baseUsername = (profileData.fullName || 'user').toLowerCase().replace(/\s+/g, '_');
+        updateData.username = baseUsername;
+      }
+
+      console.log('Updating profile with:', updateData);
+
+      const { data: updatedProfile, error: profileError } = await supabase
+        .from('profiles')
+        .upsert([updateData])
         .select('*')
         .single();
 
@@ -400,7 +438,7 @@ async searchInternships(searchParams = {}) {
         throw profileError;
       }
 
-      // Create or update student record
+      // Create or update basic student record
       const { data: studentData, error: studentError } = await supabase
         .from('students')
         .upsert([{
@@ -415,6 +453,7 @@ async searchInternships(searchParams = {}) {
         throw studentError;
       }
 
+      console.log('Profile updated successfully');
       return { data: studentData, error: null };
     } catch (error) {
       console.error('Error creating/updating student profile:', error);
@@ -422,98 +461,40 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-  // Add student education
-  async addStudentEducation(educationData) {
+  // Helper method to download documents
+  async downloadDocument(documentUrl, fileName) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
+      if (!documentUrl) {
+        throw new Error('No document URL provided');
       }
 
-      const insertData = {
-        student_id: user.id,
-        institution: educationData.institutionName,
-        degree: educationData.courseOfStudy,
-        duration: `${educationData.yearOfStudy} - ${educationData.expectedGraduationYear}`,
-        coursework: educationData.coursework || null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      // Create download link
+      const link = document.createElement('a');
+      link.href = documentUrl;
+      link.download = fileName || 'document';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-      const { data, error } = await supabase
-        .from('student_education')
-        .insert([insertData])
-        .select('*')
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return { data, error: null };
+      return { success: true, error: null };
     } catch (error) {
-      console.error('Error adding education:', error);
-      return { data: null, error: error.message };
+      console.error('Error downloading document:', error);
+      return { success: false, error: error.message };
     }
   }
 
-  // Process complete application with file upload
-  async submitCompleteApplication(applicationData, cvFile) {
+  // Helper method to get document from storage
+  async getDocumentUrl(filePath) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('You must be logged in to apply');
-      }
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
 
-      // 1. Upload CV file first
-      let cvFileUrl = null;
-      if (cvFile) {
-        const uploadResult = await this.uploadDocument(cvFile, user.id, applicationData.internshipId);
-        if (uploadResult.error) {
-          throw new Error(`File upload failed: ${uploadResult.error}`);
-        }
-        cvFileUrl = uploadResult.data.url;
-      }
-
-      // 2. Create/update student profile
-      await this.createOrUpdateStudentProfile({
-        fullName: applicationData.fullName,
-        email: applicationData.email,
-        phone: applicationData.phone || null
-      });
-
-      // 3. Add education details
-      if (applicationData.institutionName) {
-        await this.addStudentEducation({
-          institutionName: applicationData.institutionName,
-          courseOfStudy: applicationData.courseOfStudy,
-          yearOfStudy: applicationData.yearOfStudy,
-          expectedGraduationYear: applicationData.expectedGraduationYear
-        });
-      }
-
-      // 4. Submit application
-      const finalApplicationData = {
-        internshipId: applicationData.internshipId,
-        fullName: applicationData.fullName,
-        email: applicationData.email,
-        phone: applicationData.phone,
-        cvFileUrl: cvFileUrl,
-        notes: `Applied for ${applicationData.duration} starting ${applicationData.internshipStartDate}`,
-        educationDetails: {
-          institution: applicationData.institutionName,
-          course: applicationData.courseOfStudy,
-          year: applicationData.yearOfStudy,
-          graduation: applicationData.expectedGraduationYear
-        }
-      };
-
-      return await this.submitApplication(finalApplicationData);
-
+      return { data: publicUrl, error: null };
     } catch (error) {
-      console.error('Error submitting complete application:', error);
+      console.error('Error getting document URL:', error);
       return { data: null, error: error.message };
     }
   }

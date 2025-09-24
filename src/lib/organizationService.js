@@ -1,4 +1,4 @@
-// services/organizationService.js - DEBUG VERSION
+// services/organizationService.js - FIXED VERSION
 import { supabase } from './supabase.js';
 
 class OrganizationService {
@@ -45,108 +45,71 @@ class OrganizationService {
     }
   }
 
-  // Get all applications for the organization
-  async getOrganizationApplications() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error('No authenticated user');
-        return { data: [], error: 'User not authenticated' };
-      }
-
-      console.log('Fetching applications for organization:', user.id);
-
-      // Simple direct query first
-      const { data, error } = await supabase
-        .from('internship_applications')
-        .select(`
-          id,
-          status,
-          applied_at,
-          notes,
-          internship_id,
-          student_id
-        `)
-        .order('applied_at', { ascending: false });
-
-      console.log('All applications in database:', data);
-      console.log('Query error:', error);
-
-      if (error) {
-        throw error;
-      }
-
-      // Filter for this organization's internships manually
-      const { data: orgInternships, error: intError } = await supabase
-        .from('internships')
-        .select('id')
-        .eq('organization_id', user.id);
-
-      console.log('Organization internships:', orgInternships);
-
-      if (intError) {
-        console.error('Internships error:', intError);
-      }
-
-      if (!orgInternships || orgInternships.length === 0) {
-        console.log('No internships found for this organization');
-        return { data: [], error: null };
-      }
-
-      const internshipIds = orgInternships.map(i => i.id);
-      console.log('Internship IDs:', internshipIds);
-
-      const filteredApplications = data.filter(app => 
-        internshipIds.includes(app.internship_id)
-      );
-
-      console.log('Filtered applications:', filteredApplications);
-
-      // Now get the related data for filtered applications
-      if (filteredApplications.length === 0) {
-        return { data: [], error: null };
-      }
-
-      // Get full data with relationships
-      const { data: fullData, error: fullError } = await supabase
-        .from('internship_applications')
-        .select(`
-          id,
-          status,
-          applied_at,
-          notes,
-          internships (
-            id,
-            position_title,
-            department
-          ),
-          students (
-            id,
-            profiles (
-              id,
-              display_name,
-              avatar_url,
-              username
-            )
-          )
-        `)
-        .in('id', filteredApplications.map(app => app.id))
-        .order('applied_at', { ascending: false });
-
-      console.log('Full application data:', fullData);
-      console.log('Full data error:', fullError);
-
-      if (fullError) {
-        throw fullError;
-      }
-
-      return { data: fullData || [], error: null };
-    } catch (error) {
-      console.error('Error fetching applications:', error);
-      return { data: [], error: error.message };
+// FIXED: Get application details with email from application table
+async getApplicationDetails(applicationId) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .select(`
+        id,
+        status,
+        applied_at,
+        notes,
+        document_url,
+        applicant_email,
+        internships (
+          id,
+          position_title,
+          department,
+          description,
+          requirements,
+          work_type,
+          compensation,
+          location,
+          organization_id
+        ),
+        students (
+          id,
+          bio,
+          profiles!inner (
+            id,
+            display_name,
+            username,
+            phone,
+            avatar_url
+          )
+        )
+      `)
+      .eq('id', applicationId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Parse application notes to extract other details
+    const parsedNotes = this.parseApplicationNotes(data.notes);
+
+    return { 
+      data: {
+        ...data,
+        student_email: data.applicant_email || "Not provided",
+        parsed_application_data: parsedNotes,
+        student_education: []
+      }, 
+      error: null 
+    };
+  } catch (error) {
+    console.error('Error fetching application details:', error);
+    return { data: null, error: error.message };
   }
+}
 
   // Simplified stats method
   async getOrganizationStats() {
@@ -230,71 +193,71 @@ class OrganizationService {
     }
   }
 
-  // Keep other existing methods simple
-  async getApplicationDetails(applicationId) {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const { data, error } = await supabase
-        .from('internship_applications')
-        .select(`
-          id,
-          status,
-          applied_at,
-          notes,
-          internships (
-            id,
-            position_title,
-            department,
-            description,
-            requirements,
-            work_type,
-            compensation,
-            location,
-            organization_id
-          ),
-          students (
-            id,
-            bio,
-            profiles (
-              id,
-              display_name,
-              username,
-              phone,
-              avatar_url
-            )
-          )
-        `)
-        .eq('id', applicationId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      // Get student education separately
-      const { data: educationData } = await supabase
-        .from('student_education')
-        .select('*')
-        .eq('student_id', data.students.id)
-        .order('created_at', { ascending: false });
-
-      return { 
-        data: {
-          ...data,
-          student_education: educationData || []
-        }, 
-        error: null 
-      };
-    } catch (error) {
-      console.error('Error fetching application details:', error);
-      return { data: null, error: error.message };
+// FIXED: Get application details with email from application table
+async getApplicationDetails(applicationId) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .select(`
+        id,
+        status,
+        applied_at,
+        notes,
+        document_url,
+        applicant_email,
+        internships (
+          id,
+          position_title,
+          department,
+          description,
+          requirements,
+          work_type,
+          compensation,
+          location,
+          organization_id
+        ),
+        students (
+          id,
+          bio,
+          profiles!inner (
+            id,
+            display_name,
+            username,
+            phone,
+            avatar_url
+          )
+        )
+      `)
+      .eq('id', applicationId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Parse application notes to extract other details
+    const parsedNotes = this.parseApplicationNotes(data.notes);
+
+    return { 
+      data: {
+        ...data,
+        student_email: data.applicant_email || "Not provided",
+        parsed_application_data: parsedNotes,
+        student_education: []
+      }, 
+      error: null 
+    };
+  } catch (error) {
+    console.error('Error fetching application details:', error);
+    return { data: null, error: error.message };
   }
+}
 
   async updateApplicationStatus(applicationId, status, notes = null) {
     try {
@@ -325,33 +288,57 @@ class OrganizationService {
     }
   }
 
-  parseApplicationNotes(notes) {
-    if (!notes) return {};
+//Enhanced parse method to extract education data and personal details from application notes
+parseApplicationNotes(notes) {
+  if (!notes) return {};
 
-    const data = {};
-    
-    const coverLetterMatch = notes.match(/Cover Letter: (.*?)(?:\n\n|$)/s);
-    if (coverLetterMatch) {
-      data.coverLetter = coverLetterMatch[1].trim();
-    }
-
-    const whyApplyingMatch = notes.match(/Why applying: (.*?)(?:\n\n|$)/s);
-    if (whyApplyingMatch) {
-      data.whyApplying = whyApplyingMatch[1].trim();
-    }
-
-    const startDateMatch = notes.match(/Preferred start date: (.*?)(?:\n\n|$)/s);
-    if (startDateMatch) {
-      data.preferredStartDate = startDateMatch[1].trim();
-    }
-
-    const durationMatch = notes.match(/Duration: (.*?)(?:\n\n|$)/s);
-    if (durationMatch) {
-      data.duration = durationMatch[1].trim();
-    }
-
-    return data;
+  const data = {};
+  
+  const coverLetterMatch = notes.match(/Cover Letter: (.*?)(?:\n\n|$)/s);
+  if (coverLetterMatch) {
+    data.coverLetter = coverLetterMatch[1].trim();
   }
+
+  const whyApplyingMatch = notes.match(/Why applying: (.*?)(?:\n\n|$)/s);
+  if (whyApplyingMatch) {
+    data.whyApplying = whyApplyingMatch[1].trim();
+  }
+
+  const startDateMatch = notes.match(/Preferred start date: (.*?)(?:\n|$)/s);
+  if (startDateMatch) {
+    data.preferredStartDate = startDateMatch[1].trim();
+  }
+
+  const durationMatch = notes.match(/Duration: (.*?)(?:\n|$)/s);
+  if (durationMatch) {
+    data.duration = durationMatch[1].trim();
+  }
+
+  // FIXED: Extract education data from notes with improved regex pattern
+  const educationMatch = notes.match(/Education:\s*([^-\n]+?)\s*-\s*([^-\n(]+?)\s*\(([^)]+)\)/);
+  if (educationMatch) {
+    data.education = {
+      institution: educationMatch[1].trim(),
+      degree: educationMatch[2].trim(),
+      yearOfStudy: educationMatch[3].trim()
+    };
+  }
+
+  // FIXED: Extract personal details from notes - Updated regex patterns
+  const personalDetailsMatch = notes.match(/Personal Details:\s*DOB:\s*([^,\n]+),\s*Gender:\s*([^,\n]+)/);
+  if (personalDetailsMatch) {
+    data.dateOfBirth = personalDetailsMatch[1].trim();
+    data.gender = personalDetailsMatch[2].trim();
+  }
+
+  // Extract address separately
+  const addressMatch = notes.match(/Address:\s*(.+?)(?:\n|$)/s);
+  if (addressMatch) {
+    data.address = addressMatch[1].trim();
+  }
+
+  return data;
+}
 
   // Get recent applications (for dashboard)
   async getRecentApplications(limit = 5) {
@@ -363,6 +350,34 @@ class OrganizationService {
     } catch (error) {
       console.error('Error fetching recent applications:', error);
       return { data: [], error: error.message };
+    }
+  }
+
+  // Enhanced method to download documents with better error handling
+  async downloadDocument(documentUrl, fileName) {
+    try {
+      if (!documentUrl) {
+        throw new Error('No document URL provided');
+      }
+
+      console.log('Attempting to download document:', documentUrl);
+
+      // Create download link
+      const link = document.createElement('a');
+      link.href = documentUrl;
+      link.download = fileName || 'document';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      // Add to DOM temporarily
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      return { success: false, error: error.message };
     }
   }
 

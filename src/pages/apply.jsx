@@ -27,6 +27,7 @@ const MultiStepApplyForm = () => {
   const [applicationStatus, setApplicationStatus] = useState({
     hasApplied: false,
   });
+  const [autoFillLoading, setAutoFillLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -34,6 +35,7 @@ const MultiStepApplyForm = () => {
     gender: "",
     email: "",
     address: "",
+    phone: "",
     institutionName: "",
     courseOfStudy: "",
     yearOfStudy: "",
@@ -56,8 +58,55 @@ const MultiStepApplyForm = () => {
     if (internshipId) {
       loadInternshipDetails();
       checkApplicationStatus();
+      loadUserProfile(); // Auto-fill existing data
     }
   }, [internshipId]);
+
+  // New function to load and auto-fill user profile data
+  const loadUserProfile = async () => {
+    try {
+      setAutoFillLoading(true);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      // Get user profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      // Get student data
+      const { data: student } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      // Get most recent education (for reference, not auto-fill since it should be application-specific)
+      const { data: recentEducation } = await supabase
+        .from("student_education")
+        .select("*")
+        .eq("student_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      setFormData((prev) => ({
+        ...prev,
+        fullName: profile?.display_name || prev.fullName,
+        email: user.email || prev.email, // FIXED: Use user.email, don't fallback to username
+        phone: profile?.phone || prev.phone,
+      }));
+    } catch (error) {
+      console.error("Error loading user profile for auto-fill:", error);
+    } finally {
+      setAutoFillLoading(false);
+    }
+  };
 
   const loadInternshipDetails = async () => {
     try {
@@ -102,7 +151,6 @@ const MultiStepApplyForm = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file && file.size > 5 * 1024 * 1024) {
-      // 5MB limit
       alert("File size must be less than 5MB");
       return;
     }
@@ -112,100 +160,114 @@ const MultiStepApplyForm = () => {
     }));
   };
 
-  // Fixed nextStep function with proper event handling
   const nextStep = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (currentStep < 4 && isStepValid()) {
       setCurrentStep(currentStep + 1);
     }
   };
 
-  // Fixed prevStep function with proper event handling
   const prevStep = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (applicationStatus.hasApplied) {
-    alert('You have already applied for this internship');
-    return;
-  }
+    e.preventDefault();
 
-  try {
-    setSubmitting(true);
-    setError(null);
-
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error('You must be logged in to apply');
+    if (applicationStatus.hasApplied) {
+      alert("You have already applied for this internship");
+      return;
     }
 
-    // Create/update student profile - fix method name
-    await studentService.createOrUpdateStudentProfile({
-      bio: formData.whyApplying,
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone // if you have this field
-    });
+    try {
+      setSubmitting(true);
+      setError(null);
 
-    // Add education information
-    await studentService.addStudentEducation({
-      institutionName: formData.institutionName,
-      courseOfStudy: formData.courseOfStudy,
-      yearOfStudy: formData.yearOfStudy,
-      expectedGraduationYear: formData.expectedGraduationYear,
-      coursework: null
-    });
-
-    // Upload CV if provided
-    let documentUrl = null;
-    if (formData.cvFile) {
-      const uploadResult = await studentService.uploadDocument(
-        formData.cvFile,
-        user.id, // Use actual user ID
-        internshipId
-      );
-      
-      if (uploadResult.data) {
-        documentUrl = uploadResult.data.url;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("You must be logged in to apply");
       }
+
+      // Update user profile (not student-specific data)
+      await studentService.createOrUpdateStudentProfile({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+      });
+
+      // Upload CV if provided
+      let documentUrl = null;
+      if (formData.cvFile) {
+        const uploadResult = await studentService.uploadDocument(
+          formData.cvFile,
+          user.id,
+          internshipId
+        );
+
+        if (uploadResult.data) {
+          documentUrl = uploadResult.data.url;
+        }
+      }
+
+      // Create application-specific notes with education data
+      const applicationNotes = {
+        coverLetter: formData.coverLetter,
+        whyApplying: formData.whyApplying,
+        preferredStartDate: formData.internshipStartDate,
+        duration: formData.duration,
+        // Store education data in application notes instead of separate table
+        education: {
+          institutionName: formData.institutionName,
+          courseOfStudy: formData.courseOfStudy,
+          yearOfStudy: formData.yearOfStudy,
+          expectedGraduationYear: formData.expectedGraduationYear,
+        },
+        personalDetails: {
+          dateOfBirth: formData.dateOfBirth,
+          gender: formData.gender,
+          address: formData.address,
+          phone: formData.phone,
+        },
+      };
+
+      const notesString = `Cover Letter: ${formData.coverLetter}\n\nWhy applying: ${formData.whyApplying}\n\nPreferred start date: ${formData.internshipStartDate}\n\nDuration: ${formData.duration}\n\nEducation: ${formData.institutionName} - ${formData.courseOfStudy} (${formData.yearOfStudy})\n\nPersonal Details: DOB: ${formData.dateOfBirth}, Gender: ${formData.gender}\nAddress: ${formData.address}`;
+
+      // Submit application with all data in notes
+      const applicationData = {
+        internshipId: internshipId,
+        notes: notesString,
+        documentUrl: documentUrl,
+        applicantEmail: formData.email,
+      };
+
+      const { data, error } = await studentService.submitApplication(
+        applicationData
+      );
+      if (error) {
+        throw new Error(error);
+      }
+
+      alert("Application submitted successfully!");
+      navigate(`/internship-details/${internshipId}`);
+    } catch (err) {
+      console.error("Application submission error:", err);
+      setError(
+        err.message || "Failed to submit application. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    // Submit application
-    const applicationData = {
-      internshipId: internshipId,
-      notes: `Cover Letter: ${formData.coverLetter}\n\nWhy applying: ${formData.whyApplying}\n\nPreferred start date: ${formData.internshipStartDate}\n\nDuration: ${formData.duration}`,
-      documentUrl: documentUrl
-    };
-
-    const { data, error } = await studentService.submitApplication(applicationData);
-    
-    if (error) {
-      throw new Error(error);
-    }
-
-    alert('Application submitted successfully!');
-    navigate(`/internship-details/${internshipId}`);
-    
-  } catch (err) {
-    console.error('Application submission error:', err);
-    setError(err.message || 'Failed to submit application. Please try again.');
-  } finally {
-    setSubmitting(false);
-  }
-};
-
-  // Enhanced validation function with better debugging
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
@@ -216,7 +278,6 @@ const MultiStepApplyForm = () => {
           formData.email?.trim() &&
           formData.address?.trim()
         );
-        console.log('Step 1 validation:', step1Valid, formData);
         return step1Valid;
       case 2:
         const step2Valid = !!(
@@ -225,7 +286,6 @@ const MultiStepApplyForm = () => {
           formData.yearOfStudy?.trim() &&
           formData.expectedGraduationYear?.trim()
         );
-        console.log('Step 2 validation:', step2Valid, formData);
         return step2Valid;
       case 3:
         const step3Valid = !!(
@@ -233,18 +293,16 @@ const MultiStepApplyForm = () => {
           formData.duration?.trim() &&
           formData.whyApplying?.trim()
         );
-        console.log('Step 3 validation:', step3Valid, formData);
         return step3Valid;
       case 4:
         const step4Valid = !!(formData.cvFile && formData.coverLetter?.trim());
-        console.log('Step 4 validation:', step4Valid, formData);
         return step4Valid;
       default:
         return false;
     }
   };
 
-  // Form step components
+  // Form step components (same as before)
   const renderPersonalDetails = () => (
     <div className="step-content">
       <div className="step-header">
@@ -254,6 +312,12 @@ const MultiStepApplyForm = () => {
           Please provide your basic personal details
         </p>
       </div>
+
+      {autoFillLoading && (
+        <div className="auto-fill-notice">
+          <p>Loading your saved information...</p>
+        </div>
+      )}
 
       <div className="form-grid">
         <div className="input-group">
@@ -265,8 +329,14 @@ const MultiStepApplyForm = () => {
             value={formData.fullName}
             onChange={handleInputChange}
             placeholder="Enter your full name"
+            disabled={!!formData.fullName} // Disable if auto-filled
             required
           />
+          {formData.fullName && (
+            <small className="auto-fill-indicator">
+              Auto-filled from your profile
+            </small>
+          )}
         </div>
 
         <div className="input-group">
@@ -309,8 +379,32 @@ const MultiStepApplyForm = () => {
             value={formData.email}
             onChange={handleInputChange}
             placeholder="your.email@example.com"
+            disabled={!!formData.email} // Disable if auto-filled
             required
           />
+          {formData.email && (
+            <small className="auto-fill-indicator">
+              Auto-filled from your account
+            </small>
+          )}
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder="+234 xxx xxx xxxx"
+            disabled={!!formData.phone} // Disable if auto-filled
+          />
+          {formData.phone && (
+            <small className="auto-fill-indicator">
+              Auto-filled from your profile
+            </small>
+          )}
         </div>
 
         <div className="input-group full-width">
@@ -334,7 +428,9 @@ const MultiStepApplyForm = () => {
       <div className="step-header">
         <GraduationCap className="step-icon" />
         <h2 className="step-title">Educational Background</h2>
-        <p className="step-description">Tell us about your academic journey</p>
+        <p className="step-description">
+          Tell us about your academic journey for this application
+        </p>
       </div>
 
       <div className="form-grid">
@@ -446,7 +542,10 @@ const MultiStepApplyForm = () => {
             <option value="" disabled>
               Select duration
             </option>
+            <option value="2 months">2 months</option>
             <option value="3 months">3 months</option>
+            <option value="3 months">4 months</option>
+            <option value="3 months">4 months</option>
             <option value="6 months">6 months</option>
             <option value="9 months">9 months</option>
             <option value="12 months">12 months</option>
@@ -679,9 +778,17 @@ const MultiStepApplyForm = () => {
           </div>
         </div>
       </div>
-      <Footer />
-
       <style jsx>{`
+        .auto-fill-notice {
+          background: #e0f2fe;
+          border: 1px solid #0284c7;
+          color: #0c4a6e;
+          padding: 0.75rem;
+          margin-bottom: 1rem;
+          border-radius: 6px;
+          text-align: center;
+        }
+
         .apply-form-container {
           min-height: 100vh;
           background: var(--bg-secondary, #f8fafc);
@@ -1149,7 +1256,43 @@ const MultiStepApplyForm = () => {
             font-size: 0.9rem;
           }
         }
+        .input-group input:disabled,
+        .input-group select:disabled {
+          background-color: var(--bg-tertiary, #f1f5f9);
+          color: var(--text-secondary, #64748b);
+          cursor: not-allowed;
+          border-color: var(--card-border, #e5e7eb);
+          opacity: 0.8;
+        }
+
+        .auto-fill-indicator {
+          color: var(--primary, #1070e5);
+          font-size: 0.75rem;
+          font-style: italic;
+          margin-top: 0.25rem;
+          display: block;
+        }
+
+        .auto-fill-notice {
+          background: #e0f2fe;
+          border: 1px solid #0284c7;
+          color: #0c4a6e;
+          padding: 0.75rem;
+          margin-bottom: 1rem;
+          border-radius: 6px;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .auto-fill-notice::before {
+          content: "ℹ️";
+          font-size: 1rem;
+        }
       `}</style>
+      <Footer />
     </>
   );
 };

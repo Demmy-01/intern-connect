@@ -81,7 +81,7 @@ class ProfileService {
           // Profile fields
           name: profile.display_name || '',
           username: profile.username || '',
-          email: user.email || '',
+          email: user.email || '', // FIXED: Get email from auth user, not profile
           phone: profile.phone || '',
           profileImage: profile.avatar_url || '',
           

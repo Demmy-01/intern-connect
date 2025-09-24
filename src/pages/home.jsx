@@ -386,26 +386,6 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <div className="step-card fade-in">
-              <div className="step-number">5</div>
-              <div className="step-content">
-                <h3 className="step-title">Contact Organization</h3>
-                <p className="step-description">
-                  Submit your applications with ease and track your progress
-                  through our notification system and application dashboard.
-                </p>
-              </div>
-            </div>
-            <div className="step-card fade-in">
-              <div className="step-number">5</div>
-              <div className="step-content">
-                <h3 className="step-title">Contact Organization</h3>
-                <p className="step-description">
-                  Submit your applications with ease and track your progress
-                  through our notification system and application dashboard.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
