@@ -11,7 +11,7 @@ const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, pending, accepted, rejected
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     loadApplications();
@@ -21,18 +21,19 @@ const Applications = () => {
     try {
       setLoading(true);
       setError(null);
-      const { data, error } = await organizationService.getOrganizationApplications();
-      
+      const { data, error } =
+        await organizationService.getOrganizationApplications();
+
       if (error) {
         setError(error);
-        console.error('Applications error:', error);
+        console.error("Applications error:", error);
       } else {
         setApplications(data || []);
-        console.log('Loaded applications:', data);
+        console.log("Loaded applications:", data);
       }
     } catch (err) {
       setError(err.message);
-      console.error('Applications exception:', err);
+      console.error("Applications exception:", err);
     } finally {
       setLoading(false);
     }
@@ -40,39 +41,41 @@ const Applications = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).replace(/\//g, ' - ');
+    return date
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, " - ");
   };
 
   const getStatusBadgeClass = (status) => {
     switch (status?.toLowerCase()) {
-      case 'pending':
-        return 'pending';
-      case 'accepted':
-        return 'accepted';
-      case 'rejected':
-        return 'rejected';
-      case 'reviewed':
-        return 'reviewed';
+      case "pending":
+        return "pending";
+      case "accepted":
+        return "accepted";
+      case "rejected":
+        return "rejected";
+      case "reviewed":
+        return "reviewed";
       default:
-        return 'pending';
+        return "pending";
     }
   };
 
-  const filteredApplications = applications.filter(app => {
-    if (filter === 'all') return true;
+  const filteredApplications = applications.filter((app) => {
+    if (filter === "all") return true;
     return app.status?.toLowerCase() === filter.toLowerCase();
   });
 
   const getStats = () => {
     return {
       total: applications.length,
-      pending: applications.filter(app => app.status === 'pending').length,
-      accepted: applications.filter(app => app.status === 'accepted').length,
-      rejected: applications.filter(app => app.status === 'rejected').length
+      pending: applications.filter((app) => app.status === "pending").length,
+      accepted: applications.filter((app) => app.status === "accepted").length,
+      rejected: applications.filter((app) => app.status === "rejected").length,
     };
   };
 
@@ -113,43 +116,35 @@ const Applications = () => {
       <div className="applications-header">
         <h1>Applications</h1>
         <div className="applications-stats">
-          <span className="stat-item">
-            Total: {stats.total}
-          </span>
-          <span className="stat-item">
-            Pending: {stats.pending}
-          </span>
-          <span className="stat-item">
-            Accepted: {stats.accepted}
-          </span>
-          <span className="stat-item">
-            Rejected: {stats.rejected}
-          </span>
+          <span className="stat-item">Total: {stats.total}</span>
+          <span className="stat-item">Pending: {stats.pending}</span>
+          <span className="stat-item">Accepted: {stats.accepted}</span>
+          <span className="stat-item">Rejected: {stats.rejected}</span>
         </div>
       </div>
 
       <div className="applications-filters">
-        <button 
-          className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
+        <button
+          className={`filter-btn ${filter === "all" ? "active" : ""}`}
+          onClick={() => setFilter("all")}
         >
           All Applications ({stats.total})
         </button>
-        <button 
-          className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
-          onClick={() => setFilter('pending')}
+        <button
+          className={`filter-btn ${filter === "pending" ? "active" : ""}`}
+          onClick={() => setFilter("pending")}
         >
           Pending ({stats.pending})
         </button>
-        <button 
-          className={`filter-btn ${filter === 'accepted' ? 'active' : ''}`}
-          onClick={() => setFilter('accepted')}
+        <button
+          className={`filter-btn ${filter === "accepted" ? "active" : ""}`}
+          onClick={() => setFilter("accepted")}
         >
           Accepted ({stats.accepted})
         </button>
-        <button 
-          className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`}
-          onClick={() => setFilter('rejected')}
+        <button
+          className={`filter-btn ${filter === "rejected" ? "active" : ""}`}
+          onClick={() => setFilter("rejected")}
         >
           Rejected ({stats.rejected})
         </button>
@@ -181,35 +176,44 @@ const Applications = () => {
                     <div className="applicant-info">
                       <div className="applicant-avatar">
                         {application.students?.profiles?.avatar_url ? (
-                          <img 
-                            src={application.students.profiles.avatar_url} 
-                            alt={application.students.profiles.display_name || 'Student'}
+                          <img
+                            src={application.students.profiles.avatar_url}
+                            alt={
+                              application.students.profiles.full_name ||
+                              "Student"
+                            }
                           />
                         ) : (
                           <div className="avatar-placeholder">
-                            {application.students?.profiles?.display_name?.charAt(0) || 'U'}
+                            {application.students?.profiles?.display_name?.charAt(
+                              0
+                            ) || "U"}
                           </div>
                         )}
                       </div>
                       <div className="applicant-name">
-                        {application.students?.profiles?.display_name || 'Unknown Student'}
+                        {application.students?.profiles?.display_name ||
+                          "Unknown Student"}
                       </div>
                     </div>
                   </td>
                   <td className="position-cell">
-                    {application.internships?.position_title || 'Unknown Position'}
+                    {application.internships?.position_title ||
+                      "Unknown Position"}
                   </td>
                   <td className="date-cell">
                     {formatDate(application.applied_at)}
                   </td>
                   <td className="status-cell">
                     <span
-                      className={`status-badge ${getStatusBadgeClass(application.status)}`}
+                      className={`status-badge ${getStatusBadgeClass(
+                        application.status
+                      )}`}
                     >
-                      {application.status ? 
-                        application.status.charAt(0).toUpperCase() + application.status.slice(1) 
-                        : 'Unknown'
-                      }
+                      {application.status
+                        ? application.status.charAt(0).toUpperCase() +
+                          application.status.slice(1)
+                        : "Unknown"}
                     </span>
                   </td>
                   <td className="decision-cell">
@@ -226,7 +230,7 @@ const Applications = () => {
         )}
       </div>
 
-            <style jsx>{`
+      <style>{`
         .loading-container,
         .error-container {
           display: flex;
@@ -248,8 +252,12 @@ const Applications = () => {
         }
 
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         .retry-button {

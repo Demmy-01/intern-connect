@@ -329,7 +329,6 @@ const OrganizationOnboarding = () => {
             <option value="Retail">Retail</option>
             <option value="Food & Beverage">Food & Beverage</option>
             <option value="Construction">Construction</option>
-            <option value="Other">Other</option>
           </select>
           {errors.industry && (
             <span className="org-error-text">{errors.industry}</span>

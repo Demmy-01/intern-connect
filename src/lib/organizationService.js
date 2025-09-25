@@ -111,6 +111,68 @@ async getApplicationDetails(applicationId) {
   }
 }
 
+  async checkProfileCompletion() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+    const { data: orgData, error: orgError } = await supabase
+      .from('organizations')
+      .select(`
+        *,
+        organization_contacts!inner (
+          contact_name,
+          contact_email,
+          contact_phone
+        )
+      `)
+      .eq('id', user.id)
+      .single();
+
+    if (orgError) throw orgError;
+
+    // Add contact fields to the validation if contact information exists
+    if (orgData?.organization_contacts?.[0]) {
+      const contactFields = [
+        { field: 'contact_email', label: 'Contact Email' },
+        { field: 'contact_phone', label: 'Contact Phone' }
+      ];
+      
+      // Map contact data to the main object for validation
+      orgData.contact_email = orgData.organization_contacts[0].contact_email;
+      orgData.contact_phone = orgData.organization_contacts[0].contact_phone;
+      
+      requiredFields.push(...contactFields);
+    }      const requiredFields = [
+        { field: 'company_name', label: 'Organization Name' },
+        { field: 'company_description', label: 'Organization Description' },
+        { field: 'website', label: 'Website' },
+        { field: 'industry', label: 'Industry' },
+        { field: 'company_size', label: 'Company Size' },
+        { field: 'location', label: 'Location' },
+        { field: 'logo_url', label: 'Company Logo' }
+      ];
+
+      const missingFields = requiredFields.filter(field => !orgData[field.field]);
+      const completedFields = requiredFields.filter(field => orgData[field.field]);
+      const completionPercentage = (completedFields.length / requiredFields.length) * 100;
+
+      return {
+        isComplete: missingFields.length === 0,
+        completionPercentage: Math.round(completionPercentage),
+        missingFields: missingFields,
+        completedFields: completedFields,
+        totalFields: requiredFields.length
+      };
+    } catch (error) {
+      console.error('Error checking profile completion:', error);
+      return null;
+    }
+  }
+
   // Simplified stats method
   async getOrganizationStats() {
     try {
@@ -288,6 +350,37 @@ async getApplicationDetails(applicationId) {
     }
   }
 
+async getOrganizationApplications() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .select(`
+        id,
+        status,
+        applied_at,
+        document_url,
+        internships!inner (id, position_title, organization_id),
+        students!inner (id, profiles!inner (display_name, avatar_url))
+      `)
+      .eq('internships.organization_id', user.id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching organization applications:', error);
+    return { data: null, error: error.message };
+  }
+}
+
 //Enhanced parse method to extract education data and personal details from application notes
 parseApplicationNotes(notes) {
   if (!notes) return {};
@@ -420,6 +513,69 @@ parseApplicationNotes(notes) {
       return { data: internshipsWithStats, error: null };
     } catch (error) {
       console.error('Error fetching organization internships:', error);
+      return { data: [], error: error.message };
+    }
+  }
+
+  // Get all applications for the organization's internships
+  async getOrganizationApplications() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // First get all internships for the organization
+      const { data: internships, error: internshipError } = await supabase
+        .from('internships')
+        .select('id')
+        .eq('organization_id', user.id);
+
+      if (internshipError) {
+        throw internshipError;
+      }
+
+      if (!internships || internships.length === 0) {
+        return { data: [], error: null };
+      }
+
+      const internshipIds = internships.map(intern => intern.id);
+
+      // Then get all applications for these internships with related data
+      const { data, error } = await supabase
+        .from('internship_applications')
+        .select(`
+          id,
+          status,
+          applied_at,
+          internship_id,
+          student_id,
+          notes,
+          internships (
+            id,
+            position_title,
+            department
+          ),
+          students (
+            id,
+            profiles (
+              id,
+              display_name,
+              avatar_url
+            )
+          )
+        `)
+        .in('internship_id', internshipIds)
+        .order('applied_at', { ascending: false});
+
+      if (error) {
+        throw error;
+      }
+
+      return { data: data || [], error: null };
+    } catch (error) {
+      console.error('Error fetching organization applications:', error);
       return { data: [], error: error.message };
     }
   }
