@@ -123,8 +123,8 @@ export function About() {
           <div className="shape shape-3"></div>
         </div>
 
-        <div className="content-wrapper">
-          <div className="header-section">
+        <div className="content-wrapper-about">
+          <div className="header-section-about">
             <div className="mission-badge">Our Core Values</div>
             <p>The principles that guide our work and our community.</p>
           </div>

@@ -5,6 +5,9 @@ import Footer from "../components/footer";
 import { Button } from "../components/button.jsx";
 import location from "../assets/location.png";
 import profile from "../assets/profile.png";
+import phone from "../assets/phone.png";
+import email from "../assets/email.png";
+import person from "../assets/person.png";
 import organizationProfileService from "../lib/OrganizationProfileService.js";
 
 const PublicOrganizationProfile = () => {
@@ -143,10 +146,11 @@ const PublicOrganizationProfile = () => {
             </button>
           </div>
 
-          {/* Header Section */}
-          <div className="public-profile-header">
-            <div className="profile-company-info">
-              <div className="profile-logo">
+          <div className="profile-main-box">
+            {/* Header Section */}
+            <div className="profile-header-content">
+              <div className="profile-company-info">
+                <div className="profile-logo">
                 <div className="profile-logo-icon">
                   {organizationData.logo_url ? (
                     <img
@@ -210,8 +214,6 @@ const PublicOrganizationProfile = () => {
                 </div>
               </div>
             </div>
-
-            {/* Stats Section */}
             <div className="profile-stats">
               <div className="profile-stat-item">
                 <div className="profile-stat-number">
@@ -224,25 +226,34 @@ const PublicOrganizationProfile = () => {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* About Section */}
           <div className="profile-content">
             <div className="profile-about-section">
-              <h2 className="profile-about-title">
-                About {organizationData.company_name}
-              </h2>
-              <p className="profile-about-description">
-                {organizationData.company_description ||
-                  "No description available for this organization."}
-              </p>
+              <div className="content-section">
+                <h2 className="profile-about-title">
+                  About {organizationData.company_name}
+                </h2>
+                <p className="profile-about-description">
+                  {organizationData.company_description ||
+                    "No description available for this organization."}
+                </p>
+              </div>
 
               {organizationData.branches && (
-                <>
-                  <h3 className="profile-section-title">Branches</h3>
-                  <p className="profile-about-description">
-                    {organizationData.branches}
-                  </p>
-                </>
+                <div className="branches-card">
+                  <h3 className="profile-section-title">
+                    Branches
+                  </h3>
+                  <div className="branches-list">
+                    {organizationData.branches.split(',').map((branch, index) => (
+                      <div key={index} className="branch-item">
+                        <span className="branch-dot"></span>
+                        {branch.trim()}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Links */}
@@ -274,41 +285,62 @@ const PublicOrganizationProfile = () => {
               {organizationData.contact && (
                 <div className="profile-contact-section">
                   <h3 className="profile-section-title">Contact Information</h3>
-                  <div className="profile-contact-details">
+                  <div className="profile-contact-grid">
                     {organizationData.contact.contact_name && (
-                      <p>
-                        <strong>Contact Person:</strong>{" "}
-                        {organizationData.contact.contact_name}
-                      </p>
+                      <div className="contact-card">
+                        <div className="contact-card-icon">
+                          <img src={person} alt="Contact Person" className="contact-icon" />
+                        </div>
+                        <div className="contact-card-content">
+                          <h3 className="contact-label">Contact Person</h3>
+                          <p className="contact-value">{organizationData.contact.contact_name}</p>
+                          {organizationData.contact.contact_role && (
+                            <p className="contact-role">{organizationData.contact.contact_role}</p>
+                          )}
+                        </div>
+                      </div>
                     )}
-                    {organizationData.contact.contact_role && (
-                      <p>
-                        <strong>Role:</strong>{" "}
-                        {organizationData.contact.contact_role}
-                      </p>
-                    )}
+
                     {organizationData.contact.contact_email && (
-                      <p>
-                        <strong>Email:</strong>{" "}
-                        <a
-                          href={`mailto:${organizationData.contact.contact_email}`}
-                        >
-                          {organizationData.contact.contact_email}
-                        </a>
-                      </p>
+                      <div className="contact-card">
+                        <div className="contact-card-icon">
+                          <img src={email} alt="Email" className="contact-icon" />
+                        </div>
+                        <div className="contact-card-content">
+                          <h3 className="contact-label">Email Address</h3>
+                          <p className="contact-value">
+                            <a href={`mailto:${organizationData.contact.contact_email}`} className="contact-link">
+                              {organizationData.contact.contact_email}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     )}
+
                     {organizationData.contact.contact_phone && (
-                      <p>
-                        <strong>Phone:</strong>{" "}
-                        {organizationData.contact.contact_phone}
-                      </p>
+                      <div className="contact-card">
+                        <div className="contact-card-icon">
+                          <img src={phone} alt="Phone" className="contact-icon" />
+                        </div>
+                        <div className="contact-card-content">
+                          <h3 className="contact-label">Phone Number</h3>
+                          <p className="contact-value">
+                            <a href={`tel:${organizationData.contact.contact_phone}`} className="contact-link">
+                              {organizationData.contact.contact_phone}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     )}
+
                     {!organizationData.contact.contact_name &&
                       !organizationData.contact.contact_role &&
                       !organizationData.contact.contact_email &&
                       !organizationData.contact.contact_phone && (
-                        <p>Contact information not available.</p>
-                      )}
+                        <div className="contact-card">
+                          <p className="contact-value">Contact information not available.</p>
+                        </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -316,10 +348,8 @@ const PublicOrganizationProfile = () => {
           </div>
         </div>
       </div>
-
-      <style>{`
-
-.public-profile-page {
+      <style jsx>{`
+        .public-profile-page {
   min-height: calc(100vh - 160px);
   background-color: #f8fafc;
   padding: 2rem 0;
@@ -389,17 +419,29 @@ const PublicOrganizationProfile = () => {
   margin-bottom: 2rem;
 }
 
-/* Header Section */
-.public-profile-header {
+/* Main Box */
+.profile-main-box {
   background: white;
   border-radius: 12px;
-  padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+/* Header Section */
+.profile-header-content {
+  padding: 2rem;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 2rem;
+  background: linear-gradient(to right, #f8fafc, white);
+}
+
+.profile-company-info {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
 }
 
 .profile-company-info {
@@ -508,17 +550,22 @@ const PublicOrganizationProfile = () => {
 
 /* Stats Section */
 .profile-stats {
-  display: flex;
-  gap: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-left: 1px solid #e5e7eb;
   flex-shrink: 0;
+  min-width: 200px;
 }
 
 .profile-stat-item {
   text-align: center;
   padding: 1rem;
-  background: #f8fafc;
   border-radius: 8px;
-  min-width: 120px;
+  transition: transform 0.2s ease;
+}
+
+.profile-stat-item:hover {
+  transform: translateY(-2px);
 }
 
 .profile-stat-number {
@@ -543,13 +590,87 @@ const PublicOrganizationProfile = () => {
 /* Content Section */
 .profile-content {
   background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .profile-about-section {
-  margin-bottom: 2rem;
+  padding: 2rem;
+}
+
+.content-section {
+  margin-bottom: 3rem;
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+.branches-card {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.profile-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.branch-icon {
+  font-size: 1.5rem;
+}
+
+.branches-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.branch-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #475569;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.branch-item:hover {
+  background: #f1f5f9;
+  border-color: #1070e5;
+  transform: translateX(4px);
+}
+
+.branch-dot {
+  width: 8px;
+  height: 8px;
+  background: #1070e5;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.profile-about-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-about-description {
+  color: #475569;
+  line-height: 1.8;
+  font-size: 1rem;
 }
 
 .profile-about-title {
@@ -601,6 +722,78 @@ const PublicOrganizationProfile = () => {
   background: #f8fafc;
   border-radius: 8px;
   margin-top: 2rem;
+}
+
+.profile-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.contact-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 1.25rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #1070e5;
+}
+
+.contact-card-icon {
+  background: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-right: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.contact-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.contact-card-content {
+  flex: 1;
+}
+
+.contact-label {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.contact-value {
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.contact-role {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.contact-link {
+  color: #1070e5;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 .profile-contact-details p {
@@ -688,20 +881,21 @@ const PublicOrganizationProfile = () => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .public-profile-header {
+  .profile-header-content {
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 1.5rem;
-  }
-  .profile-company-name-container{
-         display: flex;
-         flex-direction: column;
+    padding: 1.5rem;
   }
 
+  .profile-company-name-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 
   .profile-company-info {
     flex-direction: column;
+    align-items: center;
     text-align: center;
     gap: 1rem;
   }
@@ -711,7 +905,11 @@ const PublicOrganizationProfile = () => {
   }
 
   .profile-stats {
-    justify-content: center;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
   }
 
   .profile-company-name {

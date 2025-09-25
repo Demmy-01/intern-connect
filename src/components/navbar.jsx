@@ -43,6 +43,10 @@ const Navbar = ({ textColor }) => {
 
   return (
     <>
+      <NotificationModal
+        isOpen={isNotificationOpen}
+        closeModal={closeNotification}
+      />
       <nav className="nav">
         <div className="nav-container">
           <div className="nav-flex">
@@ -140,11 +144,12 @@ const Navbar = ({ textColor }) => {
                 <>
                   {/* Bell Icon */}
                   <button
-                    className="icon-button"
+                    className="icon-button notification-button"
                     onClick={toggleNotification}
                     aria-label="Toggle notifications"
                   >
                     <Bell size={20} />
+                    <span className="notification-dot"></span>
                   </button>
 
                   {/* Profile Icon */}

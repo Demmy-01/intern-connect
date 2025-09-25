@@ -1,11 +1,12 @@
 // pages/PostInternship.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./org.css";
 import "./dashboard-layout.css";
 import { Button } from "../components/button.jsx";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout";
 import internshipService from "../lib/internshipService.js";
+import organizationService from "../lib/organizationService.js";
 import check from "../assets/checked.png";
 import useVerificationStatus from "../hooks/useVerificationStatus";
 
@@ -14,6 +15,23 @@ const PostInternship = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [profileStatus, setProfileStatus] = useState(null);
+  const [checkingProfile, setCheckingProfile] = useState(true);
+
+  useEffect(() => {
+    checkProfileCompletion();
+  }, []);
+
+  const checkProfileCompletion = async () => {
+    try {
+      const status = await organizationService.checkProfileCompletion();
+      setProfileStatus(status);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCheckingProfile(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     positionTitle: "",
@@ -28,7 +46,13 @@ const PostInternship = () => {
   });
 
   // Check verification status
-  const { isVerified, isPending, isRejected, loading: verificationLoading, restrictionMessage } = useVerificationStatus();
+  const {
+    isVerified,
+    isPending,
+    isRejected,
+    loading: verificationLoading,
+    restrictionMessage,
+  } = useVerificationStatus();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -74,7 +98,9 @@ const PostInternship = () => {
 
     // Check verification status before allowing submission
     if (!isVerified) {
-      setError("Your organization must be verified before posting internships.");
+      setError(
+        "Your organization must be verified before posting internships."
+      );
       return;
     }
 
@@ -86,6 +112,15 @@ const PostInternship = () => {
     setError(null);
 
     try {
+      // Double-check profile completion before submitting
+      const profileStatus = await organizationService.checkProfileCompletion();
+      if (!profileStatus.isComplete) {
+        setError(
+          "Please complete your organization profile before posting internships."
+        );
+        return;
+      }
+
       const { data, error } = await internshipService.createInternship(
         formData
       );
@@ -118,6 +153,35 @@ const PostInternship = () => {
       setLoading(false);
     }
   };
+
+  if (checkingProfile) {
+    return (
+      <DashboardLayout>
+        <div className="loading">Checking profile status...</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (profileStatus && !profileStatus.isComplete) {
+    return (
+      <DashboardLayout>
+        <div
+          className="error-message"
+          style={{ textAlign: "center", padding: "2rem" }}
+        >
+          <h2>Complete Your Profile</h2>
+          <p>
+            You need to complete your organization profile before posting
+            internships.
+          </p>
+          <p>Missing information: {profileStatus.missingFields.join(", ")}</p>
+          <Link to="/organization-profile">
+            <Button>Complete Profile</Button>
+          </Link>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (success) {
     return (
@@ -158,9 +222,15 @@ const PostInternship = () => {
 
         {/* Verification Status Restriction */}
         {restrictionMessage && (
-          <div className={`verification-restriction ${restrictionMessage.type === 'error' ? 'verification-restriction--error' : 'verification-restriction--warning'}`}>
+          <div
+            className={`verification-restriction ${
+              restrictionMessage.type === "error"
+                ? "verification-restriction--error"
+                : "verification-restriction--warning"
+            }`}
+          >
             <div className="restriction-icon">
-              {restrictionMessage.type === 'error' ? '⚠️' : '⏳'}
+              {restrictionMessage.type === "error" ? "⚠️" : "⏳"}
             </div>
             <div className="restriction-content">
               <h3>{restrictionMessage.title}</h3>

@@ -1,0 +1,32 @@
+/* Global scroll behavior */
+html {
+  scroll-behavior: auto !important;
+}
+
+body {
+  /* Prevent scroll-linked layout shifts */
+  overflow-y: scroll;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure smooth scrolling for app root */
+#app-root {
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+}
+
+/* Prevent scrolling during route transitions */
+body.transitioning {
+  overflow: hidden;
+}
+
+/* Optimize performance */
+* {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}

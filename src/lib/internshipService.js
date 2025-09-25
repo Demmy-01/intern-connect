@@ -1,5 +1,6 @@
 // services/internshipService.js
 import { supabase } from './supabase.js';
+import organizationService from './organizationService.js';
 
 class InternshipService {
   // Debug function to check user authentication and organization
@@ -40,6 +41,13 @@ class InternshipService {
   async createInternship(internshipData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      
+      // Check profile completion first
+      const profileStatus = await organizationService.checkProfileCompletion();
+      if (!profileStatus?.isComplete) {
+        throw new Error('Please complete your organization profile before posting internships. ' +
+          'Missing information: ' + profileStatus.missingFields.map(f => f.label).join(', '));
+      }
       
       if (!user) {
         throw new Error('User not authenticated');

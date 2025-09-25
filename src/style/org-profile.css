@@ -16,6 +16,85 @@
   overflow: hidden;
 }
 
+/* Contact Section Styles */
+.profile-contact-section {
+  margin-top: 32px;
+  padding: 24px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.profile-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.contact-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #2563eb;
+}
+
+.contact-card-icon {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  margin-right: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.contact-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.contact-card-content {
+  flex: 1;
+}
+
+.contact-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.contact-value {
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.contact-role {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.contact-link {
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contact-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
 /* Header Section */
 .profile-header {
   padding: 32px;

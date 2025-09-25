@@ -47,7 +47,7 @@ function App() {
       }}
     >
       <ScrollToTop />
-      <div className="app-container">
+      <div className="app-container" id="app-root">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

@@ -7,6 +7,9 @@ import DashboardLayout from "./DashboardLayout.jsx";
 import location from "../assets/location.png";
 import profile from "../assets/profile.png";
 import pencil from "../assets/pencil.png";
+import phone from "../assets/phone.png";
+import email from "../assets/email.png";
+import person from "../assets/person.png";
 import organizationProfileService from "../lib/OrganizationProfileService.js";
 import { useAuth } from "../context/AuthContext";
 
@@ -51,12 +54,16 @@ const OrganizationProfiles = () => {
       if (!user || !user.id) {
         return;
       }
-      const { data, error } = await import("../lib/organizationService.js").then(mod => mod.default.getOrganizationApplications());
+      const { data, error } = await import(
+        "../lib/organizationService.js"
+      ).then((mod) => mod.default.getOrganizationApplications());
       if (error) {
         console.error("Error fetching applications:", error);
         return;
       }
-      const acceptedCount = (data || []).filter(app => app.status === "accepted").length;
+      const acceptedCount = (data || []).filter(
+        (app) => app.status === "accepted"
+      ).length;
       setAcceptedInternsCount(acceptedCount);
     } catch (error) {
       console.error("Error fetching accepted interns count:", error);
@@ -203,13 +210,13 @@ const OrganizationProfiles = () => {
                   </div>
                 </div>
                 <div className="profile-stat-item">
-                <div className="profile-stat-number">
-                  {acceptedInternsCount}
+                  <div className="profile-stat-number">
+                    {acceptedInternsCount}
+                  </div>
+                  <div className="profile-stat-label">
+                    Total recruited interns
+                  </div>
                 </div>
-                <div className="profile-stat-label">
-                  Total recruited interns
-                </div>
-              </div>
               </div>
               <Link to="/organization-profile-edit">
                 <Button
@@ -241,10 +248,10 @@ const OrganizationProfiles = () => {
                 <>
                   <h3>Verification Pending</h3>
                   <>
-                        <br />
-                        <strong>Action:</strong>{" "}
-                        {organizationData.verification_notes}
-                      </>
+                    <br />
+                    <strong>Action:</strong>{" "}
+                    {organizationData.verification_notes}
+                  </>
                   <p>
                     Your organization profile is under review. You will receive
                     an email notification once verification is complete. This
@@ -327,24 +334,64 @@ const OrganizationProfiles = () => {
               {organizationData.contact && (
                 <div className="profile-contact-section">
                   <h2 className="profile-about-title">Contact Information</h2>
-                  <div className="profile-contact-details">
-                    <p>
-                      <strong>Contact Person:</strong>{" "}
-                      {organizationData.contact.contact_name}
-                    </p>
-                    <p>
-                      <strong>Role:</strong>{" "}
-                      {organizationData.contact.contact_role}
-                    </p>
-                    <p>
-                      <strong>Email:</strong>{" "}
-                      {organizationData.contact.contact_email}
-                    </p>
+                  <div className="profile-contact-grid">
+                    <div className="contact-card">
+                      <div className="contact-card-icon">
+                        <img
+                          src={person}
+                          alt="Contact Person"
+                          className="contact-icon"
+                        />
+                      </div>
+                      <div className="contact-card-content">
+                        <h3 className="contact-label">Contact Person</h3>
+                        <p className="contact-value">
+                          {organizationData.contact.contact_name}
+                        </p>
+                        <p className="contact-role">
+                          {organizationData.contact.contact_role}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="contact-card">
+                      <div className="contact-card-icon">
+                        <img src={email} alt="Email" className="contact-icon" />
+                      </div>
+                      <div className="contact-card-content">
+                        <h3 className="contact-label">Email Address</h3>
+                        <p className="contact-value">
+                          <a
+                            href={`mailto:${organizationData.contact.contact_email}`}
+                            className="contact-link"
+                          >
+                            {organizationData.contact.contact_email}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+
                     {organizationData.contact.contact_phone && (
-                      <p>
-                        <strong>Phone:</strong>{" "}
-                        {organizationData.contact.contact_phone}
-                      </p>
+                      <div className="contact-card">
+                        <div className="contact-card-icon">
+                          <img
+                            src={phone}
+                            alt="Phone"
+                            className="contact-icon"
+                          />
+                        </div>
+                        <div className="contact-card-content">
+                          <h3 className="contact-label">Phone Number</h3>
+                          <p className="contact-value">
+                            <a
+                              href={`tel:${organizationData.contact.contact_phone}`}
+                              className="contact-link"
+                            >
+                              {organizationData.contact.contact_phone}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
