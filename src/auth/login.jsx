@@ -109,7 +109,7 @@ const Login = () => {
       </div>
       <div className="login-page">
         <div className="login-container">
-          <h2 className="form-title">Student Login</h2>
+          <h2 className="form-title">Login</h2>
           <SocialLogin onGoogleSignIn={handleGoogleSignIn} loading={loading} />
 
           <p className="separator">
@@ -154,8 +154,7 @@ const Login = () => {
               Don't have an account? <Link to="/signup">Sign Up</Link>
             </p>
             <p className="signup-text">
-              Are you an organization?{" "}
-              <Link to="/organization-login">Organization Login</Link>
+              Back to <Link to="/">Home Page</Link>
             </p>
           </div>
         </div>

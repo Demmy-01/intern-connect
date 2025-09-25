@@ -8,6 +8,7 @@ import { Buttons } from "./button-1.jsx";
 import NotificationModal from "./notification.jsx";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import LogoutModal from "./LogoutModal";
 
 const Navbar = ({ textColor }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -15,6 +16,7 @@ const Navbar = ({ textColor }) => {
   const [isMobileDropdownOpen, setIsMobileDropdownOpen] = React.useState(false);
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] =
     React.useState(false);
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
   const { darkMode, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +41,12 @@ const Navbar = ({ textColor }) => {
 
   const toggleMobileDropdown = () => {
     setIsMobileDropdownOpen(!isMobileDropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setShowLogoutModal(false);
+    navigate("/login");
   };
 
   return (
@@ -162,10 +170,7 @@ const Navbar = ({ textColor }) => {
                   {/* Logout Icon */}
                   <button
                     className="icon-button"
-                    onClick={async () => {
-                      await logout();
-                      navigate("/login");
-                    }}
+                    onClick={() => setShowLogoutModal(true)}
                   >
                     <LogOut size={20} />
                   </button>
@@ -321,6 +326,11 @@ const Navbar = ({ textColor }) => {
       <NotificationModal
         isOpen={isNotificationOpen}
         closeModal={closeNotification}
+      />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
       />
     </>
   );

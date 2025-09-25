@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./sidebar.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import add from "../assets/add.png";
@@ -8,15 +8,27 @@ import out from "../assets/out.png";
 import people from "../assets/people.png";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import LogoutModal from "./LogoutModal";
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const handleLogout = async () => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = async () => {
     await logout();
+    setShowLogoutModal(false);
     navigate("/");
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -89,22 +101,27 @@ const Sidebar = ({ isOpen, onToggle }) => {
           <div className="side-nav-item logout">
             <div
               className="nav-icon logout-icon"
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               style={{ cursor: "pointer" }}
             >
               <img src={out} alt="Logout Icon" className="sidebar-icon" />
             </div>
             <span
               className="side-nav-link"
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               style={{ cursor: "pointer" }}
             >
-              Log Out
+              <p className="log">Log Out</p>
             </span>
           </div>
         </nav>
       </aside>
       {isOpen && <div className="sidebar-overlay" onClick={onToggle}></div>}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onConfirm={handleLogoutConfirm}
+        onClose={handleLogoutCancel}
+      />
     </>
   );
 };

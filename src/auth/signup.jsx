@@ -108,7 +108,7 @@ const SignUp = () => {
       </div>
       <div className="login-page">
         <div className="login-container">
-          <h2 className="form-title">Student Sign Up</h2>
+          <h2 className="form-title">Sign Up</h2>
           <SocialLogin onGoogleSignIn={handleGoogleSignIn} loading={loading} />
 
           <p className="separator">

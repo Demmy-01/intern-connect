@@ -15,6 +15,9 @@
   background-color: #f3f4f6;
 }
 
+.log{
+  color: red;
+}
 .side-nav-item.active {
   background-color: #ebf5ff;
   color: #2563eb;
@@ -56,4 +59,17 @@
   text-decoration: none;
   color: inherit;
   flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.side-nav-item.logout {
+  display: flex;
+  align-items: center;
 }

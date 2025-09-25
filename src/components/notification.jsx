@@ -1,5 +1,14 @@
 import React from "react";
-import { Bell, X, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Bell,
+  X,
+  CheckCircle,
+  AlertCircle,
+  User,
+  Award,
+  Calendar,
+  Star,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import ProfileService from "../lib/profileService";
@@ -17,70 +26,191 @@ const getRandomColor = (str) => {
   return "#" + "0".repeat(6 - color.length) + color;
 };
 
-// Reusable NotificationItem Component
-const NotificationItem = ({ icon, title, description, timeAgo, iconBg }) => {
+// Welcome notification for new users
+const WelcomeNotification = ({ userName }) => (
+  <div className="notification-item welcome-item">
+    <div className="icon-container welcome-icon">
+      <Star size={18} color="white" />
+    </div>
+    <div className="notification-content">
+      <div className="notification-header">
+        <h4 className="notification-title">Welcome to InternHub!</h4>
+        <span className="time-ago">
+          <span className="dot"></span>
+          New
+        </span>
+      </div>
+      <p className="notification-description">
+        Hi {userName || "there"}! Welcome to your internship journey. Complete
+        your profile and start applying to amazing opportunities today!
+      </p>
+    </div>
+  </div>
+);
+
+// Profile completion notification
+const ProfileCompletionNotification = ({ profile }) => {
+  const missingFields = [
+    !profile?.bio && "bio",
+    (!profile?.skills || profile.skills.length === 0) && "skills",
+    (!profile?.education || profile.education.length === 0) && "education",
+    (!profile?.experiences || profile.experiences.length === 0) && "experience",
+  ].filter(Boolean);
+
+  const completionPercentage = Math.round(
+    ((4 - missingFields.length) / 4) * 100
+  );
+
   return (
-    <div className="notification-item">
-      <div className="icon-container" style={{ backgroundColor: iconBg }}>
-        {icon}
+    <div className="notification-item profile-item">
+      <div className="icon-container profile-icon">
+        <User size={18} color="white" />
       </div>
       <div className="notification-content">
         <div className="notification-header">
-          <h4 className="notification-title">{title}</h4>
+          <h4 className="notification-title">Complete Your Profile</h4>
           <span className="time-ago">
             <span className="dot"></span>
-            {timeAgo}
+            {completionPercentage}% done
           </span>
         </div>
-        <p className="notification-description">{description}</p>
+        <p className="notification-description">
+          Your profile is {completionPercentage}% complete. Add your{" "}
+          {missingFields.join(", ")}
+          to increase your chances of getting hired by up to 70%!
+        </p>
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{ width: `${completionPercentage}%` }}
+          ></div>
+        </div>
       </div>
     </div>
   );
 };
 
-// Reusable ApplicationStatusItem Component
-const ApplicationStatusItem = ({
-  logoComponent,
-  companyName,
-  companyType,
-  location,
-  status,
-  statusColor,
-  timeAgo,
-  additionalInfo,
-}) => {
-  const getStatusIcon = () => {
-    if (status === "Approved") {
-      return <CheckCircle size={16} color="#16a34a" />;
+// Application status notification
+const ApplicationStatusNotification = ({ app, type = "approved" }) => {
+  const getNotificationContent = () => {
+    switch (type) {
+      case "approved":
+        return {
+          icon: <CheckCircle size={18} color="white" />,
+          iconBg: "#10b981",
+          title: "Application Approved!",
+          description: `Congratulations! Your application for ${app.internships.position_title} at ${app.internships.organizations?.organization_name} has been approved.`,
+        };
+      case "rejected":
+        return {
+          icon: <X size={18} color="white" />,
+          iconBg: "#ef4444",
+          title: "Application Update",
+          description: `Your application for ${app.internships.position_title} was not successful this time. Keep applying - the right opportunity is waiting!`,
+        };
+      default:
+        return {
+          icon: <AlertCircle size={18} color="white" />,
+          iconBg: "#f59e0b",
+          title: "Application Under Review",
+          description: `Your application for ${app.internships.position_title} is being reviewed. We'll notify you once there's an update.`,
+        };
     }
-    if (status === "Under Review") {
-      return <AlertCircle size={16} color="#ca8a04" />;
-    }
-    return null;
   };
 
+  const content = getNotificationContent();
+
   return (
-    <div className="application-item">
-      <div className="logo-container">{logoComponent}</div>
-      <div className="application-content">
-        <div className="application-header">
-          <h4 className="company-name">{companyName}</h4>
+    <div className="notification-item">
+      <div
+        className="icon-container"
+        style={{ backgroundColor: content.iconBg }}
+      >
+        {content.icon}
+      </div>
+      <div className="notification-content">
+        <div className="notification-header">
+          <h4 className="notification-title">{content.title}</h4>
           <span className="time-ago">
             <span className="dot"></span>
-            {timeAgo}
+            {new Date(app.updated_at).toLocaleDateString()}
           </span>
         </div>
-        <p className="company-details">{companyType}</p>
-        <p className="location">Location: {location}</p>
-        <div className="status-container">
-          <span className="status-label">Status: </span>
-          <span className="status-text" style={{ color: statusColor }}>
-            {status}
-          </span>
-          {getStatusIcon()}
-          {additionalInfo && (
-            <span className="additional-info">{additionalInfo}</span>
+        <p className="notification-description">{content.description}</p>
+      </div>
+    </div>
+  );
+};
+
+// Accepted internship item
+const AcceptedInternshipItem = ({ app }) => {
+  return (
+    <div className="internship-card">
+      <div className="internship-logo">
+        {app.internships.organizations?.logo_url ? (
+          <img
+            src={app.internships.organizations.logo_url}
+            alt={app.internships.organizations.organization_name}
+            className="company-logo-img"
+          />
+        ) : (
+          <div
+            className="company-logo-placeholder"
+            style={{
+              backgroundColor: getRandomColor(
+                app.internships.organizations?.organization_name || "Default"
+              ),
+            }}
+          >
+            <span className="company-initial">
+              {app.internships.organizations?.organization_name?.charAt(0) ||
+                "?"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="internship-info">
+        <div className="internship-header">
+          <h4 className="internship-title">{app.internships.position_title}</h4>
+          <div className="success-badge">
+            <CheckCircle size={16} />
+            <span>Accepted</span>
+          </div>
+        </div>
+
+        <p className="company-name">
+          {app.internships.organizations?.organization_name}
+        </p>
+
+        <div className="internship-details">
+          <div className="detail-item">
+            <Calendar size={14} />
+            <span>{app.internships.location}</span>
+          </div>
+          {app.internships.work_type && (
+            <div className="detail-item">
+              <Award size={14} />
+              <span>{app.internships.work_type}</span>
+            </div>
           )}
+          {app.internships.compensation && (
+            <div className="detail-item">
+              <span className="compensation-label">💰</span>
+              <span>{app.internships.compensation}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="acceptance-date">
+          <span className="date-label">Accepted on:</span>
+          <span className="date-value">
+            {new Date(app.updated_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
         </div>
       </div>
     </div>
@@ -91,207 +221,189 @@ const ApplicationStatusItem = ({
 const NotificationModal = ({ isOpen, closeModal }) => {
   const [profile, setProfile] = React.useState(null);
   const [applications, setApplications] = React.useState([]);
+  const [isNewUser, setIsNewUser] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
   const { user } = useAuth();
 
   React.useEffect(() => {
     if (user && isOpen) {
-      // Fetch profile data
-      const fetchProfile = async () => {
-        const profileService = new ProfileService();
-        const result = await profileService.getProfile(user.id);
-        if (result.success) {
-          setProfile(result.data);
-        }
-      };
-
-      // Fetch applications
-      const fetchApplications = async () => {
-        const { data: applications, error } = await supabase
-          .from("internship_applications")
-          .select(
-            `
-            id,
-            status,
-            applied_at,
-            updated_at,
-            internships:internship_id (
-              id,
-              position_title,
-              department,
-              location,
-              work_type,
-              compensation,
-              organizations (
-                organization_name,
-                organization_type,
-                logo_url,
-                location
-              )
-            )
-          `
-          )
-          .eq("student_id", user.id)
-          .eq("status", "accepted")
-          .order("updated_at", { ascending: false });
-
-        if (!error) {
-          setApplications(applications || []);
-        }
-      };
-
-      fetchProfile();
-      fetchApplications();
+      loadNotificationData();
     }
   }, [user, isOpen]);
 
+  const loadNotificationData = async () => {
+    try {
+      setLoading(true);
+
+      // Check if user is new (created within last 7 days)
+      const userCreated = new Date(user.created_at);
+      const daysSinceCreated = Math.floor(
+        (new Date() - userCreated) / (1000 * 60 * 60 * 24)
+      );
+      setIsNewUser(daysSinceCreated <= 7);
+
+      // Fetch profile data
+      const profileService = new ProfileService();
+      const profileResult = await profileService.getProfile(user.id);
+      if (profileResult.success) {
+        setProfile(profileResult.data);
+      }
+
+      // Fetch applications
+      const { data: applications, error } = await supabase
+        .from("internship_applications")
+        .select(
+          `
+          id,
+          status,
+          applied_at,
+          updated_at,
+          internships:internship_id (
+            id,
+            position_title,
+            department,
+            location,
+            work_type,
+            compensation,
+            organizations (
+              organization_name,
+              organization_type,
+              logo_url,
+              location
+            )
+          )
+        `
+        )
+        .eq("student_id", user.id)
+        .order("updated_at", { ascending: false });
+
+      if (!error) {
+        setApplications(applications || []);
+      }
+    } catch (error) {
+      console.error("Error loading notification data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
+
+  const acceptedApplications = applications.filter(
+    (app) => app.status === "accepted" || app.status === "approved"
+  );
+  const isProfileIncomplete =
+    profile &&
+    (!profile.bio ||
+      !profile.skills?.length ||
+      !profile.education?.length ||
+      !profile.experiences?.length);
 
   return (
     <div className="notification-backdrop" onClick={closeModal}>
       <div className="notification-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Modal Header */}
+        {/* Enhanced Modal Header */}
         <div className="modal-header">
           <div className="header-left">
-            <Bell size={20} color="#333" />
-            <h2 className="modal-title">Notification</h2>
+            <div className="header-icon">
+              <Bell size={20} color="#1070e5" />
+            </div>
+            <div className="header-content">
+              <h2 className="modal-title">Notifications</h2>
+              <span className="header-subtitle">
+                Stay updated with your internship journey
+              </span>
+            </div>
           </div>
-          <div className="header-right">
-            <span className="check-status">Check Application Status</span>
-            <button
-              onClick={closeModal}
-              className="close-button"
-              aria-label="Close notification modal"
-            >
-              <X size={20} />
-            </button>
-          </div>
+          <button
+            onClick={closeModal}
+            className="close-button"
+            aria-label="Close notification modal"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        {/* Notification Items */}
-        <div className="notifications-section">
-          {/* Profile completion reminder */}
-          {profile &&
-            (!profile.bio ||
-              !profile.skills?.length ||
-              !profile.education?.length ||
-              !profile.experiences?.length) && (
-              <NotificationItem
-                icon={<span className="reminder-icon">⚠️</span>}
-                title="Complete Your Profile"
-                description={`Your profile is incomplete. Please update your ${[
-                  !profile.bio && "bio",
-                  !profile.skills?.length && "skills",
-                  !profile.education?.length && "education",
-                  !profile.experiences?.length && "experience",
-                ]
-                  .filter(Boolean)
-                  .join(", ")} to improve your chances of getting hired.`}
-                timeAgo="Now"
-                iconBg="#dc2626"
-              />
-            )}
+        {loading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading notifications...</p>
+          </div>
+        ) : (
+          <>
+            {/* Notifications Section */}
+            <div className="notifications-section">
+              {/* Welcome notification for new users */}
+              {isNewUser && (
+                <WelcomeNotification userName={profile?.first_name} />
+              )}
 
-          {/* Recent application updates */}
-          {applications
-            .filter((app) => app.status === "approved")
-            .slice(0, 3)
-            .map((app, index) => (
-              <NotificationItem
-                key={app.id}
-                icon={<span className="intern-icon">🎉</span>}
-                title="Application Approved!"
-                description={`Congratulations! Your application for ${app.internships.position_title} at ${app.organizations.organization_name} has been approved. Check your dashboard for more details.`}
-                timeAgo={new Date(app.updated_at).toLocaleDateString()}
-                iconBg="#16a34a"
-              />
-            ))}
-        </div>
+              {/* Profile completion reminder */}
+              {isProfileIncomplete && (
+                <ProfileCompletionNotification profile={profile} />
+              )}
 
-        {/* Accepted Internships Section */}
-        <div className="application-status-section">
-          <h3 className="section-title">Accepted Internships</h3>
+              {/* Recent application updates */}
+              {applications
+                .filter(
+                  (app) =>
+                    app.status === "accepted" || app.status === "approved"
+                )
+                .slice(0, 2)
+                .map((app) => (
+                  <ApplicationStatusNotification
+                    key={`approved-${app.id}`}
+                    app={app}
+                    type="approved"
+                  />
+                ))}
 
-          {applications.length > 0 ? (
-            <div className="offers-list">
-              {applications.map((app) => (
-                <div key={app.id} className="application-item">
-                  <div className="logo-container">
-                    {app.internships.organizations?.logo_url ? (
-                      <img
-                        src={app.internships.organizations.logo_url}
-                        alt={app.internships.organizations.organization_name}
-                        className="company-logo"
-                      />
-                    ) : (
-                      <div
-                        className="company-logo"
-                        style={{
-                          backgroundColor: getRandomColor(
-                            app.internships.organizations.organization_name
-                          ),
-                        }}
-                      >
-                        <span className="company-initial">
-                          {app.internships.organizations.organization_name.charAt(
-                            0
-                          )}
-                        </span>
-                      </div>
-                    )}
+              {applications
+                .filter((app) => app.status === "rejected")
+                .slice(0, 1)
+                .map((app) => (
+                  <ApplicationStatusNotification
+                    key={`rejected-${app.id}`}
+                    app={app}
+                    type="rejected"
+                  />
+                ))}
+
+              {/* Show message if no notifications */}
+              {!isNewUser &&
+                !isProfileIncomplete &&
+                applications.length === 0 && (
+                  <div className="no-notifications">
+                    <Bell size={48} color="#e5e7eb" />
+                    <h3>No new notifications</h3>
+                    <p>You're all caught up! Check back later for updates.</p>
                   </div>
+                )}
+            </div>
 
-                  <div className="application-content">
-                    <div className="application-header">
-                      <h4 className="company-name">
-                        {app.internships.position_title}
-                      </h4>
-                      <span className="time-ago">
-                        <span className="dot"></span>
-                        {new Date(app.updated_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="company-details">
-                      {app.internships.organizations.organization_name}
-                    </p>
-                    <div className="internship-details">
-                      <p className="location">📍 {app.internships.location}</p>
-                      {app.internships.work_type && (
-                        <p className="work-type">
-                          💼 {app.internships.work_type}
-                        </p>
-                      )}
-                      {app.internships.compensation && (
-                        <p className="compensation">
-                          💰 {app.internships.compensation}
-                        </p>
-                      )}
-                    </div>
-                    <div className="status-container success">
-                      <span
-                        className="status-text"
-                        style={{ color: "#16a34a" }}
-                      >
-                        <CheckCircle
-                          size={16}
-                          color="#16a34a"
-                          style={{ marginRight: "4px" }}
-                        />
-                        Accepted
-                      </span>
-                      <span className="additional-info">
-                        Check your dashboard for details
-                      </span>
-                    </div>
-                  </div>
+            {/* Accepted Internships Section */}
+            {acceptedApplications.length > 0 && (
+              <div className="accepted-internships-section">
+                <div className="section-header">
+                  <h3 className="section-title">
+                    <CheckCircle size={20} color="#10b981" />
+                    Accepted Internships
+                  </h3>
+                  <span className="section-count">
+                    {acceptedApplications.length} offer
+                    {acceptedApplications.length !== 1 ? "s" : ""}
+                  </span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="no-applications">
-              <p>No accepted internships yet. Keep applying!</p>
-            </div>
-          )}
-        </div>
+
+                <div className="internships-list">
+                  {acceptedApplications.map((app) => (
+                    <AcceptedInternshipItem key={app.id} app={app} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

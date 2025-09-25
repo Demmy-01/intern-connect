@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import profileService from "../lib/profileService";
+import LogoutModal from "./LogoutModal";
 
 // Header Component
 const DashboardHeader = () => {
@@ -34,13 +35,24 @@ const DashboardHeader = () => {
     fetchProfileData();
   }, [user]);
 
-  const handleLogout = async () => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = async () => {
     try {
       await logout();
+      setShowLogoutModal(false);
       navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error);
     }
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -61,8 +73,13 @@ const DashboardHeader = () => {
         <Link to="/internships">
           <Buttons label="Explore Internships" />
         </Link>
-        <Buttons label="Logout" onClick={handleLogout} />
+        <Buttons label="Logout" onClick={handleLogoutClick} />
       </div>
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onConfirm={handleLogoutConfirm}
+        onClose={handleLogoutCancel}
+      />
     </div>
   );
 };
