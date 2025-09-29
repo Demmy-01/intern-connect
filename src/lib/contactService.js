@@ -1,12 +1,10 @@
 import { supabase } from './supabase';
 
 export const contactService = {
-  // Submit contact form (works for both authenticated and non-authenticated users)
   async submitContactForm(formData) {
     try {
       console.log('Submitting contact form data:', formData);
       
-      // Get current user (will be null for non-authenticated users)
       const { data: { user } } = await supabase.auth.getUser();
       console.log('Current user:', user);
       
@@ -15,9 +13,7 @@ export const contactService = {
         email: formData.email,
         phone_number: formData.phoneNumber || null,
         message: formData.message,
-        user_id: user ? user.id : null, // null for non-authenticated users
-        // Remove created_at since it has a default value
-        // Remove status since it has a default value
+        user_id: user ? user.id : null,
       };
 
       console.log('Prepared contact data:', contactData);
@@ -25,7 +21,7 @@ export const contactService = {
       const { data, error } = await supabase
         .from('contact_messages')
         .insert([contactData])
-        .select(); // Add .select() to get the inserted data back
+        .select();
 
       if (error) {
         console.error('Supabase error:', error);
