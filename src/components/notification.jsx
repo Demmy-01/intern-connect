@@ -34,7 +34,7 @@ const WelcomeNotification = ({ userName }) => (
     </div>
     <div className="notification-content">
       <div className="notification-header">
-        <h4 className="notification-title">Welcome to InternHub!</h4>
+        <h4 className="notification-title">Welcome to Intern Connect!</h4>
         <span className="time-ago">
           <span className="dot"></span>
           New

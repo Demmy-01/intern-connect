@@ -1,6 +1,7 @@
 import Navbar from "../components/navbar";
 import "../style/home.css";
 import PageTransition from "../components/PageTransition";
+import { supabase } from "../lib/supabase";
 import {
   Search,
   MapPin,
@@ -18,9 +19,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import heroBackground from "../assets/Rectangle-27.png";
 import Footer from "../components/footer.jsx";
+import { contactService } from "../lib/contactService";
 
 export default function Home() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({
+    success: false,
+    message: "",
+  });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -76,6 +83,17 @@ export default function Home() {
     });
   }, []);
 
+  // Auto-hide submit status message after 4 seconds
+  useEffect(() => {
+    if (submitStatus.message) {
+      const timer = setTimeout(() => {
+        setSubmitStatus({ success: false, message: "" });
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [submitStatus.message]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -84,25 +102,104 @@ export default function Home() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted:", formData);
+    console.log("Form submission started with data:", formData);
 
-    // Show success message (you can implement a toast notification here)
-    alert("Thank you for your message! We'll get back to you soon.");
+    // Basic form validation
+    if (
+      !formData.fullName.trim() ||
+      !formData.email.trim() ||
+      !formData.message.trim()
+    ) {
+      console.log("Validation failed");
+      setSubmitStatus({
+        success: false,
+        message:
+          "Please fill in all required fields (Name, Email, and Message).",
+      });
+      return;
+    }
 
-    // Reset form
-    setFormData({
-      fullName: "",
-      email: "",
-      phoneNumber: "",
-      message: "",
-    });
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      console.log("Email validation failed");
+      setSubmitStatus({
+        success: false,
+        message: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      console.log("Calling contactService.submitContactForm");
+      const result = await contactService.submitContactForm(formData);
+      console.log("Contact form submission result:", result);
+
+      if (result.success) {
+        console.log("SUCCESS: Showing success toast");
+
+        // Show success message
+        setSubmitStatus({
+          success: true,
+          message: "Thank you for your message! We'll get back to you soon.",
+        });
+
+        // Reset form
+        setFormData({
+          fullName: user?.user_metadata?.full_name || "",
+          email: user?.email || "",
+          phoneNumber: "",
+          message: "",
+        });
+      } else {
+        console.log("FAILURE: Showing error toast");
+        setSubmitStatus({
+          success: false,
+          message: result.error || "Failed to submit contact form",
+        });
+      }
+    } catch (error) {
+      console.error("CATCH: Unexpected error:", error);
+      setSubmitStatus({
+        success: false,
+        message: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (user && user.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email,
+        fullName: user.user_metadata?.full_name || prev.fullName,
+      }));
+    }
+  }, [user]);
+
   const handleExploreClick = () => {
-    // You can navigate to internships page or implement search functionality
     navigate("/internships");
   };
 
@@ -234,7 +331,7 @@ export default function Home() {
       {/* Why Internship is Important Section */}
       <section className="why-internship-section" id="why-internship">
         <div className="section-container">
-          <div className="section-header fade-in">
+          <div className="section-header-home fade-in">
             <h2 className="section-title-1">Why Internships are Important</h2>
             <p className="section-subtitle">
               Internships are the bridge between academic learning and
@@ -333,7 +430,7 @@ export default function Home() {
       {/* How to Apply Section */}
       <section className="how-to-apply-section" id="how-to-apply">
         <div className="section-container">
-          <div className="section-header fade-in">
+          <div className="section-header-home fade-in">
             <h2 className="section-title-1">How to Apply</h2>
             <p className="section-subtitle">
               Getting started is simple. Follow these easy steps to begin your
@@ -393,7 +490,7 @@ export default function Home() {
       {/* Contact Us Section */}
       <section className="contact-section" id="contact">
         <div className="section-container">
-          <div className="section-header fade-in">
+          <div className="section-header-home fade-in">
             <h2 className="section-title-1">Contact Us</h2>
             <p className="section-subtitle">
               Get in touch with our team for personalized assistance and support
@@ -472,11 +569,21 @@ export default function Home() {
                   label={
                     <span className="button-content">
                       <Send className="button-icon" />
-                      Send Message
+                      {isSubmitting ? "Sending..." : "Send Message"}
                     </span>
                   }
                   className="contact-submit-btn"
+                  disabled={isSubmitting}
                 />
+                {submitStatus.message && (
+                  <div
+                    className={`submit-status-message ${
+                      submitStatus.success ? "success" : "error"
+                    }`}
+                  >
+                    {submitStatus.message}
+                  </div>
+                )}
               </form>
             </div>
 

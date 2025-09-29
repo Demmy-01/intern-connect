@@ -90,7 +90,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
               location.pathname.startsWith("/organization") ? "active" : ""
             }`}
           >
-            <div className="nav-icon profile-icon">
+            <div className="nav-icon applications-icon">
               <img src={profile} alt="Profile Icon" className="sidebar-icon" />
             </div>
             <Link to="/organization-profile" className="side-nav-link">
