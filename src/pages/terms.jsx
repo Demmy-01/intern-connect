@@ -238,15 +238,8 @@ export default function Terms() {
               </li>
             </ul>
           </div>
-
-          {/* Accept Button */}
-          {/* <div className="terms-accept">
-            <Button className="accept-button">Accept Terms & Conditions</Button>
-          </div> */}
         </div>
       </section>
-
-      <Footer />
     </>
   );
 }

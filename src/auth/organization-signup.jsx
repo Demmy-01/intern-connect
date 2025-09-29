@@ -207,6 +207,19 @@ const OrganizationSignup = () => {
                   disabled={isLoading}
                 />
               </div>
+              <div className="org-input-container checkbox-container">
+                <input type="checkbox" id="terms" name="terms" required />
+                <label htmlFor="terms" className="org-terms-label">
+                  I agree to the{" "}
+                  <Link to="/terms" className="org-terms-link">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/terms" className="org-terms-link">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
             </div>
 
             {error && (
@@ -247,17 +260,6 @@ const OrganizationSignup = () => {
                   Student Signup
                 </Link>
               </p>
-            </div>
-
-            <div className="org-terms-section">
-              <div className="org-terms-divider">
-                <div className="org-terms-line" />
-                <div className="org-terms-text">
-                  <span className="org-terms-span">
-                    By signing up, you agree to our Terms of Service
-                  </span>
-                </div>
-              </div>
             </div>
           </form>
         </div>
