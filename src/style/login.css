@@ -201,6 +201,14 @@
 .signup-text a:hover{
   text-decoration: underline;
 }
+.checkbox{
+  font-size: 12px;
+}
+.checkbox span{
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+  margin-left: 5px;
+}
 
 @media screen and (max-width: 768px) {
   .login-container {
