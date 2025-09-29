@@ -142,7 +142,12 @@ const SignUp = () => {
               value={formData.password}
               onChange={handleChange}
             />
-
+            <div className="checkbox">
+              <input type="checkbox" required />
+              <span>I agree to the </span>
+              <Link to="/terms-of-service">Terms of Service</Link> and{" "}
+              <Link to="/privacy-policy">Privacy Policy</Link>
+            </div>
             <button type="submit" className="login-button" disabled={loading}>
               {loading ? "Creating Account..." : "Sign Up"}
             </button>
