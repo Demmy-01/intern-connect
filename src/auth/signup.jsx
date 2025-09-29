@@ -145,8 +145,8 @@ const SignUp = () => {
             <div className="checkbox">
               <input type="checkbox" required />
               <span className="check-span">I agree to the </span>
-              <Link to="/terms-of-service">Terms of Service</Link> and{" "}
-              <Link to="/privacy-policy">Privacy Policy</Link>
+              <Link to="/terms">Terms of Service</Link> and{" "}
+              <Link to="/terms">Privacy Policy</Link>
             </div>
             <button type="submit" className="login-button" disabled={loading}>
               {loading ? "Creating Account..." : "Sign Up"}

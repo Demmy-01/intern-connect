@@ -37,6 +37,7 @@ import OrganizationProfileEdit from "./orgnization/organization-profile-edit.jsx
 import InternshipDetails from "./pages/internship-details.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import PublicOrganizationProfile from "./pages/organizations-profile.jsx";
+import Terms from "./pages/terms.jsx";
 
 function App() {
   return (
@@ -193,6 +194,10 @@ function App() {
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="/terms" element={<Terms />} />
+
+          {/* Catch-all Route */}
+          <Route path="*" element={<h1>404 - Page Not Found</h1>} />
         </Routes>
       </div>
     </Router>

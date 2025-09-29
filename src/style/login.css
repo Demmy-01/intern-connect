@@ -209,6 +209,11 @@
   transition: color 0.3s ease;
   margin-left: 5px;
 }
+.checkbox input{
+  transform: scale(1.2);
+  cursor: pointer;
+  margin-bottom: -3px !important;
+}
 
 @media screen and (max-width: 768px) {
   .login-container {
