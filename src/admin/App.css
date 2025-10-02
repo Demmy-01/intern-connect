@@ -1,0 +1,29 @@
+@import "tailwindcss";
+/* @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap'); */
+
+@layer components{
+  .container {
+    @apply w-[90%]! max-w-[78rem]! mx-auto;
+  }
+}
+@font-face {
+  font-family: "Switzer"; /* The name you’ll use in CSS */
+  src: url("./assets/font/Switzer-Variable.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;  
+}
+@media (max-width: 1440px) {
+  html {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  html {
+    font-size: 16px !important;
+  }
+}
+
+body {
+  font-family: "Switzer", "Roboto", "Nunito", "Merriweather", sans-serif;
+}
