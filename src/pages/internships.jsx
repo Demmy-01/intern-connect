@@ -218,7 +218,7 @@ const InternshipSearchPage = () => {
         {/* Header */}
         <div className="page-header-new">
           <div className="container-new">
-            <h1 className="page-title-new">Find Your Dream Internship</h1>
+            <h1 className="page-title-new"><center>Find Your Dream Internship</center></h1>
             <p className="page-subtitle-new">
               <center>Search and discover amazing opportunities across Nigeria</center>
             </p>
