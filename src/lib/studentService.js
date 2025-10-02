@@ -2,19 +2,75 @@
 import { supabase } from './supabase.js';
 
 class StudentService {
-  // Search internships with flexible matching
-async searchInternships(searchParams = {}) {
-  try {
-    const { 
-      query = '', 
-      location = '', 
-      workType = '', 
-      duration = '',
-      compensation = ''
-    } = searchParams;
+  // Search internships with exact and fuzzy fallback matching
+  async searchInternships(searchParams = {}) {
+    try {
+      const { 
+        query = '', 
+        location = '', 
+        workType = '', 
+        duration = '',
+        compensation = ''
+      } = searchParams;
 
-    console.log('Search params:', searchParams);
+      console.log('Search params:', searchParams);
 
+      // Step 1: Try exact/full-text search first
+      const exactResults = await this.executeExactSearch({
+        query,
+        location,
+        workType,
+        duration,
+        compensation
+      });
+
+      if (exactResults.length > 0) {
+        console.log('Exact results found:', exactResults.length);
+        return { 
+          data: exactResults, 
+          error: null,
+          searchType: 'exact' // Indicate exact match
+        };
+      }
+
+      // Step 2: If no exact results and query exists, try fuzzy search
+      if (query.trim()) {
+        console.log('No exact results, trying fuzzy search...');
+        const fuzzyResults = await this.executeFuzzySearch({
+          query,
+          location,
+          workType,
+          duration,
+          compensation
+        });
+
+        if (fuzzyResults.length > 0) {
+          console.log('Fuzzy results found:', fuzzyResults.length);
+          return { 
+            data: fuzzyResults, 
+            error: null,
+            searchType: 'fuzzy', // Indicate fuzzy match
+            searchedTerm: query.trim() // Return what was searched
+          };
+        }
+      }
+
+      // Step 3: No results at all
+      console.log('No results found');
+      return { 
+        data: [], 
+        error: null,
+        searchType: 'none'
+      };
+
+    } catch (error) {
+      console.error('Error searching internships:', error);
+      return { data: [], error: error.message, searchType: 'error' };
+    }
+  }
+
+  // Execute exact search with keyword matching
+  async executeExactSearch({ query, location, workType, duration, compensation }) {
     let supabaseQuery = supabase
       .from('internships')
       .select(`
@@ -29,14 +85,10 @@ async searchInternships(searchParams = {}) {
       `)
       .eq('is_active', true);
 
-    // Fixed search logic - search across internship fields and organization name
+    // Exact keyword search across multiple fields
     if (query.trim()) {
       const searchTerm = query.toLowerCase().trim();
       
-      // Method 1: Use textSearch if available, or Method 2: Multiple separate queries
-      // Let's use Method 2 for better compatibility
-      
-      // Search in internship fields OR organization name
       const searchConditions = [
         `position_title.ilike.%${searchTerm}%`,
         `department.ilike.%${searchTerm}%`, 
@@ -44,11 +96,10 @@ async searchInternships(searchParams = {}) {
         `requirements.ilike.%${searchTerm}%`
       ];
       
-      // Apply the OR search across internship fields
       supabaseQuery = supabaseQuery.or(searchConditions.join(','));
     }
 
-    // Location search on internship location (text field)
+    // Apply other filters
     if (location.trim()) {
       supabaseQuery = supabaseQuery.ilike('location', `%${location}%`);
     }
@@ -61,9 +112,7 @@ async searchInternships(searchParams = {}) {
       supabaseQuery = supabaseQuery.eq('compensation', compensation);
     }
 
-    // Duration filtering - more flexible approach
     if (duration && duration !== 'all') {
-      // Extract number from duration like "2 months" -> 2
       const durationMatch = duration.match(/(\d+)/);
       const durationNum = durationMatch ? parseInt(durationMatch[1]) : NaN;
       if (!isNaN(durationNum)) {
@@ -73,16 +122,13 @@ async searchInternships(searchParams = {}) {
       }
     }
 
-    // Add ordering
     supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
 
     const { data, error } = await supabaseQuery;
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
-    // If we have a query term, also search by organization name separately and merge results
+    // Also search by organization name
     let orgResults = [];
     if (query.trim()) {
       const searchTerm = query.toLowerCase().trim();
@@ -114,29 +160,109 @@ async searchInternships(searchParams = {}) {
     const allResults = data || [];
     const combinedResults = [...allResults];
     
-    // Add organization results that aren't already included
     orgResults.forEach(orgResult => {
       if (!allResults.find(result => result.id === orgResult.id)) {
         combinedResults.push(orgResult);
       }
     });
 
-    // Apply additional filters to combined results if needed
-    let filteredResults = combinedResults;
+    return combinedResults;
+  }
+
+  // Execute fuzzy search using pg_trgm similarity
+  async executeFuzzySearch({ query, location, workType, duration, compensation }) {
+    const searchTerm = query.toLowerCase().trim();
     
+    // Get all active internships for client-side fuzzy matching
+    let supabaseQuery = supabase
+      .from('internships')
+      .select(`
+        *,
+        organizations!inner(
+          id,
+          organization_name,
+          logo_url,
+          company_type,
+          location
+        )
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    const { data, error } = await supabaseQuery;
+
+    if (error) throw error;
+    if (!data || data.length === 0) return [];
+
+    // Calculate similarity scores for each internship
+    const scoredResults = data.map(internship => {
+      const title = (internship.position_title || '').toLowerCase();
+      const dept = (internship.department || '').toLowerCase();
+      const desc = (internship.description || '').toLowerCase();
+      const orgName = (internship.organizations?.organization_name || '').toLowerCase();
+
+      // Calculate similarity score (simple word overlap algorithm)
+      let similarityScore = 0;
+      const searchWords = searchTerm.split(/\s+/);
+      
+      searchWords.forEach(word => {
+        if (word.length < 3) return; // Skip very short words
+        
+        // Check partial matches in different fields
+        if (title.includes(word)) similarityScore += 10;
+        if (dept.includes(word)) similarityScore += 8;
+        if (orgName.includes(word)) similarityScore += 6;
+        if (desc.includes(word)) similarityScore += 3;
+
+        // Bonus for word proximity (e.g., "front" matches "frontend")
+        const titleWords = title.split(/\s+/);
+        const deptWords = dept.split(/\s+/);
+        
+        titleWords.forEach(tw => {
+          if (tw.includes(word) || word.includes(tw)) similarityScore += 5;
+        });
+        
+        deptWords.forEach(dw => {
+          if (dw.includes(word) || word.includes(dw)) similarityScore += 4;
+        });
+      });
+
+      return { ...internship, similarityScore };
+    });
+
+    // Filter out results with very low scores and sort by similarity
+    let fuzzyResults = scoredResults
+      .filter(item => item.similarityScore > 5) // Minimum threshold
+      .sort((a, b) => b.similarityScore - a.similarityScore);
+
+    // Apply additional filters (more lenient for fuzzy search)
     if (location.trim()) {
-      filteredResults = filteredResults.filter(item => 
+      fuzzyResults = fuzzyResults.filter(item => 
         item.location?.toLowerCase().includes(location.toLowerCase())
       );
     }
 
-    console.log('Search results:', filteredResults);
-    return { data: filteredResults, error: null };
-  } catch (error) {
-    console.error('Error searching internships:', error);
-    return { data: [], error: error.message };
+    if (workType && workType !== 'all') {
+      fuzzyResults = fuzzyResults.filter(item => item.work_type === workType);
+    }
+
+    if (compensation && compensation !== 'all') {
+      fuzzyResults = fuzzyResults.filter(item => item.compensation === compensation);
+    }
+
+    if (duration && duration !== 'all') {
+      const durationMatch = duration.match(/(\d+)/);
+      const durationNum = durationMatch ? parseInt(durationMatch[1]) : NaN;
+      if (!isNaN(durationNum)) {
+        fuzzyResults = fuzzyResults.filter(item => 
+          item.min_duration <= durationNum && item.max_duration >= durationNum
+        );
+      }
+    }
+
+    // Return top 20 most relevant fuzzy matches
+    return fuzzyResults.slice(0, 20);
   }
-}
 
   // Get all active internships (default view)
   async getAllActiveInternships() {
@@ -171,23 +297,23 @@ async searchInternships(searchParams = {}) {
   async getInternshipById(internshipId) {
     try {
       const { data, error } = await supabase
-        .from('internships')
-        .select(`
-          *,
-          organizations!inner(
-            id,
-            organization_name,
-            logo_url,
-            company_type,
-            location,
-            website,
-            company_description,
-            industry
-          )
-        `)
-        .eq('id', internshipId)
-        .eq('is_active', true)
-        .single();
+  .from('internships')
+  .select(`
+    *,
+    organizations!inner(
+      id,
+      organization_name,
+      logo_url,
+      company_type,
+      location,
+      website,
+      company_description,
+      industry
+    )
+  `)
+  .eq('id', internshipId)
+  .eq('is_active', true)
+  .single();
 
       if (error) {
         throw error;
@@ -213,7 +339,6 @@ async searchInternships(searchParams = {}) {
         throw orgError;
       }
 
-      // Get organization's active internships
       const { data: internships, error: internshipsError } = await supabase
         .from('internships')
         .select('*')
@@ -238,8 +363,6 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-  // FIXED: Submit internship application - properly stores document URL
-// FIXED: Submit internship application - properly stores document URL and email
   async submitApplication(applicationData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -258,7 +381,7 @@ async searchInternships(searchParams = {}) {
           status: 'pending',
           notes: applicationData.notes || null,
           document_url: applicationData.documentUrl || null,
-          applicant_email: applicationData.applicantEmail || user.email, // SAVE EMAIL HERE
+          applicant_email: applicationData.applicantEmail || user.email,
           applied_at: new Date().toISOString()
         }])
         .select('*')
@@ -276,7 +399,6 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-  // Check application status for a specific internship
   async checkApplicationStatus(internshipId) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -292,7 +414,7 @@ async searchInternships(searchParams = {}) {
         .eq('student_id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      if (error && error.code !== 'PGRST116') {
         throw error;
       }
 
@@ -307,7 +429,6 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-  // Get student's applications
   async getStudentApplications() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -346,55 +467,52 @@ async searchInternships(searchParams = {}) {
     }
   }
 
-// FIXED: Upload application document (CV/Resume) with proper file handling
-async uploadDocument(file, studentId, internshipId) {
-  try {
-    if (!file) {
-      throw new Error('No file provided');
+  async uploadDocument(file, studentId, internshipId) {
+    try {
+      if (!file) {
+        throw new Error('No file provided');
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${studentId}_${internshipId}_${Date.now()}.${fileExt}`;
+      const filePath = `applications/${fileName}`;
+
+      console.log('Uploading document:', { fileName, filePath, fileSize: file.size });
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      console.log('Document uploaded successfully:', { publicUrl, filePath });
+
+      return { 
+        data: { 
+          path: filePath, 
+          url: publicUrl,
+          fileName: file.name,
+          size: file.size,
+          type: file.type
+        }, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      return { data: null, error: error.message };
     }
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${studentId}_${internshipId}_${Date.now()}.${fileExt}`;
-    const filePath = `applications/${fileName}`;
-
-    console.log('Uploading document:', { fileName, filePath, fileSize: file.size });
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('documents')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      throw uploadError;
-    }
-
-    // Get public URL for viewing
-    const { data: { publicUrl } } = supabase.storage
-      .from('documents')
-      .getPublicUrl(filePath);
-
-    console.log('Document uploaded successfully:', { publicUrl, filePath });
-
-    return { 
-      data: { 
-        path: filePath, 
-        url: publicUrl,
-        fileName: file.name,
-        size: file.size,
-        type: file.type
-      }, 
-      error: null 
-    };
-  } catch (error) {
-    console.error('Error uploading document:', error);
-    return { data: null, error: error.message };
   }
-}
 
-  // FIXED: Create or update student profile - DON'T overwrite username with email
   async createOrUpdateStudentProfile(profileData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -403,14 +521,12 @@ async uploadDocument(file, studentId, internshipId) {
         throw new Error('User not authenticated');
       }
 
-      // Get current profile to preserve existing username
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('username, display_name')
         .eq('id', user.id)
         .single();
 
-      // Only update display_name and phone, preserve existing username
       const updateData = {
         id: user.id,
         user_type: 'student',
@@ -419,9 +535,7 @@ async uploadDocument(file, studentId, internshipId) {
         updated_at: new Date().toISOString()
       };
 
-      // Only update username if it doesn't exist (new user) and don't use email
       if (!currentProfile?.username) {
-        // Generate a username from display name or use a default
         const baseUsername = (profileData.fullName || 'user').toLowerCase().replace(/\s+/g, '_');
         updateData.username = baseUsername;
       }
@@ -438,7 +552,6 @@ async uploadDocument(file, studentId, internshipId) {
         throw profileError;
       }
 
-      // Create or update basic student record
       const { data: studentData, error: studentError } = await supabase
         .from('students')
         .upsert([{
@@ -461,14 +574,12 @@ async uploadDocument(file, studentId, internshipId) {
     }
   }
 
-  // Helper method to download documents
   async downloadDocument(documentUrl, fileName) {
     try {
       if (!documentUrl) {
         throw new Error('No document URL provided');
       }
 
-      // Create download link
       const link = document.createElement('a');
       link.href = documentUrl;
       link.download = fileName || 'document';
@@ -485,7 +596,6 @@ async uploadDocument(file, studentId, internshipId) {
     }
   }
 
-  // Helper method to get document from storage
   async getDocumentUrl(filePath) {
     try {
       const { data: { publicUrl } } = supabase.storage
@@ -499,7 +609,6 @@ async uploadDocument(file, studentId, internshipId) {
     }
   }
 
-  // New method for search suggestions (e.g., position titles)
   async getSuggestions(query) {
     try {
       if (!query.trim()) return { data: [], error: null };
@@ -515,7 +624,6 @@ async uploadDocument(file, studentId, internshipId) {
         throw error;
       }
 
-      // Extract unique titles
       const suggestions = [...new Set(data.map(item => item.position_title))];
       return { data: suggestions, error: null };
     } catch (error) {
@@ -524,7 +632,6 @@ async uploadDocument(file, studentId, internshipId) {
     }
   }
 
-  // Real-time subscription for application updates
   subscribeToApplicationUpdates(callback) {
     return supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return null;
@@ -545,7 +652,6 @@ async uploadDocument(file, studentId, internshipId) {
     });
   }
 
-  // Unsubscribe from real-time updates
   unsubscribe(subscription) {
     if (subscription) {
       supabase.removeChannel(subscription);

@@ -66,6 +66,7 @@ class InternshipService {
         location: internshipData.location || null,
         min_duration: parseInt(internshipData.minDuration),
         max_duration: parseInt(internshipData.maxDuration),
+        application_deadline: internshipData.applicationDeadline, // NEW FIELD
         is_active: true
       };
 
@@ -112,6 +113,12 @@ class InternshipService {
       }
 
       console.log('Fetched internships:', data);
+      
+      // Auto-deactivate expired internships
+      if (data && data.length > 0) {
+        await this.checkAndDeactivateExpired(data);
+      }
+      
       return { data, error: null };
     } catch (error) {
       console.error('Error fetching organization internships:', error);
@@ -119,9 +126,39 @@ class InternshipService {
     }
   }
 
+  // Check and deactivate expired internships
+  async checkAndDeactivateExpired(internships) {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const expiredInternships = internships.filter(internship => {
+        if (!internship.application_deadline || !internship.is_active) return false;
+        
+        const deadline = new Date(internship.application_deadline);
+        deadline.setHours(0, 0, 0, 0);
+        
+        return deadline < today;
+      });
+
+      if (expiredInternships.length > 0) {
+        console.log('Found expired internships:', expiredInternships.length);
+        
+        // Deactivate all expired internships
+        for (const internship of expiredInternships) {
+          await this.toggleInternshipStatus(internship.id, false);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking expired internships:', error);
+    }
+  }
+
   // Get all active internships (public view for students)
   async getActiveInternships() {
     try {
+      const today = new Date().toISOString().split('T')[0];
+      
       const { data, error } = await supabase
         .from('internships')
         .select(`
@@ -133,6 +170,7 @@ class InternshipService {
           )
         `)
         .eq('is_active', true)
+        .gte('application_deadline', today) // Only show internships with future deadlines
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -146,36 +184,36 @@ class InternshipService {
     }
   }
 
- // Updated toggleInternshipStatus method 
-async toggleInternshipStatus(internshipId, isActive) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
+  // Updated toggleInternshipStatus method 
+  async toggleInternshipStatus(internshipId, isActive) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      console.log('Toggling internship:', internshipId, 'to:', isActive, 'for user:', user.id);
+
+      // Use RPC function to bypass RLS issues
+      const { data, error } = await supabase.rpc('toggle_internship_status', {
+        internship_id: internshipId,
+        new_status: isActive,
+        user_id: user.id
+      });
+
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+
+      console.log('Updated internship via RPC:', data);
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error toggling internship status:', error);
+      return { data: null, error: error.message };
     }
-
-    console.log('Toggling internship:', internshipId, 'to:', isActive, 'for user:', user.id);
-
-    // Use RPC function to bypass RLS issues
-    const { data, error } = await supabase.rpc('toggle_internship_status', {
-      internship_id: internshipId,
-      new_status: isActive,
-      user_id: user.id
-    });
-
-    if (error) {
-      console.error('RPC error:', error);
-      throw error;
-    }
-
-    console.log('Updated internship via RPC:', data);
-    return { data, error: null };
-  } catch (error) {
-    console.error('Error toggling internship status:', error);
-    return { data: null, error: error.message };
   }
-}
 
   // Update internship
   async updateInternship(internshipId, updateData) {
@@ -196,7 +234,8 @@ async toggleInternshipStatus(internshipId, isActive) {
         ...(updateData.compensation && { compensation: updateData.compensation }),
         ...(updateData.location && { location: updateData.location }),
         ...(updateData.minDuration && { min_duration: parseInt(updateData.minDuration) }),
-        ...(updateData.maxDuration && { max_duration: parseInt(updateData.maxDuration) })
+        ...(updateData.maxDuration && { max_duration: parseInt(updateData.maxDuration) }),
+        ...(updateData.applicationDeadline && { application_deadline: updateData.applicationDeadline })
       };
 
       const { data, error } = await supabase

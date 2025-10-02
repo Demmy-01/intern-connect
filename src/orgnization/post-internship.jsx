@@ -28,6 +28,7 @@ const PostInternship = () => {
       setProfileStatus(status);
     } catch (err) {
       setError(err.message);
+      setProfileStatus(null);
     } finally {
       setCheckingProfile(false);
     }
@@ -43,6 +44,7 @@ const PostInternship = () => {
     location: "",
     minDuration: "",
     maxDuration: "",
+    applicationDeadline: "", // NEW FIELD
   });
 
   // Check verification status
@@ -74,6 +76,7 @@ const PostInternship = () => {
       "compensation",
       "minDuration",
       "maxDuration",
+      "applicationDeadline", // NEW VALIDATION
     ];
     const missing = required.filter((field) => !formData[field].trim());
 
@@ -87,6 +90,16 @@ const PostInternship = () => {
 
     if (minDur >= maxDur) {
       setError("Maximum duration must be greater than minimum duration");
+      return false;
+    }
+
+    // Validate deadline is in the future
+    const deadlineDate = new Date(formData.applicationDeadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (deadlineDate < today) {
+      setError("Application deadline must be in the future");
       return false;
     }
 
@@ -112,9 +125,8 @@ const PostInternship = () => {
     setError(null);
 
     try {
-      // Double-check profile completion before submitting
       const profileStatus = await organizationService.checkProfileCompletion();
-      if (!profileStatus.isComplete) {
+      if (!profileStatus || !profileStatus.isComplete) {
         setError(
           "Please complete your organization profile before posting internships."
         );
@@ -140,6 +152,7 @@ const PostInternship = () => {
           location: "",
           minDuration: "",
           maxDuration: "",
+          applicationDeadline: "",
         });
 
         // Show success message briefly then redirect
@@ -174,7 +187,7 @@ const PostInternship = () => {
             You need to complete your organization profile before posting
             internships.
           </p>
-          <p>Missing information: {profileStatus.missingFields.join(", ")}</p>
+          <p>Missing information: {profileStatus.missingFields.map(f => f.label).join(", ")}</p>
           <Link to="/organization-profile">
             <Button>Complete Profile</Button>
           </Link>
@@ -322,6 +335,24 @@ const PostInternship = () => {
             />
           </div>
 
+          {/* NEW APPLICATION DEADLINE FIELD */}
+          <div className="form-group">
+            <label htmlFor="applicationDeadline">Application Deadline *</label>
+            <input
+              type="date"
+              id="applicationDeadline"
+              name="applicationDeadline"
+              value={formData.applicationDeadline}
+              onChange={handleInputChange}
+              min={new Date().toISOString().split('T')[0]}
+              required
+              disabled={loading || !isVerified}
+            />
+            <small className="form-help">
+              Internship will automatically deactivate after this date
+            </small>
+          </div>
+
           <div className="form-group duration-group">
             <label>Duration *</label>
             <div className="duration-inputs">
@@ -408,7 +439,7 @@ const PostInternship = () => {
             <button
               type="button"
               className="cancel-button"
-              onClick={() => navigate("/posted-internships")}
+              onClick={() => navigate("/posted-internship")}
               disabled={loading}
             >
               Cancel

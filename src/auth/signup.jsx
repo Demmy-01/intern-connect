@@ -143,7 +143,7 @@ const SignUp = () => {
               onChange={handleChange}
             />
             <div className="checkbox">
-              <input type="checkbox" required />
+              <input type="checkbox" id="terms" name="terms" required />
               <span className="check-span">I agree to the </span>
               <Link to="/terms">Terms of Service</Link> and{" "}
               <Link to="/terms">Privacy Policy</Link>

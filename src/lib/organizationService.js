@@ -45,127 +45,75 @@ class OrganizationService {
     }
   }
 
-// FIXED: Get application details with email from application table
-async getApplicationDetails(applicationId) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
 
-    const { data, error } = await supabase
-      .from('internship_applications')
-      .select(`
-        id,
-        status,
-        applied_at,
-        notes,
-        document_url,
-        applicant_email,
-        internships (
-          id,
-          position_title,
-          department,
-          description,
-          requirements,
-          work_type,
-          compensation,
-          location,
-          organization_id
-        ),
-        students (
-          id,
-          bio,
-          profiles!inner (
-            id,
-            display_name,
-            username,
-            phone,
-            avatar_url
-          )
-        )
-      `)
-      .eq('id', applicationId)
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    // Parse application notes to extract other details
-    const parsedNotes = this.parseApplicationNotes(data.notes);
-
-    return { 
-      data: {
-        ...data,
-        student_email: data.applicant_email || "Not provided",
-        parsed_application_data: parsedNotes,
-        student_education: []
-      }, 
-      error: null 
-    };
-  } catch (error) {
-    console.error('Error fetching application details:', error);
-    return { data: null, error: error.message };
-  }
-}
 
   async checkProfileCompletion() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         throw new Error('User not authenticated');
       }
 
-    const { data: orgData, error: orgError } = await supabase
-      .from('organizations')
-      .select(`
-        *,
-        organization_contacts!inner (
-          contact_name,
-          contact_email,
-          contact_phone
-        )
-      `)
-      .eq('id', user.id)
-      .single();
+      // First get organization data
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (orgError) throw orgError;
+      if (orgError) throw orgError;
 
-    // Add contact fields to the validation if contact information exists
-    if (orgData?.organization_contacts?.[0]) {
-      const contactFields = [
-        { field: 'contact_email', label: 'Contact Email' },
-        { field: 'contact_phone', label: 'Contact Phone' }
-      ];
-      
-      // Map contact data to the main object for validation
-      orgData.contact_email = orgData.organization_contacts[0].contact_email;
-      orgData.contact_phone = orgData.organization_contacts[0].contact_phone;
-      
-      requiredFields.push(...contactFields);
-    }      const requiredFields = [
+      // Then get contact data separately
+      const { data: contactData, error: contactError } = await supabase
+        .from('organization_contacts')
+        .select('*')
+        .eq('organization_id', user.id)
+        .eq('is_primary', true)
+        .single();
+
+      // Required fields for organization
+      const requiredOrgFields = [
         { field: 'company_name', label: 'Organization Name' },
         { field: 'company_description', label: 'Organization Description' },
-        { field: 'website', label: 'Website' },
         { field: 'industry', label: 'Industry' },
-        { field: 'company_size', label: 'Company Size' },
-        { field: 'location', label: 'Location' },
-        { field: 'logo_url', label: 'Company Logo' }
+        { field: 'location', label: 'Location' }
       ];
 
-      const missingFields = requiredFields.filter(field => !orgData[field.field]);
-      const completedFields = requiredFields.filter(field => orgData[field.field]);
-      const completionPercentage = (completedFields.length / requiredFields.length) * 100;
+      // Required fields for contacts (if contacts exist)
+      const requiredContactFields = [];
+      if (contactData && !contactError) {
+        requiredContactFields.push(
+          { field: 'contact_name', label: 'Contact Name' },
+          { field: 'contact_email', label: 'Contact Email' }
+        );
+      }
+
+      const allRequiredFields = [...requiredOrgFields, ...requiredContactFields];
+
+      // Check organization fields
+      const missingOrgFields = requiredOrgFields.filter(field => !orgData[field.field]);
+
+      // Check contact fields
+      const missingContactFields = requiredContactFields.filter(field => !contactData[field.field]);
+
+      const missingFields = [...missingOrgFields, ...missingContactFields];
+      const completedFields = allRequiredFields.filter(field => {
+        if (requiredOrgFields.includes(field)) {
+          return orgData[field.field];
+        } else {
+          return contactData && contactData[field.field];
+        }
+      });
+
+      const completionPercentage = allRequiredFields.length > 0 ? (completedFields.length / allRequiredFields.length) * 100 : 0;
 
       return {
         isComplete: missingFields.length === 0,
         completionPercentage: Math.round(completionPercentage),
         missingFields: missingFields,
         completedFields: completedFields,
-        totalFields: requiredFields.length
+        totalFields: allRequiredFields.length
       };
     } catch (error) {
       console.error('Error checking profile completion:', error);
@@ -350,36 +298,7 @@ async getApplicationDetails(applicationId) {
     }
   }
 
-async getOrganizationApplications() {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
 
-    const { data, error } = await supabase
-      .from('internship_applications')
-      .select(`
-        id,
-        status,
-        applied_at,
-        document_url,
-        internships!inner (id, position_title, organization_id),
-        students!inner (id, profiles!inner (display_name, avatar_url))
-      `)
-      .eq('internships.organization_id', user.id);
-
-    if (error) {
-      throw error;
-    }
-
-    return { data, error: null };
-  } catch (error) {
-    console.error('Error fetching organization applications:', error);
-    return { data: null, error: error.message };
-  }
-}
 
 //Enhanced parse method to extract education data and personal details from application notes
 parseApplicationNotes(notes) {

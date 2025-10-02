@@ -130,10 +130,6 @@ const OrganizationLogin = () => {
               <Link to="/organization-signup">Sign up here</Link>
             </p>
             <p>
-              Looking to join as a student?{" "}
-              <Link to="/login">Student Login</Link>
-            </p>
-            <p>
               Back to <Link to="/">Home Page</Link>
             </p>
           </div>

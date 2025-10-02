@@ -47,7 +47,9 @@ const InternHeroSection = ({ children }) => {
       <div className="hero-section">
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title">Find Your Dream Internship</h1>
+            <h1 className="hero-title">
+              Search and Find Your Dream Internship
+            </h1>
             <p className="hero-subtitle">
               Discover amazing internship opportunities across Nigeria
             </p>
