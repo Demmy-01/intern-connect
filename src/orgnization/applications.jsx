@@ -12,6 +12,8 @@ const Applications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [positionFilter, setPositionFilter] = useState("all");
 
   useEffect(() => {
     loadApplications();
@@ -65,12 +67,24 @@ const Applications = () => {
     }
   };
 
+  const uniquePositions = [
+    ...new Set(
+      applications.map((app) => app.internships?.position_title || "Unknown")
+    ),
+  ];
+
   const filteredApplications = applications.filter((app) => {
-    if (filter === "all") return true;
-    return app.status?.toLowerCase() === filter.toLowerCase();
+    const matchesStatus =
+      statusFilter === "all" ||
+      app.status?.toLowerCase() === statusFilter.toLowerCase();
+
+    const matchesPosition =
+      positionFilter === "all" ||
+      (app.internships?.position_title || "Unknown") === positionFilter;
+
+    return matchesStatus && matchesPosition;
   });
 
-  
   const getStats = () => {
     return {
       total: applications.length,
@@ -126,29 +140,41 @@ const Applications = () => {
 
       <div className="applications-filters">
         <button
-          className={`filter-btn ${filter === "all" ? "active" : ""}`}
+          className={`filter-btn ${statusFilter  === "all" ? "active" : ""}`}
           onClick={() => setFilter("all")}
         >
           All Applications ({stats.total})
         </button>
         <button
-          className={`filter-btn ${filter === "pending" ? "active" : ""}`}
+          className={`filter-btn ${statusFilter  === "pending" ? "active" : ""}`}
           onClick={() => setFilter("pending")}
         >
           Pending ({stats.pending})
         </button>
         <button
-          className={`filter-btn ${filter === "accepted" ? "active" : ""}`}
+          className={`filter-btn ${statusFilter  === "accepted" ? "active" : ""}`}
           onClick={() => setFilter("accepted")}
         >
           Accepted ({stats.accepted})
         </button>
         <button
-          className={`filter-btn ${filter === "rejected" ? "active" : ""}`}
+          className={`filter-btn ${statusFilter  === "rejected" ? "active" : ""}`}
           onClick={() => setFilter("rejected")}
         >
           Rejected ({stats.rejected})
         </button>
+        <select
+          value={positionFilter}
+          onChange={(e) => setPositionFilter(e.target.value)}
+          className="filter-btn"
+        >
+          <option value="all">All Positions</option>
+          {uniquePositions.map((pos, idx) => (
+            <option key={idx} value={pos}>
+              {pos}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="applications-table-container">

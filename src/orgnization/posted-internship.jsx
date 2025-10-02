@@ -106,13 +106,11 @@ const PostedInternship = () => {
     return (
       <DashboardLayout>
         <div className="post-container">
-          <div className="post-main-card">
-            <div className="loading-spinner">
+          <div className="loading-container">
               <div className="spinner"></div>
               <p>Loading internships...</p>
             </div>
           </div>
-        </div>
       </DashboardLayout>
     );
   }
