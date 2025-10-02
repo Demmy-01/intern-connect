@@ -70,6 +70,7 @@ const Applications = () => {
     return app.status?.toLowerCase() === filter.toLowerCase();
   });
 
+  
   const getStats = () => {
     return {
       total: applications.length,
