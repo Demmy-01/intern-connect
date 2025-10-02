@@ -1,45 +1,107 @@
 import React, { useState, useEffect } from "react";
 import "../style/internship.css";
-import InternHeroSection from "../components/InternHero.jsx";
-import ResultsHeader from "../components/ResultsHeader.jsx";
-import JobCardApply from "../components/JobCardApply.jsx";
-import SearchBar from "../components/SearchBar.jsx";
 import { Button } from "../components/button.jsx";
 import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer.jsx";
 import { useNavigate } from "react-router-dom";
 import studentService from "../lib/studentService.js";
+import '../style/it.css'
 
 const getCompanyLogo = (logoUrl) => {
   return logoUrl || "https://via.placeholder.com/60x60/3498db/ffffff?text=ORG";
 };
 
-// Main Search Page Component
 const InternshipSearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRoles, setSelectedRoles] = useState([]);
   const [location, setLocation] = useState("");
   const [jobType, setJobType] = useState("");
   const [duration, setDuration] = useState("");
   const [compensation, setCompensation] = useState("");
   const [internships, setInternships] = useState([]);
   const [allInternships, setAllInternships] = useState([]);
+  const [availableRoles, setAvailableRoles] = useState([]);
+  const [filteredRoles, setFilteredRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searching, setSearching] = useState(false);
   const [displayCount, setDisplayCount] = useState(7);
   const [hasSearched, setHasSearched] = useState(false);
-  const [searchType, setSearchType] = useState(null); // 'exact', 'fuzzy', or 'none'
-  const [searchedTerm, setSearchedTerm] = useState(""); // Store what was searched for fuzzy results
+  const [searchType, setSearchType] = useState(null);
+  const [searchedTerm, setSearchedTerm] = useState("");
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const navigate = useNavigate();
 
+  // Fetch available roles on component mount
   useEffect(() => {
-    setLoading(false);
+    fetchAvailableRoles();
   }, []);
 
+  // Filter roles based on search query
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = availableRoles.filter(role =>
+        role.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredRoles(filtered);
+    } else {
+      setFilteredRoles(availableRoles);
+    }
+  }, [searchQuery, availableRoles]);
+
+  const fetchAvailableRoles = async () => {
+    try {
+      const { data } = await studentService.getAllActiveInternships();
+      if (data) {
+        // Extract unique roles from internships
+        const roles = [...new Set(data.map(i => i.position_title))];
+        
+        const commonRoles = [
+          "Frontend Developer",
+          "Backend Developer",
+          "Full Stack Developer",
+          "UI/UX Designer",
+          "Product Designer",
+          "Data Analyst",
+          "Data Scientist",
+          "Marketing",
+          "Content Writer",
+          "Social Media Manager",
+          "Business Analyst",
+          "Project Manager",
+          "Mobile Developer",
+          "DevOps Engineer",
+          "QA Engineer",
+          "Software Engineer",
+          "Web Developer",
+          "Graphic Designer"
+        ];
+        
+        const allRoles = [...new Set([...roles, ...commonRoles])].sort();
+        setAvailableRoles(allRoles);
+        setFilteredRoles(allRoles);
+      }
+    } catch (err) {
+      console.error("Error fetching roles:", err);
+    }
+  };
+
+  const handleRoleToggle = (role) => {
+    setSelectedRoles(prev =>
+      prev.includes(role)
+        ? prev.filter(r => r !== role)
+        : [...prev, role]
+    );
+  };
+
+  const handleRemoveRole = (role) => {
+    setSelectedRoles(prev => prev.filter(r => r !== role));
+  };
+
   const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      setError("Please enter a role or keyword to search for internships");
+    if (selectedRoles.length === 0 && !searchQuery.trim()) {
+      setError("Please select at least one role or enter a keyword to search");
       return;
     }
 
@@ -49,8 +111,13 @@ const InternshipSearchPage = () => {
       setHasSearched(true);
       setDisplayCount(7);
 
+      // Build search query from selected roles
+      const roleQuery = selectedRoles.length > 0 
+        ? selectedRoles.join(" ") 
+        : searchQuery.trim();
+
       const searchParams = {
-        query: searchQuery.trim(),
+        query: roleQuery,
         location: location.trim(),
         workType: jobType,
         duration: duration,
@@ -76,7 +143,7 @@ const InternshipSearchPage = () => {
         setAllInternships(results);
         setInternships(results.slice(0, 7));
         setSearchType(resultType);
-        setSearchedTerm(term || searchQuery.trim());
+        setSearchedTerm(term || roleQuery);
       }
     } catch (err) {
       setError(err.message);
@@ -85,6 +152,7 @@ const InternshipSearchPage = () => {
       setSearchType("none");
     } finally {
       setSearching(false);
+      setShowRoleDropdown(false);
     }
   };
 
@@ -97,6 +165,7 @@ const InternshipSearchPage = () => {
 
   const clearFilters = () => {
     setSearchQuery("");
+    setSelectedRoles([]);
     setLocation("");
     setJobType("");
     setDuration("");
@@ -145,172 +214,306 @@ const InternshipSearchPage = () => {
   return (
     <>
       <Navbar />
-      <div className="search-page">
-        {/* Hero Section with Search */}
-        <InternHeroSection>
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            location={location}
-            setLocation={setLocation}
-            jobType={jobType}
-            setJobType={setJobType}
-            duration={duration}
-            setDuration={setDuration}
-            compensation={compensation}
-            setCompensation={setCompensation}
-            onSearch={handleSearch}
-            onClear={clearFilters}
-            loading={searching}
-          />
-        </InternHeroSection>
+      <div className="search-page-new">
+        {/* Header */}
+        <div className="page-header-new">
+          <div className="container-new">
+            <h1 className="page-title-new">Find Your Dream Internship</h1>
+            <p className="page-subtitle-new">
+              <center>Search and discover amazing opportunities across Nigeria</center>
+            </p>
+          </div>
+        </div>
+
+        {/* Search Section */}
+        <div className="search-section-new">
+          <div className="container-new">
+            <div className="search-card-new">
+              {/* Role Filter with Dropdown */}
+              <div className="filter-group-new role-filter-group-new">
+                <label className="filter-label-new">Role</label>
+                <div className="role-filter-container-new">
+                  <div className="role-input-wrapper-new">
+                    <input
+                      type="text"
+                      placeholder="Search or select roles..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => setShowRoleDropdown(true)}
+                      className="filter-input-new"
+                    />
+                    <button
+                      className="dropdown-toggle-new"
+                      onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                    >
+                      ▼
+                    </button>
+                  </div>
+
+                  {/* Selected Roles Pills */}
+                  {selectedRoles.length > 0 && (
+                    <div className="selected-roles-new">
+                      {selectedRoles.map(role => (
+                        <span key={role} className="role-pill-new">
+                          {role}
+                          <button
+                            onClick={() => handleRemoveRole(role)}
+                            className="remove-role-new"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Dropdown */}
+                  {showRoleDropdown && (
+                    <div className="role-dropdown-new">
+                      <div className="dropdown-header-new">
+                        <span>Select roles</span>
+                        <button
+                          onClick={() => setShowRoleDropdown(false)}
+                          className="close-dropdown-new"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="role-list-new">
+                        {filteredRoles.map(role => (
+                          <label key={role} className="role-option-new">
+                            <input
+                              type="checkbox"
+                              checked={selectedRoles.includes(role)}
+                              onChange={() => handleRoleToggle(role)}
+                            />
+                            <span>{role}</span>
+                          </label>
+                        ))}
+                        {filteredRoles.length === 0 && (
+                          <div className="no-roles-new">No roles found</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Other Filters */}
+              <div className="filters-row-new">
+                <div className="filter-group-new">
+                  <label className="filter-label-new">Location</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Lagos, Abuja"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="filter-input-new"
+                  />
+                </div>
+
+                <div className="filter-group-new">
+                  <label className="filter-label-new">Work Type</label>
+                  <select
+                    value={jobType}
+                    onChange={(e) => setJobType(e.target.value)}
+                    className="filter-select-new"
+                  >
+                    <option value="">All Types</option>
+                    <option value="remote">Remote</option>
+                    <option value="onsite">Onsite</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
+                </div>
+
+                <div className="filter-group-new">
+                  <label className="filter-label-new">Duration</label>
+                  <select
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    className="filter-select-new"
+                  >
+                    <option value="">All Durations</option>
+                    <option value="2 months">2 Months</option>
+                    <option value="3 months">3 Months</option>
+                    <option value="4 months">4 Months</option>
+                    <option value="5 months">5 Months</option>
+                    <option value="6 months">6+ Months</option>
+                  </select>
+                </div>
+
+                <div className="filter-group-new">
+                  <label className="filter-label-new">Compensation</label>
+                  <select
+                    value={compensation}
+                    onChange={(e) => setCompensation(e.target.value)}
+                    className="filter-select-new"
+                  >
+                    <option value="">All</option>
+                    <option value="paid">Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="action-buttons-new">
+                <Button
+                  label={searching ? "Searching..." : "Search Internships"}
+                  onClick={handleSearch}
+                  disabled={searching}
+                />
+                <Button
+                  label="Clear All Filters"
+                  onClick={clearFilters}
+                  variant="secondary"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Results Section */}
-        <div className="results-section">
-          <div className="in-container">
-            {hasSearched && <ResultsHeader jobCount={allInternships.length} />}
+        <div className="results-section-new">
+          <div className="container-new">
+            {hasSearched && (
+              <div className="results-header-new">
+                <h2 className="results-title-new">
+                  {allInternships.length} Internship{allInternships.length !== 1 ? 's' : ''} Found
+                </h2>
+                <p className="results-subtitle-new">
+                  Showing relevant opportunities based on your search
+                </p>
+              </div>
+            )}
 
             {error && (
-              <div className="error-message">
+              <div className="error-message-new">
                 <p>Error: {error}</p>
-                {error.includes("role or keyword") ? (
-                  <p style={{ fontSize: "14px", marginTop: "0.5rem" }}>
-                    Try searching for roles like: Frontend, Backend, Design,
-                    Marketing, Data Science, etc.
-                  </p>
-                ) : (
-                  <button
-                    className="retry-btn"
-                    onClick={() => {
-                      setError(null);
-                      handleSearch();
-                    }}
-                  >
-                    Retry
-                  </button>
-                )}
+                <button
+                  className="retry-btn-new"
+                  onClick={() => {
+                    setError(null);
+                    handleSearch();
+                  }}
+                >
+                  Retry
+                </button>
               </div>
             )}
 
             {/* Fuzzy Search Notice */}
             {searchType === "fuzzy" && internships.length > 0 && (
-              <div className="fuzzy-search-notice">
-                <div className="notice-icon">ℹ️</div>
-                <div className="notice-content">
-                  <p className="notice-title">
-                    ❌ No exact matches found for "
-                    <strong>{searchedTerm}</strong>"
+              <div className="fuzzy-search-notice-new">
+                <div className="notice-icon-new">ℹ️</div>
+                <div className="notice-content-new">
+                  <p className="notice-title-new">
+                    ❌ No exact matches found for "<strong>{searchedTerm}</strong>"
                   </p>
-                  <p className="notice-subtitle">
-                    ✅ Here are some related internship opportunities you might
-                    be interested in:
+                  <p className="notice-subtitle-new">
+                    ✅ Here are some related internship opportunities you might be interested in:
                   </p>
                 </div>
               </div>
             )}
 
             {/* Job Listings */}
-            <div className="in-jobs-container">
+            <div className="jobs-grid-new">
               {searching ? (
-                <div className="loading-state">
-                  <div className="spinner"></div>
+                <div className="loading-state-new">
+                  <div className="spinner-new"></div>
                   <p>Searching internships...</p>
                 </div>
               ) : internships.length > 0 ? (
-                <>
-                  {internships.map((internship) => {
-                    const formattedData = formatInternshipData(internship);
-                    return (
-                      <JobCardApply
-                        key={internship.id}
-                        logo={formattedData.logo}
-                        jobTitle={formattedData.jobTitle}
-                        company={formattedData.company}
-                        location={formattedData.location}
-                        duration={formattedData.duration}
-                        timePosted={formattedData.timePosted}
-                        tags={formattedData.tags}
-                        onApply={() => handleApply(internship.id)}
-                        onViewDetails={() => handleViewDetails(internship.id)}
-                      />
-                    );
-                  })}
-                </>
+                internships.map((internship) => {
+                  const formattedData = formatInternshipData(internship);
+                  return (
+                    <div key={internship.id} className="job-card-new">
+                      <div className="job-card-header-new">
+                        <img
+                          src={formattedData.logo}
+                          alt={formattedData.company}
+                          className="company-logo-new"
+                        />
+                        <div className="job-info-new">
+                          <h3 className="job-title-new">{formattedData.jobTitle}</h3>
+                          <p className="company-name-new">{formattedData.company}</p>
+                        </div>
+                      </div>
+
+                      <div className="job-details-new">
+                        <div className="detail-item-new">
+                          <span className="icon-new">📍</span>
+                          <span>{formattedData.location}</span>
+                        </div>
+                        <div className="detail-item-new">
+                          <span className="icon-new">📅</span>
+                          <span>{formattedData.duration}</span>
+                        </div>
+                        <div className="detail-item-new">
+                          <span className="icon-new">🕒</span>
+                          <span>{formattedData.timePosted}</span>
+                        </div>
+                      </div>
+
+                      <div className="job-tags-new">
+                        {formattedData.tags.map((tag, idx) => (
+                          <span key={idx} className={`tag-new tag-${tag.toLowerCase()}-new`}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="job-actions-new">
+                        <Button
+                          label="Apply Now"
+                          onClick={() => handleApply(internship.id)}
+                        />
+                        <Button
+                          label="View Details"
+                          onClick={() => handleViewDetails(internship.id)}
+                          variant="secondary"
+                        />
+                      </div>
+                    </div>
+                  );
+                })
               ) : hasSearched && !searching ? (
-                <div className="no-results-state">
-                  <div className="search-icon">🔍</div>
+                <div className="no-results-state-new">
+                  <div className="search-icon-new">🔍</div>
                   <h3>No Internships Found</h3>
                   <p>
-                    We couldn't find any internships matching "
-                    <strong>{searchQuery}</strong>"
+                    We couldn't find any internships matching your criteria
                   </p>
-                  <p>
-                    <strong>Try:</strong>
-                  </p>
+                  <p><strong>Try:</strong></p>
                   <ul>
-                    <li>Checking your spelling</li>
-                    <li>
-                      Using different keywords (e.g., "developer" instead of
-                      "programmer")
-                    </li>
-                    <li>
-                      Trying broader terms (e.g., "tech" instead of specific
-                      technologies)
-                    </li>
-                    <li>Removing some filters to see more results</li>
-                    <li>Searching for related roles</li>
+                    <li>Selecting different roles</li>
+                    <li>Removing some filters</li>
+                    <li>Using broader search terms</li>
                   </ul>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "#6b7280",
-                      marginTop: "1rem",
-                    }}
-                  >
-                    <em>
-                      💡 Our search looks for both exact and similar matches to
-                      help you find relevant opportunities.
-                    </em>
-                  </p>
                 </div>
               ) : (
-                <div className="initial-state">
-                  <div className="empty-search-state">
-                    <div className="search-icon">🔍</div>
-                    <h3>Find Your Perfect Internship</h3>
-                    <p>
-                      Enter a role or keyword above to discover internship
-                      opportunities that match your interests and skills.
-                    </p>
-                    <p>
-                      <strong>Popular searches:</strong> Frontend, Backend,
-                      Design, Marketing, Data Science, Mobile Development
-                    </p>
-                    <p style={{ color: "#6b7280", fontSize: "14px" }}>
-                      <em>
-                        💡 Pro tip: We'll show you both exact matches and
-                        related opportunities!
-                      </em>
-                    </p>
-                  </div>
+                <div className="initial-state-new">
+                  <div className="search-icon-new">🔍</div>
+                  <h3>Find Your Perfect Internship</h3>
+                  <p>
+                    Select roles and apply filters above to discover internship opportunities
+                  </p>
+                  <p><strong>Popular roles:</strong> Frontend Developer, Backend Developer, UI/UX Designer, Data Analyst</p>
                 </div>
               )}
             </div>
 
             {/* Load More Button */}
             {hasMoreResults && internships.length > 0 && (
-              <div className="load-more-container">
+              <div className="load-more-container-new">
                 <Button
-                  label={`Load ${Math.min(
-                    3,
-                    allInternships.length - displayCount
-                  )} More Internships`}
+                  label={`Load ${Math.min(3, allInternships.length - displayCount)} More Internships`}
                   variant="secondary"
                   onClick={handleLoadMore}
                 />
-                <p className="load-more-info">
-                  Showing {internships.length} of {allInternships.length}{" "}
-                  internships
+                <p className="load-more-info-new">
+                  Showing {internships.length} of {allInternships.length} internships
                 </p>
               </div>
             )}
@@ -318,180 +521,6 @@ const InternshipSearchPage = () => {
         </div>
       </div>
       <Footer />
-
-      <style jsx>{`
-        .loading-state {
-          text-align: center;
-          padding: 3rem;
-        }
-
-        .spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #1070e5;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        .error-message {
-          background: #fee;
-          border: 1px solid #fcc;
-          border-radius: 8px;
-          padding: 1rem;
-          margin: 1rem 0;
-          text-align: center;
-        }
-
-        .error-message p {
-          color: #c33;
-          margin: 0 0 1rem;
-        }
-
-        .retry-btn {
-          background: #1070e5;
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .retry-btn:hover {
-          background: #0d5bb8;
-        }
-
-        /* Fuzzy Search Notice Styles */
-        .fuzzy-search-notice {
-          background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
-          border: 2px solid #ffc107;
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin: 1.5rem 0;
-          display: flex;
-          gap: 1rem;
-          align-items: flex-start;
-          box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
-        }
-
-        .notice-icon {
-          font-size: 2rem;
-          flex-shrink: 0;
-        }
-
-        .notice-content {
-          flex: 1;
-        }
-
-        .notice-title {
-          font-size: 1.05rem;
-          font-weight: 600;
-          color: #856404;
-          margin: 0 0 0.5rem;
-          line-height: 1.4;
-        }
-
-        .notice-subtitle {
-          font-size: 0.95rem;
-          color: #533f03;
-          margin: 0;
-          line-height: 1.5;
-        }
-
-        .notice-title strong,
-        .notice-subtitle strong {
-          color: #664d03;
-        }
-
-        .empty-search-state,
-        .no-results-state {
-          text-align: center;
-          padding: 4rem 2rem;
-          max-width: 500px;
-          margin: 0 auto;
-        }
-
-        .search-icon {
-          font-size: 4rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .empty-search-state h3,
-        .no-results-state h3 {
-          font-size: 1.5rem;
-          color: #1e293b;
-          margin-bottom: 1rem;
-        }
-
-        .empty-search-state p,
-        .no-results-state p {
-          color: #64748b;
-          margin-bottom: 1rem;
-          line-height: 1.6;
-        }
-
-        .no-results-state ul {
-          text-align: left;
-          color: #64748b;
-          margin: 1rem 0;
-          padding-left: 1.5rem;
-        }
-
-        .no-results-state li {
-          margin-bottom: 0.5rem;
-        }
-
-        .initial-state {
-          min-height: 300px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .load-more-container {
-          text-align: center;
-          padding: 2rem 0;
-          border-top: 1px solid #e2e8f0;
-          margin-top: 2rem;
-        }
-
-        .load-more-info {
-          color: #64748b;
-          font-size: 0.9rem;
-          margin-top: 1rem;
-        }
-
-        /* Responsive design for fuzzy notice */
-        @media (max-width: 640px) {
-          .fuzzy-search-notice {
-            flex-direction: column;
-            text-align: center;
-            padding: 1.25rem;
-          }
-
-          .notice-icon {
-            font-size: 2.5rem;
-          }
-
-          .notice-title {
-            font-size: 1rem;
-          }
-
-          .notice-subtitle {
-            font-size: 0.9rem;
-          }
-        }
-      `}</style>
     </>
   );
 };
