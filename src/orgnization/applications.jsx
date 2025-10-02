@@ -141,25 +141,25 @@ const Applications = () => {
       <div className="applications-filters">
         <button
           className={`filter-btn ${statusFilter  === "all" ? "active" : ""}`}
-          onClick={() => setFilter("all")}
+          onClick={() => setStatusFilter("all")}
         >
           All Applications ({stats.total})
         </button>
         <button
           className={`filter-btn ${statusFilter  === "pending" ? "active" : ""}`}
-          onClick={() => setFilter("pending")}
+          onClick={() => setStatusFilter("pending")}
         >
           Pending ({stats.pending})
         </button>
         <button
           className={`filter-btn ${statusFilter  === "accepted" ? "active" : ""}`}
-          onClick={() => setFilter("accepted")}
+          onClick={() => setStatusFilter("accepted")}
         >
           Accepted ({stats.accepted})
         </button>
         <button
           className={`filter-btn ${statusFilter  === "rejected" ? "active" : ""}`}
-          onClick={() => setFilter("rejected")}
+          onClick={() => setStatusFilter("rejected")}
         >
           Rejected ({stats.rejected})
         </button>
