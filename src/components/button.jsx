@@ -1,9 +1,13 @@
 import '../style/button.css';
 
-export function Button({ label, onClick, className }) {
+export const Button = ({ label, onClick, disabled, variant = "primary" }) => {
   return (
-    <button className={`custom-button ${className}`} onClick={onClick}>
+    <button
+      className={`btn btn-${variant} ${disabled ? 'disabled' : ''}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {label}
     </button>
   );
-}
+};

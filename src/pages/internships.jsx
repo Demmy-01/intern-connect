@@ -5,7 +5,7 @@ import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer.jsx";
 import { useNavigate } from "react-router-dom";
 import studentService from "../lib/studentService.js";
-import '../style/it.css'
+import "../style/it.css";
 
 const getCompanyLogo = (logoUrl) => {
   return logoUrl || "https://via.placeholder.com/60x60/3498db/ffffff?text=ORG";
@@ -41,7 +41,7 @@ const InternshipSearchPage = () => {
   // Filter roles based on search query
   useEffect(() => {
     if (searchQuery) {
-      const filtered = availableRoles.filter(role =>
+      const filtered = availableRoles.filter((role) =>
         role.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredRoles(filtered);
@@ -55,8 +55,8 @@ const InternshipSearchPage = () => {
       const { data } = await studentService.getAllActiveInternships();
       if (data) {
         // Extract unique roles from internships
-        const roles = [...new Set(data.map(i => i.position_title))];
-        
+        const roles = [...new Set(data.map((i) => i.position_title))];
+
         const commonRoles = [
           "Frontend Developer",
           "Backend Developer",
@@ -75,9 +75,9 @@ const InternshipSearchPage = () => {
           "QA Engineer",
           "Software Engineer",
           "Web Developer",
-          "Graphic Designer"
+          "Graphic Designer",
         ];
-        
+
         const allRoles = [...new Set([...roles, ...commonRoles])].sort();
         setAvailableRoles(allRoles);
         setFilteredRoles(allRoles);
@@ -88,15 +88,13 @@ const InternshipSearchPage = () => {
   };
 
   const handleRoleToggle = (role) => {
-    setSelectedRoles(prev =>
-      prev.includes(role)
-        ? prev.filter(r => r !== role)
-        : [...prev, role]
+    setSelectedRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
     );
   };
 
   const handleRemoveRole = (role) => {
-    setSelectedRoles(prev => prev.filter(r => r !== role));
+    setSelectedRoles((prev) => prev.filter((r) => r !== role));
   };
 
   const handleSearch = async () => {
@@ -112,9 +110,8 @@ const InternshipSearchPage = () => {
       setDisplayCount(7);
 
       // Build search query from selected roles
-      const roleQuery = selectedRoles.length > 0 
-        ? selectedRoles.join(" ") 
-        : searchQuery.trim();
+      const roleQuery =
+        selectedRoles.length > 0 ? selectedRoles.join(" ") : searchQuery.trim();
 
       const searchParams = {
         query: roleQuery,
@@ -227,9 +224,13 @@ const InternshipSearchPage = () => {
         {/* Header */}
         <div className="page-header-new">
           <div className="container-new">
-            <h1 className="page-title-new"><center>Find Your Dream Internship</center></h1>
+            <h1 className="page-title-new">
+              <center>Find Your Dream Internship</center>
+            </h1>
             <p className="page-subtitle-new">
-              <center>Search and discover amazing opportunities across Nigeria</center>
+              <center>
+                Search and discover amazing opportunities across Nigeria
+              </center>
             </p>
           </div>
         </div>
@@ -262,7 +263,7 @@ const InternshipSearchPage = () => {
                   {/* Selected Roles Pills */}
                   {selectedRoles.length > 0 && (
                     <div className="selected-roles-new">
-                      {selectedRoles.map(role => (
+                      {selectedRoles.map((role) => (
                         <span key={role} className="role-pill-new">
                           {role}
                           <button
@@ -289,7 +290,7 @@ const InternshipSearchPage = () => {
                         </button>
                       </div>
                       <div className="role-list-new">
-                        {filteredRoles.map(role => (
+                        {filteredRoles.map((role) => (
                           <label key={role} className="role-option-new">
                             <input
                               type="checkbox"
@@ -388,7 +389,8 @@ const InternshipSearchPage = () => {
             {hasSearched && (
               <div className="results-header-new">
                 <h2 className="results-title-new">
-                  {allInternships.length} Internship{allInternships.length !== 1 ? 's' : ''} Found
+                  {allInternships.length} Internship
+                  {allInternships.length !== 1 ? "s" : ""} Found
                 </h2>
                 <p className="results-subtitle-new">
                   Showing relevant opportunities based on your search
@@ -417,10 +419,12 @@ const InternshipSearchPage = () => {
                 <div className="notice-icon-new">ℹ️</div>
                 <div className="notice-content-new">
                   <p className="notice-title-new">
-                    ❌ No exact matches found for "<strong>{searchedTerm}</strong>"
+                    ❌ No exact matches found for "
+                    <strong>{searchedTerm}</strong>"
                   </p>
                   <p className="notice-subtitle-new">
-                    ✅ Here are some related internship opportunities you might be interested in:
+                    ✅ Here are some related internship opportunities you might
+                    be interested in:
                   </p>
                 </div>
               </div>
@@ -445,8 +449,12 @@ const InternshipSearchPage = () => {
                           className="company-logo-new"
                         />
                         <div className="job-info-new">
-                          <h3 className="job-title-new">{formattedData.jobTitle}</h3>
-                          <p className="company-name-new">{formattedData.company}</p>
+                          <h3 className="job-title-new">
+                            {formattedData.jobTitle}
+                          </h3>
+                          <p className="company-name-new">
+                            {formattedData.company}
+                          </p>
                         </div>
                       </div>
 
@@ -467,22 +475,33 @@ const InternshipSearchPage = () => {
 
                       <div className="job-tags-new">
                         {formattedData.tags.map((tag, idx) => (
-                          <span key={idx} className={`tag-new tag-${tag.toLowerCase()}-new`}>
+                          <span
+                            key={idx}
+                            className={`tag-new tag-${tag.toLowerCase()}-new`}
+                          >
                             {tag}
                           </span>
                         ))}
                       </div>
 
                       <div className="job-actions-new">
-                      <Button
-                        label={isDeadlinePassed(internship.application_deadline) ? "Application Closed" : "Apply Now"}
-                        onClick={() => {
-                          if (!isDeadlinePassed(internship.application_deadline)) {
-                            handleApply(internship.id);
+                        <Button
+                          label={
+                            isDeadlinePassed(internship.application_deadline)
+                              ? "Application Closed"
+                              : "Apply Now"
                           }
-                        }}
-                        disabled={isDeadlinePassed(internship.application_deadline)}
-                      />
+                          onClick={() => {
+                            if (
+                              !isDeadlinePassed(internship.application_deadline)
+                            ) {
+                              handleApply(internship.id);
+                            }
+                          }}
+                          disabled={isDeadlinePassed(
+                            internship.application_deadline
+                          )}
+                        />
                         <Button
                           label="View Details"
                           onClick={() => handleViewDetails(internship.id)}
@@ -496,10 +515,10 @@ const InternshipSearchPage = () => {
                 <div className="no-results-state-new">
                   <div className="search-icon-new">🔍</div>
                   <h3>No Internships Found</h3>
+                  <p>We couldn't find any internships matching your criteria</p>
                   <p>
-                    We couldn't find any internships matching your criteria
+                    <strong>Try:</strong>
                   </p>
-                  <p><strong>Try:</strong></p>
                   <ul>
                     <li>Selecting different roles</li>
                     <li>Removing some filters</li>
@@ -511,9 +530,13 @@ const InternshipSearchPage = () => {
                   <div className="search-icon-new">🔍</div>
                   <h3>Find Your Perfect Internship</h3>
                   <p>
-                    Select roles and apply filters above to discover internship opportunities
+                    Select roles and apply filters above to discover internship
+                    opportunities
                   </p>
-                  <p><strong>Popular roles:</strong> Frontend Developer, Backend Developer, UI/UX Designer, Data Analyst</p>
+                  <p>
+                    <strong>Popular roles:</strong> Frontend Developer, Backend
+                    Developer, UI/UX Designer, Data Analyst
+                  </p>
                 </div>
               )}
             </div>
@@ -522,12 +545,16 @@ const InternshipSearchPage = () => {
             {hasMoreResults && internships.length > 0 && (
               <div className="load-more-container-new">
                 <Button
-                  label={`Load ${Math.min(3, allInternships.length - displayCount)} More Internships`}
+                  label={`Load ${Math.min(
+                    3,
+                    allInternships.length - displayCount
+                  )} More Internships`}
                   variant="secondary"
                   onClick={handleLoadMore}
                 />
                 <p className="load-more-info-new">
-                  Showing {internships.length} of {allInternships.length} internships
+                  Showing {internships.length} of {allInternships.length}{" "}
+                  internships
                 </p>
               </div>
             )}

@@ -365,21 +365,28 @@ const InternshipDetails = () => {
 
           {/* Action Buttons */}
           <div className="action-buttons">
-          <button
-            className={`btn btn-primary ${
-              applicationStatus.hasApplied || isDeadlinePassed(internshipData.application_deadline) ? "disabled" : ""
-            }`}
-            onClick={handleApplyNow}
-            disabled={applicationStatus.hasApplied || applying || isDeadlinePassed(internshipData.application_deadline)}
-          >
-            {applying
-              ? "Applying..."
-              : isDeadlinePassed(internshipData.application_deadline)
-              ? "Application Closed"
-              : applicationStatus.hasApplied
-              ? "Already Applied"
-              : "Apply Now"}
-          </button>
+            <button
+              className={`btn btn-primary ${
+                applicationStatus.hasApplied ||
+                isDeadlinePassed(internshipData.application_deadline)
+                  ? "disabled"
+                  : ""
+              }`}
+              onClick={handleApplyNow}
+              disabled={
+                applicationStatus.hasApplied ||
+                applying ||
+                isDeadlinePassed(internshipData.application_deadline)
+              }
+            >
+              {applying
+                ? "Applying..."
+                : isDeadlinePassed(internshipData.application_deadline)
+                ? "Application Closed"
+                : applicationStatus.hasApplied
+                ? "Already Applied"
+                : "Apply Now"}
+            </button>
             <button className="btn btn-secondary" onClick={handleViewProfile}>
               View Organization Profile
             </button>
