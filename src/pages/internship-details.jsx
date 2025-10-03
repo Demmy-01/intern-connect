@@ -52,9 +52,22 @@ const InternshipDetails = () => {
     }
   };
 
+  const isDeadlinePassed = (deadlineString) => {
+    if (!deadlineString) return false;
+    const deadline = new Date(deadlineString);
+    const today = new Date();
+    deadline.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return deadline < today;
+  };
+
   const handleApplyNow = () => {
     if (applicationStatus.hasApplied) {
       alert("You have already applied for this internship");
+      return;
+    }
+    if (isDeadlinePassed(internshipData.application_deadline)) {
+      alert("Application deadline has passed. You cannot apply.");
       return;
     }
     navigate(`/apply/${id}`);
@@ -352,19 +365,21 @@ const InternshipDetails = () => {
 
           {/* Action Buttons */}
           <div className="action-buttons">
-            <button
-              className={`btn btn-primary ${
-                applicationStatus.hasApplied ? "disabled" : ""
-              }`}
-              onClick={handleApplyNow}
-              disabled={applicationStatus.hasApplied || applying}
-            >
-              {applying
-                ? "Applying..."
-                : applicationStatus.hasApplied
-                ? "Already Applied"
-                : "Apply Now"}
-            </button>
+          <button
+            className={`btn btn-primary ${
+              applicationStatus.hasApplied || isDeadlinePassed(internshipData.application_deadline) ? "disabled" : ""
+            }`}
+            onClick={handleApplyNow}
+            disabled={applicationStatus.hasApplied || applying || isDeadlinePassed(internshipData.application_deadline)}
+          >
+            {applying
+              ? "Applying..."
+              : isDeadlinePassed(internshipData.application_deadline)
+              ? "Application Closed"
+              : applicationStatus.hasApplied
+              ? "Already Applied"
+              : "Apply Now"}
+          </button>
             <button className="btn btn-secondary" onClick={handleViewProfile}>
               View Organization Profile
             </button>

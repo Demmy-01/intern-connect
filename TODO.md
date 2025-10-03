@@ -1,8 +1,4 @@
-# TODO: Add "home-" prefix to all classnames in home page
-
-## Tasks
-
-- [ ] Update all classNames in src/pages/home.jsx to include "home-" prefix
-- [ ] Update all CSS selectors in src/style/home.css to include "home-" prefix
-- [ ] Verify changes by checking files for completeness
-- [ ] Test the application to ensure styles work correctly
+- [x] Add isDeadlinePassed helper function to internship-details.jsx
+- [x] Modify apply button in internship-details.jsx to disable when deadline passed and change text to "Application Closed"
+- [x] Add isDeadlinePassed helper function to internships.jsx
+- [x] Modify apply button in internships.jsx job cards to disable when deadline passed and change label to "Application Closed"

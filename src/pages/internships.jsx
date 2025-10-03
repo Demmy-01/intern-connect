@@ -183,6 +183,15 @@ const InternshipSearchPage = () => {
     navigate(`/internship-details/${internshipId}`);
   };
 
+  const isDeadlinePassed = (deadlineString) => {
+    if (!deadlineString) return false;
+    const deadline = new Date(deadlineString);
+    const today = new Date();
+    deadline.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return deadline < today;
+  };
+
   const handleApply = (internshipId) => {
     navigate(`/apply/${internshipId}`);
   };
@@ -465,10 +474,15 @@ const InternshipSearchPage = () => {
                       </div>
 
                       <div className="job-actions-new">
-                        <Button
-                          label="Apply Now"
-                          onClick={() => handleApply(internship.id)}
-                        />
+                      <Button
+                        label={isDeadlinePassed(internship.application_deadline) ? "Application Closed" : "Apply Now"}
+                        onClick={() => {
+                          if (!isDeadlinePassed(internship.application_deadline)) {
+                            handleApply(internship.id);
+                          }
+                        }}
+                        disabled={isDeadlinePassed(internship.application_deadline)}
+                      />
                         <Button
                           label="View Details"
                           onClick={() => handleViewDetails(internship.id)}
