@@ -6,17 +6,20 @@ import DashboardLayout from "./DashboardLayout";
 import { Button } from "../components/button.jsx";
 import { Link } from "react-router-dom";
 import organizationService from "../lib/organizationService.js";
+import ManualScreeningPanel from "../components/ManualScreeningPanel.jsx";
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [screeningFilter, setScreeningFilter] = useState("all");
   const [positionFilter, setPositionFilter] = useState("all");
+  const [screeningStats, setScreeningStats] = useState(null);
 
   useEffect(() => {
     loadApplications();
+    loadScreeningStats();
   }, []);
 
   const loadApplications = async () => {
@@ -38,6 +41,16 @@ const Applications = () => {
       console.error("Applications exception:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadScreeningStats = async () => {
+    try {
+      const { data } = await organizationService.getScreeningStats();
+      setScreeningStats(data);
+      console.log("Screening stats:", data);
+    } catch (err) {
+      console.error("Error loading screening stats:", err);
     }
   };
 
@@ -67,6 +80,44 @@ const Applications = () => {
     }
   };
 
+  const getScreeningBadgeClass = (screeningStatus) => {
+    switch (screeningStatus) {
+      case "shortlisted":
+        return "shortlisted";
+      case "flagged_review":
+        return "flagged";
+      case "auto_rejected":
+        return "auto-rejected";
+      case "ai_screened":
+        return "screened";
+      default:
+        return "unscreened";
+    }
+  };
+
+  const getScreeningLabel = (screeningStatus) => {
+    switch (screeningStatus) {
+      case "shortlisted":
+        return "Shortlisted";
+      case "flagged_review":
+        return "Needs Review";
+      case "auto_rejected":
+        return "Auto-Rejected";
+      case "ai_screened":
+        return "AI Screened";
+      case "unscreened":
+        return "Not Screened";
+      default:
+        return screeningStatus;
+    }
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 70) return "#22c55e";
+    if (score >= 40) return "#f59e0b";
+    return "#ef4444";
+  };
+
   const uniquePositions = [
     ...new Set(
       applications.map((app) => app.internships?.position_title || "Unknown")
@@ -82,7 +133,10 @@ const Applications = () => {
       positionFilter === "all" ||
       (app.internships?.position_title || "Unknown") === positionFilter;
 
-    return matchesStatus && matchesPosition;
+    const matchesScreening =
+      screeningFilter === "all" || app.screening_status === screeningFilter;
+
+    return matchesStatus && matchesPosition && matchesScreening;
   });
 
   const getStats = () => {
@@ -129,44 +183,109 @@ const Applications = () => {
   return (
     <DashboardLayout>
       <div className="applications-header">
-        <h1>Applications</h1>
-        <div className="applications-stats">
-          <span className="stat-item">Total: {stats.total}</span>
-          <span className="stat-item">Pending: {stats.pending}</span>
-          <span className="stat-item">Accepted: {stats.accepted}</span>
-          <span className="stat-item">Rejected: {stats.rejected}</span>
-        </div>
+        <h1>Applications Management</h1>
       </div>
 
+      <ManualScreeningPanel
+        applications={applications}
+        onScreeningComplete={loadApplications}
+      />
+      {/* AI Screening Stats Dashboard */}
+      {screeningStats && (
+        <div className="screening-stats-grid">
+          <div className="stat-card">
+            <div className="stat-label">Total Applications</div>
+            <div className="stat-value">{screeningStats.total}</div>
+          </div>
+          <div className="stat-card stat-shortlisted">
+            <div className="stat-label">✓ Shortlisted</div>
+            <div className="stat-value">{screeningStats.shortlisted}</div>
+          </div>
+          <div className="stat-card stat-flagged">
+            <div className="stat-label">⚠ Needs Review</div>
+            <div className="stat-value">{screeningStats.flagged}</div>
+          </div>
+          <div className="stat-card stat-rejected">
+            <div className="stat-label">✗ Auto-Rejected</div>
+            <div className="stat-value">{screeningStats.autoRejected}</div>
+          </div>
+          <div className="stat-card stat-average">
+            <div className="stat-label">Avg AI Score</div>
+            <div className="stat-value">{screeningStats.averageScore}%</div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Filters */}
       <div className="applications-filters">
         <button
-          className={`filter-btn ${statusFilter  === "all" ? "active" : ""}`}
+          className={`filter-btn ${statusFilter === "all" ? "active" : ""}`}
           onClick={() => setStatusFilter("all")}
         >
           All Applications ({stats.total})
         </button>
         <button
-          className={`filter-btn ${statusFilter  === "pending" ? "active" : ""}`}
+          className={`filter-btn ${statusFilter === "pending" ? "active" : ""}`}
           onClick={() => setStatusFilter("pending")}
         >
           Pending ({stats.pending})
         </button>
         <button
-          className={`filter-btn ${statusFilter  === "accepted" ? "active" : ""}`}
+          className={`filter-btn ${
+            statusFilter === "accepted" ? "active" : ""
+          }`}
           onClick={() => setStatusFilter("accepted")}
         >
           Accepted ({stats.accepted})
         </button>
         <button
-          className={`filter-btn ${statusFilter  === "rejected" ? "active" : ""}`}
+          className={`filter-btn ${
+            statusFilter === "rejected" ? "active" : ""
+          }`}
           onClick={() => setStatusFilter("rejected")}
         >
           Rejected ({stats.rejected})
         </button>
+      </div>
+
+      {/* AI Screening Filters */}
+      <div className="screening-filters">
+        <label className="filter-label">AI Screening Status:</label>
+        <button
+          className={`filter-btn ${screeningFilter === "all" ? "active" : ""}`}
+          onClick={() => setScreeningFilter("all")}
+        >
+          All
+        </button>
+        <button
+          className={`filter-btn screening-shortlist ${
+            screeningFilter === "shortlisted" ? "active" : ""
+          }`}
+          onClick={() => setScreeningFilter("shortlisted")}
+        >
+          Shortlisted
+        </button>
+        <button
+          className={`filter-btn screening-flagged ${
+            screeningFilter === "flagged_review" ? "active" : ""
+          }`}
+          onClick={() => setScreeningFilter("flagged_review")}
+        >
+          Needs Review
+        </button>
+        <button
+          className={`filter-btn screening-rejected ${
+            screeningFilter === "auto_rejected" ? "active" : ""
+          }`}
+          onClick={() => setScreeningFilter("auto_rejected")}
+        >
+          Auto-Rejected
+        </button>
+
         <select
           value={positionFilter}
           onChange={(e) => setPositionFilter(e.target.value)}
-          className="filter-btn"
+          className="filter-btn position-select"
         >
           <option value="all">All Positions</option>
           {uniquePositions.map((pos, idx) => (
@@ -177,6 +296,7 @@ const Applications = () => {
         </select>
       </div>
 
+      {/* Applications Table */}
       <div className="applications-table-container">
         {filteredApplications.length === 0 ? (
           <div className="no-applications">
@@ -191,6 +311,8 @@ const Applications = () => {
               <tr>
                 <th>Applicant</th>
                 <th>Position</th>
+                <th>AI Score</th>
+                <th>Screening Status</th>
                 <th>Date Applied</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -198,7 +320,14 @@ const Applications = () => {
             </thead>
             <tbody>
               {filteredApplications.map((application) => (
-                <tr key={application.id}>
+                <tr
+                  key={application.id}
+                  className={`app-row ${
+                    application.screening_status === "auto_rejected"
+                      ? "auto-rejected-row"
+                      : ""
+                  }`}
+                >
                   <td className="applicant-cell">
                     <div className="applicant-info">
                       <div className="applicant-avatar">
@@ -206,7 +335,7 @@ const Applications = () => {
                           <img
                             src={application.students.profiles.avatar_url}
                             alt={
-                              application.students.profiles.full_name ||
+                              application.students.profiles.display_name ||
                               "Student"
                             }
                           />
@@ -227,6 +356,29 @@ const Applications = () => {
                   <td className="position-cell">
                     {application.internships?.position_title ||
                       "Unknown Position"}
+                  </td>
+                  <td className="score-cell">
+                    {application.ai_score !== null ? (
+                      <div
+                        className="score-badge"
+                        style={{
+                          backgroundColor: getScoreColor(application.ai_score),
+                        }}
+                      >
+                        {application.ai_score}%
+                      </div>
+                    ) : (
+                      <span className="no-score">Not screened</span>
+                    )}
+                  </td>
+                  <td className="screening-cell">
+                    <span
+                      className={`screening-badge ${getScreeningBadgeClass(
+                        application.screening_status
+                      )}`}
+                    >
+                      {getScreeningLabel(application.screening_status)}
+                    </span>
                   </td>
                   <td className="date-cell">
                     {formatDate(application.applied_at)}
@@ -258,148 +410,136 @@ const Applications = () => {
       </div>
 
       <style>{`
-        .loading-container,
-        .error-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
+        .screening-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .stat-card {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 2px solid #e5e7eb;
           text-align: center;
-        }
-
-        .spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #1070e5;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        .retry-button {
-          background: #1070e5;
-          color: white;
-          border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          margin-top: 1rem;
-        }
-
-        .retry-button:hover {
-          background: #0856c1;
-        }
-
-        .applications-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        }
-
-        .applications-stats {
-          display: flex;
-          gap: 1rem;
-        }
-
-        .stat-item {
-          background: white;
-          padding: 0.5rem 1rem;
-          border-radius: 8px;
-          border: 1px solid #e5e7eb;
-          font-size: 0.875rem;
-          font-weight: 500;
-        }
-
-        .applications-filters {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 2rem;
-        }
-
-        .filter-btn {
-          background: white;
-          border: 1px solid #e5e7eb;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          color: #64748b;
           transition: all 0.2s;
         }
 
-        .filter-btn.active,
-        .filter-btn:hover {
-          background: #1070e5;
-          color: white;
-          border-color: #1070e5;
+        .stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .applicant-info {
+        .stat-shortlisted { border-color: #22c55e; }
+        .stat-flagged { border-color: #f59e0b; }
+        .stat-rejected { border-color: #ef4444; }
+        .stat-average { border-color: #3b82f6; }
+
+        .stat-label {
+          font-size: 0.875rem;
+          color: #64748b;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+        }
+
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #1e293b;
+        }
+
+        .screening-filters {
           display: flex;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+          flex-wrap: wrap;
           align-items: center;
-          gap: 0.75rem;
         }
 
-        .applicant-avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          overflow: hidden;
-        }
-
-        .applicant-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .avatar-placeholder {
-          width: 40px;
-          height: 40px;
-          background: #e5e7eb;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .filter-label {
           font-weight: 600;
-          color: #64748b;
+          color: #475569;
         }
 
-        .no-applications {
+        .screening-shortlist.active {
+          background: #22c55e !important;
+          border-color: #22c55e !important;
+        }
+
+        .screening-flagged.active {
+          background: #f59e0b !important;
+          border-color: #f59e0b !important;
+        }
+
+        .screening-rejected.active {
+          background: #ef4444 !important;
+          border-color: #ef4444 !important;
+        }
+
+        .position-select {
+          min-width: 200px;
+        }
+
+        .score-cell {
           text-align: center;
-          padding: 3rem;
-          color: #64748b;
-          background: white;
-          border-radius: 8px;
-          border: 1px solid #e5e7eb;
         }
 
-        .status-badge.accepted {
-          background-color: #dcfce7;
+        .score-badge {
+          display: inline-block;
+          padding: 0.375rem 0.75rem;
+          border-radius: 6px;
+          color: white;
+          font-weight: 600;
+          font-size: 0.875rem;
+        }
+
+        .no-score {
+          color: #94a3b8;
+          font-size: 0.875rem;
+          font-style: italic;
+        }
+
+        .screening-badge {
+          display: inline-block;
+          padding: 0.375rem 0.75rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .screening-badge.shortlisted {
+          background: #dcfce7;
           color: #16a34a;
         }
 
-        .status-badge.rejected {
-          background-color: #fef2f2;
+        .screening-badge.flagged {
+          background: #fef3c7;
+          color: #d97706;
+        }
+
+        .screening-badge.auto-rejected {
+          background: #fee2e2;
           color: #dc2626;
         }
 
-        .status-badge.reviewed {
-          background-color: #fef3c7;
-          color: #d97706;
+        .screening-badge.screened {
+          background: #e0e7ff;
+          color: #4f46e5;
+        }
+
+        .screening-badge.unscreened {
+          background: #f1f5f9;
+          color: #64748b;
+        }
+
+        .auto-rejected-row {
+          background: #fef2f2;
+          opacity: 0.8;
+        }
+
+        .auto-rejected-row:hover {
+          opacity: 1;
         }
       `}</style>
     </DashboardLayout>

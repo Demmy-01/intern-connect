@@ -498,6 +498,235 @@ parseApplicationNotes(notes) {
       return { data: [], error: error.message };
     }
   }
+
+// UPDATED: Get application details with AI screening data
+async getApplicationDetails(applicationId) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .select(`
+        id,
+        status,
+        applied_at,
+        notes,
+        document_url,
+        applicant_email,
+        ai_score,
+        ai_analysis,
+        screening_status,
+        internships (
+          id,
+          position_title,
+          department,
+          description,
+          requirements,
+          work_type,
+          compensation,
+          location,
+          organization_id
+        ),
+        students (
+          id,
+          bio,
+          profiles!inner (
+            id,
+            display_name,
+            username,
+            phone,
+            avatar_url
+          )
+        )
+      `)
+      .eq('id', applicationId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    const parsedNotes = this.parseApplicationNotes(data.notes);
+
+    return { 
+      data: {
+        ...data,
+        student_email: data.applicant_email || "Not provided",
+        parsed_application_data: parsedNotes,
+        student_education: []
+      }, 
+      error: null 
+    };
+  } catch (error) {
+    console.error('Error fetching application details:', error);
+    return { data: null, error: error.message };
+  }
+}
+
+// UPDATED: Get all applications with AI screening data
+async getOrganizationApplications() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data: internships, error: internshipError } = await supabase
+      .from('internships')
+      .select('id')
+      .eq('organization_id', user.id);
+
+    if (internshipError) {
+      throw internshipError;
+    }
+
+    if (!internships || internships.length === 0) {
+      return { data: [], error: null };
+    }
+
+    const internshipIds = internships.map(intern => intern.id);
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .select(`
+        id,
+        status,
+        applied_at,
+        internship_id,
+        student_id,
+        notes,
+        ai_score,
+        ai_analysis,
+        screening_status,
+        internships (
+          id,
+          position_title,
+          department
+        ),
+        students (
+          id,
+          profiles (
+            id,
+            display_name,
+            avatar_url
+          )
+        )
+      `)
+      .in('internship_id', internshipIds)
+      .order('applied_at', { ascending: false});
+
+    if (error) {
+      throw error;
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Error fetching organization applications:', error);
+    return { data: [], error: error.message };
+  }
+}
+
+// NEW: Get screening statistics
+async getScreeningStats() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data: internships, error: internshipsError } = await supabase
+      .from('internships')
+      .select('id')
+      .eq('organization_id', user.id);
+
+    if (internshipsError || !internships || internships.length === 0) {
+      return {
+        data: {
+          total: 0,
+          screened: 0,
+          shortlisted: 0,
+          flagged: 0,
+          autoRejected: 0,
+          averageScore: 0
+        },
+        error: null
+      };
+    }
+
+    const internshipIds = internships.map(i => i.id);
+
+    const { data: applications, error } = await supabase
+      .from('internship_applications')
+      .select('screening_status, ai_score')
+      .in('internship_id', internshipIds);
+
+    if (error) throw error;
+
+    const stats = {
+      total: applications?.length || 0,
+      screened: applications?.filter(a => a.screening_status !== 'unscreened').length || 0,
+      shortlisted: applications?.filter(a => a.screening_status === 'shortlisted').length || 0,
+      flagged: applications?.filter(a => a.screening_status === 'flagged_review').length || 0,
+      autoRejected: applications?.filter(a => a.screening_status === 'auto_rejected').length || 0
+    };
+
+    const scoredApps = applications?.filter(a => a.ai_score) || [];
+    stats.averageScore = scoredApps.length > 0
+      ? Math.round(scoredApps.reduce((sum, a) => sum + a.ai_score, 0) / scoredApps.length)
+      : 0;
+
+    return { data: stats, error: null };
+  } catch (error) {
+    console.error('Error getting screening stats:', error);
+    return { data: null, error: error.message };
+  }
+}
+
+// NEW: Manually trigger re-screening for an application
+async reScreenApplication(applicationId) {
+  try {
+    const aiScreeningService = (await import('./aiScreeningService.js')).default;
+    const result = await aiScreeningService.reScreenApplication(applicationId);
+    return { data: result, error: result.success ? null : result.error };
+  } catch (error) {
+    console.error('Error re-screening application:', error);
+    return { data: null, error: error.message };
+  }
+}
+
+// NEW: Override AI decision (move from auto_rejected to manual review)
+async overrideAIDecision(applicationId, newStatus) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .update({
+        screening_status: newStatus,
+        status: newStatus === 'auto_rejected' ? 'rejected' : 'pending'
+      })
+      .eq('id', applicationId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error overriding AI decision:', error);
+    return { data: null, error: error.message };
+  }
+}
 }
 
 export default new OrganizationService();

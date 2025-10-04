@@ -363,7 +363,7 @@ class StudentService {
     }
   }
 
-  async submitApplication(applicationData) {
+    async submitApplication(applicationData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -373,6 +373,7 @@ class StudentService {
 
       console.log('Submitting application with data:', applicationData);
 
+      // Step 1: Create the application
       const { data, error } = await supabase
         .from('internship_applications')
         .insert([{
@@ -382,6 +383,7 @@ class StudentService {
           notes: applicationData.notes || null,
           document_url: applicationData.documentUrl || null,
           applicant_email: applicationData.applicantEmail || user.email,
+          screening_status: 'unscreened', // ADD THIS LINE
           applied_at: new Date().toISOString()
         }])
         .select('*')
@@ -392,13 +394,27 @@ class StudentService {
       }
 
       console.log('Application submitted successfully:', data);
+
+      // Step 2: Trigger AI screening asynchronously (doesn't block success message)
+      if (data.id && data.document_url) {
+        console.log('Triggering AI screening for application:', data.id);
+        
+        aiScreeningService.processNewApplication(data.id)
+          .then(result => {
+            console.log('AI screening completed:', result);
+          })
+          .catch(error => {
+            console.error('AI screening failed (non-critical):', error);
+          });
+      }
+
+      // Step 3: Return success immediately
       return { data, error: null };
     } catch (error) {
       console.error('Error submitting application:', error);
       return { data: null, error: error.message };
     }
   }
-
   async checkApplicationStatus(internshipId) {
     try {
       const { data: { user } } = await supabase.auth.getUser();

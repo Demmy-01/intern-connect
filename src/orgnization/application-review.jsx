@@ -10,7 +10,6 @@ import email from "../assets/email.png";
 import location from "../assets/location.png";
 import time from "../assets/time.png";
 import school from "../assets/school.png";
-import profile from "../assets/profile.png";
 import organizationService from "../lib/organizationService.js";
 
 const ApplicationDetails = () => {
@@ -83,6 +82,44 @@ const ApplicationDetails = () => {
       } finally {
         setUpdating(false);
       }
+    }
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 70) return "#22c55e";
+    if (score >= 40) return "#f59e0b";
+    return "#ef4444";
+  };
+
+  const getScreeningBadgeClass = (screeningStatus) => {
+    switch (screeningStatus) {
+      case "shortlisted":
+        return "shortlisted";
+      case "flagged_review":
+        return "flagged";
+      case "auto_rejected":
+        return "auto-rejected";
+      case "ai_screened":
+        return "screened";
+      default:
+        return "unscreened";
+    }
+  };
+
+  const getScreeningLabel = (screeningStatus) => {
+    switch (screeningStatus) {
+      case "shortlisted":
+        return "Shortlisted";
+      case "flagged_review":
+        return "Needs Review";
+      case "auto_rejected":
+        return "Auto-Rejected";
+      case "ai_screened":
+        return "AI Screened";
+      case "unscreened":
+        return "Not Screened";
+      default:
+        return screeningStatus;
     }
   };
 
@@ -218,6 +255,213 @@ const ApplicationDetails = () => {
               </button>
             </div>
           </div>
+
+          {/* AI Screening Results Section */}
+          {applicationData.ai_score !== null && applicationData.ai_analysis && (
+            <div className="ai-screening-card">
+              <div className="ai-header">
+                <h3>🤖 AI Screening Results</h3>
+                <div
+                  className="ai-score-large"
+                  style={{
+                    backgroundColor: getScoreColor(applicationData.ai_score),
+                  }}
+                >
+                  {applicationData.ai_score}%
+                </div>
+              </div>
+
+              <div className="ai-status-indicator">
+                <span
+                  className={`ai-status-badge ${getScreeningBadgeClass(
+                    applicationData.screening_status
+                  )}`}
+                >
+                  {getScreeningLabel(applicationData.screening_status)}
+                </span>
+              </div>
+
+              {/* Match Analysis */}
+              <div className="ai-analysis-section">
+                <h4>Requirements Match Analysis</h4>
+
+                {applicationData.ai_analysis.matchedKeywords?.length > 0 && (
+                  <div className="keywords-section">
+                    <div className="keywords-label">
+                      ✓ Matched Requirements (
+                      {applicationData.ai_analysis.matchedKeywords.length})
+                    </div>
+                    <div className="keywords-list matched">
+                      {applicationData.ai_analysis.matchedKeywords.map(
+                        (keyword, idx) => (
+                          <span key={idx} className="keyword-tag matched">
+                            {keyword}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {applicationData.ai_analysis.missingKeywords?.length > 0 && (
+                  <div className="keywords-section">
+                    <div className="keywords-label">
+                      ✗ Missing Requirements (
+                      {applicationData.ai_analysis.missingKeywords.length})
+                    </div>
+                    <div className="keywords-list missing">
+                      {applicationData.ai_analysis.missingKeywords.map(
+                        (keyword, idx) => (
+                          <span key={idx} className="keyword-tag missing">
+                            {keyword}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* CV Quality Analysis */}
+              {applicationData.ai_analysis.cvAnalysis && (
+                <div className="cv-quality-section">
+                  <h4>CV Quality Assessment</h4>
+                  <div className="quality-indicators">
+                    <div
+                      className={`quality-item ${
+                        applicationData.ai_analysis.cvAnalysis.hasEducation
+                          ? "has"
+                          : "missing"
+                      }`}
+                    >
+                      <span className="quality-icon">
+                        {applicationData.ai_analysis.cvAnalysis.hasEducation
+                          ? "✓"
+                          : "✗"}
+                      </span>
+                      <span>Education Section</span>
+                    </div>
+                    <div
+                      className={`quality-item ${
+                        applicationData.ai_analysis.cvAnalysis.hasExperience
+                          ? "has"
+                          : "missing"
+                      }`}
+                    >
+                      <span className="quality-icon">
+                        {applicationData.ai_analysis.cvAnalysis.hasExperience
+                          ? "✓"
+                          : "✗"}
+                      </span>
+                      <span>Experience Section</span>
+                    </div>
+                    <div
+                      className={`quality-item ${
+                        applicationData.ai_analysis.cvAnalysis.hasSkills
+                          ? "has"
+                          : "missing"
+                      }`}
+                    >
+                      <span className="quality-icon">
+                        {applicationData.ai_analysis.cvAnalysis.hasSkills
+                          ? "✓"
+                          : "✗"}
+                      </span>
+                      <span>Skills Section</span>
+                    </div>
+                    <div
+                      className={`quality-item ${
+                        applicationData.ai_analysis.cvAnalysis.hasContact
+                          ? "has"
+                          : "missing"
+                      }`}
+                    >
+                      <span className="quality-icon">
+                        {applicationData.ai_analysis.cvAnalysis.hasContact
+                          ? "✓"
+                          : "✗"}
+                      </span>
+                      <span>Contact Information</span>
+                    </div>
+                  </div>
+                  <div className="word-count">
+                    <small>
+                      CV Word Count:{" "}
+                      {applicationData.ai_analysis.cvAnalysis.wordCount} words
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              {/* AI Reasoning */}
+              {applicationData.ai_analysis.reasoning && (
+                <div className="ai-reasoning">
+                  <h4>AI Assessment</h4>
+                  <p>{applicationData.ai_analysis.reasoning}</p>
+                </div>
+              )}
+
+              {/* Screening Scores Breakdown */}
+              <div className="score-breakdown">
+                <div className="score-item">
+                  <span className="score-label">Requirements Match:</span>
+                  <span className="score-value">
+                    {applicationData.ai_analysis.keywordMatchScore}%
+                  </span>
+                </div>
+                <div className="score-item">
+                  <span className="score-label">CV Quality:</span>
+                  <span className="score-value">
+                    {applicationData.ai_analysis.qualityScore}%
+                  </span>
+                </div>
+                <div className="score-item">
+                  <span className="score-label">Overall Score:</span>
+                  <span className="score-value" style={{ fontWeight: 700 }}>
+                    {applicationData.ai_score}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Override AI Decision (for auto-rejected) */}
+              {applicationData.screening_status === "auto_rejected" && (
+                <div className="override-section">
+                  <button
+                    className="override-btn"
+                    onClick={async () => {
+                      if (
+                        window.confirm(
+                          "Override AI decision and move to manual review?"
+                        )
+                      ) {
+                        const { error } =
+                          await organizationService.overrideAIDecision(
+                            applicationId,
+                            "flagged_review"
+                          );
+                        if (!error) {
+                          alert("Application moved to manual review");
+                          loadApplicationDetails();
+                        }
+                      }
+                    }}
+                  >
+                    Override AI Decision
+                  </button>
+                  <small>Move this application to manual review queue</small>
+                </div>
+              )}
+
+              <div className="screening-timestamp">
+                <small>
+                  Screened on{" "}
+                  {new Date(
+                    applicationData.ai_analysis.screenedAt
+                  ).toLocaleString()}
+                </small>
+              </div>
+            </div>
+          )}
 
           {/* Documents Section */}
           <div className="appl-documents">
@@ -722,6 +966,244 @@ const ApplicationDetails = () => {
         .appl-download-text {
           font-size: 0.75rem;
           color: #64748b;
+        }
+        .ai-screening-card {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 16px;
+          padding: 1.5rem;
+          margin-bottom: 1.5rem;
+          color: white;
+          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .ai-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .ai-header h3 {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 600;
+        }
+
+        .ai-score-large {
+          font-size: 2rem;
+          font-weight: 700;
+          padding: 0.5rem 1rem;
+          border-radius: 12px;
+          background: white;
+          color: white;
+          min-width: 80px;
+          text-align: center;
+        }
+
+        .ai-status-indicator {
+          margin-bottom: 1.5rem;
+        }
+
+        .ai-status-badge {
+          display: inline-block;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          background: white;
+        }
+
+        .ai-status-badge.shortlisted {
+          color: #16a34a;
+        }
+
+        .ai-status-badge.flagged {
+          color: #d97706;
+        }
+
+        .ai-status-badge.auto-rejected {
+          color: #dc2626;
+        }
+
+        .ai-analysis-section {
+          background: rgba(255, 255, 255, 0.15);
+          padding: 1rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
+        }
+
+        .ai-analysis-section h4 {
+          margin: 0 0 1rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .keywords-section {
+          margin-bottom: 1rem;
+        }
+
+        .keywords-section:last-child {
+          margin-bottom: 0;
+        }
+
+        .keywords-label {
+          font-size: 0.875rem;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+          opacity: 0.9;
+        }
+
+        .keywords-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .keyword-tag {
+          display: inline-block;
+          padding: 0.375rem 0.75rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .keyword-tag.matched {
+          background: rgba(34, 197, 94, 0.9);
+          color: white;
+        }
+
+        .keyword-tag.missing {
+          background: rgba(239, 68, 68, 0.9);
+          color: white;
+        }
+
+        .cv-quality-section {
+          background: rgba(255, 255, 255, 0.15);
+          padding: 1rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
+        }
+
+        .cv-quality-section h4 {
+          margin: 0 0 1rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .quality-indicators {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .quality-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
+          font-size: 0.875rem;
+        }
+
+        .quality-item.has {
+          background: rgba(34, 197, 94, 0.2);
+        }
+
+        .quality-item.missing {
+          background: rgba(239, 68, 68, 0.2);
+          opacity: 0.7;
+        }
+
+        .quality-icon {
+          font-weight: 700;
+        }
+
+        .word-count {
+          margin-top: 0.5rem;
+          opacity: 0.8;
+        }
+
+        .ai-reasoning {
+          background: rgba(255, 255, 255, 0.15);
+          padding: 1rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
+        }
+
+        .ai-reasoning h4 {
+          margin: 0 0 0.75rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .ai-reasoning p {
+          margin: 0;
+          line-height: 1.6;
+          font-size: 0.9375rem;
+        }
+
+        .score-breakdown {
+          background: rgba(255, 255, 255, 0.15);
+          padding: 1rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
+        }
+
+        .score-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-item:last-child {
+          border-bottom: none;
+        }
+
+        .score-label {
+          font-size: 0.875rem;
+        }
+
+        .score-value {
+          font-weight: 600;
+        }
+
+        .override-section {
+          background: rgba(239, 68, 68, 0.2);
+          padding: 1rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
+          text-align: center;
+        }
+
+        .override-btn {
+          background: white;
+          color: #dc2626;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          margin-bottom: 0.5rem;
+          transition: all 0.2s;
+        }
+
+        .override-btn:hover {
+          background: #fef2f2;
+          transform: translateY(-1px);
+        }
+
+        .override-section small {
+          display: block;
+          opacity: 0.9;
+        }
+
+        .screening-timestamp {
+          text-align: center;
+          opacity: 0.8;
+          font-size: 0.75rem;
         }
       `}</style>
     </DashboardLayout>
