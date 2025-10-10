@@ -437,67 +437,74 @@ parseApplicationNotes(notes) {
   }
 
   // Get all applications for the organization's internships
-  async getOrganizationApplications() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // First get all internships for the organization
-      const { data: internships, error: internshipError } = await supabase
-        .from('internships')
-        .select('id')
-        .eq('organization_id', user.id);
-
-      if (internshipError) {
-        throw internshipError;
-      }
-
-      if (!internships || internships.length === 0) {
-        return { data: [], error: null };
-      }
-
-      const internshipIds = internships.map(intern => intern.id);
-
-      // Then get all applications for these internships with related data
-      const { data, error } = await supabase
-        .from('internship_applications')
-        .select(`
-          id,
-          status,
-          applied_at,
-          internship_id,
-          student_id,
-          notes,
-          internships (
-            id,
-            position_title,
-            department
-          ),
-          students (
-            id,
-            profiles (
-              id,
-              display_name,
-              avatar_url
-            )
-          )
-        `)
-        .in('internship_id', internshipIds)
-        .order('applied_at', { ascending: false});
-
-      if (error) {
-        throw error;
-      }
-
-      return { data: data || [], error: null };
-    } catch (error) {
-      console.error('Error fetching organization applications:', error);
-      return { data: [], error: error.message };
+async getOrganizationApplications() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    const { data: internships, error: internshipError } = await supabase
+      .from('internships')
+      .select('id')
+      .eq('organization_id', user.id);
+
+    if (internshipError) {
+      throw internshipError;
+    }
+
+    if (!internships || internships.length === 0) {
+      return { data: [], error: null };
+    }
+
+    const internshipIds = internships.map(intern => intern.id);
+
+    const { data, error } = await supabase
+      .from('internship_applications')
+      .select(`
+        id,
+        status,
+        applied_at,
+        internship_id,
+        student_id,
+        notes,
+        document_url,
+        ai_score,
+        ai_analysis,
+        screening_status,
+        internships (
+          id,
+          position_title,
+          department
+        ),
+        students (
+          id,
+          profiles (
+            id,
+            display_name,
+            avatar_url
+          )
+        )
+      `)
+      .in('internship_id', internshipIds)
+      .order('applied_at', { ascending: false});
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Applications with document_url:', data?.map(app => ({
+      id: app.id,
+      has_cv: !!app.document_url
+    })));
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Error fetching organization applications:', error);
+    return { data: [], error: error.message };
   }
+}
 
 // UPDATED: Get application details with AI screening data
 async getApplicationDetails(applicationId) {
@@ -700,33 +707,103 @@ async reScreenApplication(applicationId) {
   }
 }
 
-// NEW: Override AI decision (move from auto_rejected to manual review)
-async overrideAIDecision(applicationId, newStatus) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
+  // NEW: Override AI decision (move from auto_rejected to manual review)
+  async overrideAIDecision(applicationId, newStatus) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('internship_applications')
+        .update({
+          screening_status: newStatus,
+          status: newStatus === 'auto_rejected' ? 'rejected' : 'pending'
+        })
+        .eq('id', applicationId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error overriding AI decision:', error);
+      return { data: null, error: error.message };
     }
-
-    const { data, error } = await supabase
-      .from('internship_applications')
-      .update({
-        screening_status: newStatus,
-        status: newStatus === 'auto_rejected' ? 'rejected' : 'pending'
-      })
-      .eq('id', applicationId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return { data, error: null };
-  } catch (error) {
-    console.error('Error overriding AI decision:', error);
-    return { data: null, error: error.message };
   }
-}
+
+  // New method to get applications with document_url included
+  async getOrganizationApplicationsWithDocument() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data: internships, error: internshipError } = await supabase
+        .from('internships')
+        .select('id')
+        .eq('organization_id', user.id);
+
+      if (internshipError) {
+        throw internshipError;
+      }
+
+      if (!internships || internships.length === 0) {
+        return { data: [], error: null };
+      }
+
+      const internshipIds = internships.map(intern => intern.id);
+
+      const { data, error } = await supabase
+        .from('internship_applications')
+        .select(`
+          id,
+          status,
+          applied_at,
+          internship_id,
+          student_id,
+          notes,
+          document_url,
+          ai_score,
+          ai_analysis,
+          screening_status,
+          internships (
+            id,
+            position_title,
+            department
+          ),
+          students (
+            id,
+            profiles (
+              id,
+              display_name,
+              avatar_url
+            )
+          )
+        `)
+        .in('internship_id', internshipIds)
+        .order('applied_at', { ascending: false});
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Applications with document_url:', data?.map(app => ({
+        id: app.id,
+        has_cv: !!app.document_url
+      })));
+
+      return { data: data || [], error: null };
+    } catch (error) {
+      console.error('Error fetching organization applications with document:', error);
+      return { data: [], error: error.message };
+    }
+  }
 }
 
 export default new OrganizationService();

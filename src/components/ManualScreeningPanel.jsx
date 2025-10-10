@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
-import aiScreeningService from '../lib/aiScreeningService.js';
+import React, { useState } from "react";
+import aiScreeningService from "../lib/aiScreeningService.js";
 
 const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [screening, setScreening] = useState(false);
-  const [keywords, setKeywords] = useState('');
-  const [selectedPosition, setSelectedPosition] = useState('all');
+  const [keywords, setKeywords] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("all");
   const [passScore, setPassScore] = useState(40);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const positions = [...new Set(applications.map(app => app.internships?.position_title))].filter(Boolean);
+  const positions = [
+    ...new Set(applications.map((app) => app.internships?.position_title)),
+  ].filter(Boolean);
 
   const handleScreenApplications = async (e) => {
-    e.preventDefault(); // CRITICAL: Prevent form submission
+    e.preventDefault();
     e.stopPropagation();
 
     if (!keywords.trim()) {
-      alert('Please enter keywords to screen for');
+      alert("Please enter keywords to screen for");
       return;
     }
 
@@ -27,30 +29,37 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
 
     try {
       // Filter applications by position
-      const appsToScreen = applications.filter(app => {
-        if (selectedPosition === 'all') return true;
+      const appsToScreen = applications.filter((app) => {
+        if (selectedPosition === "all") return true;
         return app.internships?.position_title === selectedPosition;
       });
 
       if (appsToScreen.length === 0) {
-        alert('No applications found for selected position');
+        alert("No applications found for selected position");
         setScreening(false);
         return;
       }
 
-      console.log(`Starting screening for ${appsToScreen.length} applications...`);
+      console.log(
+        `Starting screening for ${appsToScreen.length} applications...`
+      );
       const screeningResults = [];
-      
+
       // Screen each application
       for (const app of appsToScreen) {
         console.log(`Screening application ${app.id}...`);
+        console.log("App data:", {
+          id: app.id,
+          document_url: app.document_url,
+          has_document_url: !!app.document_url,
+        });
 
         if (!app.document_url) {
           screeningResults.push({
             id: app.id,
             name: app.students?.profiles?.display_name,
-            status: 'no_cv',
-            message: 'No CV uploaded'
+            status: "no_cv",
+            message: "No CV uploaded",
           });
           continue;
         }
@@ -65,28 +74,36 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
 
           if (result.success) {
             // Update application with screening results
-            const updateResult = await aiScreeningService.updateApplicationScreening(app.id, result);
-            
+            const updateResult =
+              await aiScreeningService.updateApplicationScreening(
+                app.id,
+                result
+              );
+
             if (updateResult.error) {
-              console.error('Failed to update application:', updateResult.error);
+              console.error(
+                "Failed to update application:",
+                updateResult.error
+              );
               screeningResults.push({
                 id: app.id,
                 name: app.students?.profiles?.display_name,
-                status: 'error',
-                message: `Update failed: ${updateResult.error}`
+                status: "error",
+                message: `Update failed: ${updateResult.error}`,
               });
               continue;
             }
 
-            const status = result.aiScore >= passScore ? 'shortlisted' : 'rejected';
-            
+            const status =
+              result.aiScore >= passScore ? "shortlisted" : "rejected";
+
             screeningResults.push({
               id: app.id,
               name: app.students?.profiles?.display_name,
               score: result.aiScore,
               status,
               matched: result.aiAnalysis.matchedKeywords,
-              missing: result.aiAnalysis.missingKeywords
+              missing: result.aiAnalysis.missingKeywords,
             });
 
             // Send rejection email if below pass score
@@ -97,8 +114,8 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
             screeningResults.push({
               id: app.id,
               name: app.students?.profiles?.display_name,
-              status: 'error',
-              message: result.error || 'Screening failed'
+              status: "error",
+              message: result.error || "Screening failed",
             });
           }
         } catch (appError) {
@@ -106,24 +123,24 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
           screeningResults.push({
             id: app.id,
             name: app.students?.profiles?.display_name,
-            status: 'error',
-            message: appError.message
+            status: "error",
+            message: appError.message,
           });
         }
       }
 
       setResults(screeningResults);
-      
+
       // Reload applications to show updated data
       if (onScreeningComplete) {
         await onScreeningComplete();
       }
 
-      console.log('Screening complete:', screeningResults);
+      console.log("Screening complete:", screeningResults);
     } catch (error) {
-      console.error('Error during screening:', error);
+      console.error("Error during screening:", error);
       setError(error.message);
-      alert('Error during screening: ' + error.message);
+      alert("Error during screening: " + error.message);
     } finally {
       setScreening(false);
     }
@@ -131,7 +148,7 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
 
   return (
     <div className="manual-screening-panel">
-      <button 
+      <button
         className="screening-trigger-btn"
         onClick={(e) => {
           e.preventDefault();
@@ -144,11 +161,14 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
 
       {isOpen && (
         <div className="screening-modal" onClick={() => setIsOpen(false)}>
-          <div className="screening-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="screening-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="screening-header">
               <h2>AI Application Screening</h2>
-              <button 
-                className="close-btn" 
+              <button
+                className="close-btn"
                 onClick={() => setIsOpen(false)}
                 type="button"
               >
@@ -165,14 +185,18 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
 
               <div className="form-group">
                 <label>Select Position:</label>
-                <select 
+                <select
                   value={selectedPosition}
                   onChange={(e) => setSelectedPosition(e.target.value)}
                   disabled={screening}
                 >
-                  <option value="all">All Positions ({applications.length})</option>
+                  <option value="all">
+                    All Positions ({applications.length})
+                  </option>
                   {positions.map((pos, idx) => {
-                    const count = applications.filter(app => app.internships?.position_title === pos).length;
+                    const count = applications.filter(
+                      (app) => app.internships?.position_title === pos
+                    ).length;
                     return (
                       <option key={idx} value={pos}>
                         {pos} ({count})
@@ -191,7 +215,9 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
                   rows="6"
                   disabled={screening}
                 />
-                <small>AI will check CV and application details for these keywords</small>
+                <small>
+                  AI will check CV and application details for these keywords
+                </small>
               </div>
 
               <div className="form-group">
@@ -207,11 +233,13 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
                   />
                   <span className="score-value">{passScore}%</span>
                 </div>
-                <small>Applications scoring {passScore}% or above will be shortlisted</small>
+                <small>
+                  Applications scoring {passScore}% or above will be shortlisted
+                </small>
               </div>
 
               <div className="screening-actions">
-                <button 
+                <button
                   className="cancel-btn"
                   onClick={(e) => {
                     e.preventDefault();
@@ -222,93 +250,107 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   className="screen-btn"
                   onClick={handleScreenApplications}
                   disabled={screening || !keywords.trim()}
                   type="button"
                 >
-                  {screening ? 'Screening...' : 'Start Screening'}
+                  {screening ? "Screening..." : "Start Screening"}
                 </button>
               </div>
+            </div>
 
-              {screening && (
-                <div className="screening-progress">
-                  <div className="spinner"></div>
-                  <p>Analyzing CVs and applications... This may take a few minutes.</p>
-                  <small>Do not close this window</small>
-                </div>
-              )}
+            {screening && (
+              <div className="screening-progress">
+                <div className="spinner"></div>
+                <p>
+                  Analyzing CVs and applications... This may take a few minutes.
+                </p>
+                <small>Do not close this window</small>
+              </div>
+            )}
 
-              {results && (
-                <div className="screening-results">
-                  <h3>Screening Results</h3>
-                  
-                  <div className="results-summary">
-                    <div className="summary-item shortlisted">
-                      <strong>{results.filter(r => r.status === 'shortlisted').length}</strong>
-                      <span>Shortlisted</span>
-                    </div>
-                    <div className="summary-item rejected">
-                      <strong>{results.filter(r => r.status === 'rejected').length}</strong>
-                      <span>Rejected</span>
-                    </div>
-                    <div className="summary-item error">
-                      <strong>{results.filter(r => r.status === 'error' || r.status === 'no_cv').length}</strong>
-                      <span>Errors</span>
-                    </div>
+            {results && (
+              <div className="screening-results">
+                <h3>Screening Results</h3>
+
+                <div className="results-summary">
+                  <div className="summary-item shortlisted">
+                    <strong>
+                      {results.filter((r) => r.status === "shortlisted").length}
+                    </strong>
+                    <span>Shortlisted</span>
                   </div>
+                  <div className="summary-item rejected">
+                    <strong>
+                      {results.filter((r) => r.status === "rejected").length}
+                    </strong>
+                    <span>Rejected</span>
+                  </div>
+                  <div className="summary-item error">
+                    <strong>
+                      {
+                        results.filter(
+                          (r) => r.status === "error" || r.status === "no_cv"
+                        ).length
+                      }
+                    </strong>
+                    <span>Errors</span>
+                  </div>
+                </div>
 
-                  <div className="results-list">
-                    {results.map((result, idx) => (
-                      <div key={idx} className={`result-item ${result.status}`}>
-                        <div className="result-header">
-                          <strong>{result.name}</strong>
-                          {result.score !== undefined && (
-                            <span className="result-score">{result.score}%</span>
-                          )}
-                        </div>
-                        
-                        {result.status === 'shortlisted' && (
-                          <div className="result-details">
-                            <div className="matched-keywords">
-                              ✓ Matched: {result.matched?.join(', ') || 'N/A'}
-                            </div>
-                            {result.missing?.length > 0 && (
-                              <div className="missing-keywords">
-                                ✗ Missing: {result.missing.slice(0, 3).join(', ')}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        
-                        {result.status === 'rejected' && (
-                          <div className="result-details">
-                            <span className="rejection-msg">
-                              Score: {result.score}% (Below {passScore}% threshold). Rejection email sent.
-                            </span>
-                          </div>
-                        )}
-                        
-                        {(result.status === 'error' || result.status === 'no_cv') && (
-                          <div className="result-details">
-                            <span className="error-msg">{result.message}</span>
-                          </div>
+                <div className="results-list">
+                  {results.map((result, idx) => (
+                    <div key={idx} className={`result-item ${result.status}`}>
+                      <div className="result-header">
+                        <strong>{result.name}</strong>
+                        {result.score !== undefined && (
+                          <span className="result-score">{result.score}%</span>
                         )}
                       </div>
-                    ))}
-                  </div>
 
-                  <button 
-                    className="close-results-btn"
-                    onClick={() => setIsOpen(false)}
-                    type="button"
-                  >
-                    Close
-                  </button>
+                      {result.status === "shortlisted" && (
+                        <div className="result-details">
+                          <div className="matched-keywords">
+                            ✓ Matched: {result.matched?.join(", ") || "N/A"}
+                          </div>
+                          {result.missing?.length > 0 && (
+                            <div className="missing-keywords">
+                              ✗ Missing: {result.missing.slice(0, 3).join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {result.status === "rejected" && (
+                        <div className="result-details">
+                          <span className="rejection-msg">
+                            Score: {result.score}% (Below {passScore}%
+                            threshold). Rejection email sent.
+                          </span>
+                        </div>
+                      )}
+
+                      {(result.status === "error" ||
+                        result.status === "no_cv") && (
+                        <div className="result-details">
+                          <span className="error-msg">{result.message}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
+
+                <button
+                  className="close-results-btn"
+                  onClick={() => setIsOpen(false)}
+                  type="button"
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -505,8 +547,12 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
         }
 
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         .screening-results {

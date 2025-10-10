@@ -1,247 +1,392 @@
-// lib/aiScreeningService.js
 import { supabase } from './supabase.js';
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import * as Tesseract from 'tesseract.js/dist/tesseract.min.js';
+import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 
-class AIScreeningService {
+class SmartCVScreeningService {
   
   /**
-   * Extract text from PDF document
+   * Extract text from PDF document with OCR fallback
    */
   async extractTextFromPDF(pdfUrl) {
     try {
-      console.log('Extracting text from PDF:', pdfUrl);
+      console.log('📄 Extracting text from PDF:', pdfUrl);
       
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      if (!pdfUrl || pdfUrl === 'undefined') {
+        throw new Error('Invalid PDF URL provided');
+      }
+      
+      const loadingTask = pdfjsLib.getDocument({
+        url: pdfUrl,
+        withCredentials: false,
+        disableWorker: false,
+      });
+      
       const pdf = await loadingTask.promise;
+      console.log('✅ PDF loaded successfully, pages:', pdf.numPages);
       
       let fullText = '';
       
-      // Extract text from all pages
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
+        console.log(`Page ${i} textContent items:`, textContent.items);
         const pageText = textContent.items.map(item => item.str).join(' ');
         fullText += pageText + '\n';
       }
       
-      console.log('Extracted text length:', fullText.length);
-      return fullText.toLowerCase();
-    } catch (error) {
-      console.error('Error extracting PDF text:', error);
-      throw new Error('Failed to extract text from CV');
-    }
-  }
-
-  /**
-   * Parse requirements from internship requirements text
-   */
-  parseRequirements(requirementsText) {
-    if (!requirementsText) return [];
-    
-    // Common keywords and phrases to extract
-    const keywords = [];
-    
-    // Split by common delimiters
-    const lines = requirementsText
-      .toLowerCase()
-      .split(/[\n,;•\-]/)
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-    
-    // Extract meaningful keywords (2+ words or technical terms)
-    lines.forEach(line => {
-      // Remove common filler words
-      const cleaned = line
-        .replace(/^(required|preferred|must have|should have|experience in|knowledge of|proficiency in|familiarity with)[:.]?\s*/gi, '')
-        .trim();
+      console.log('✅ Extracted text length:', fullText.length, 'characters');
       
-      if (cleaned.length >= 3) {
-        keywords.push(cleaned);
+      if (fullText.trim().length === 0) {
+        console.log('⚠️ No text extracted, falling back to OCR...');
+        fullText = await this.extractTextWithOCR(pdf);
+        console.log('✅ OCR extracted text length:', fullText.length, 'characters');
+        if (fullText.trim().length === 0) {
+          throw new Error('OCR failed to extract any text');
+        }
       }
-    });
-    
-    return keywords;
+      
+      return fullText;
+    } catch (error) {
+      console.error('❌ Error extracting PDF text:', error);
+      throw new Error(`Failed to extract text from CV: ${error.message}`);
+    }
   }
 
   /**
-   * Calculate match score based on keyword presence
+   * Extract text from PDF pages using OCR (Tesseract.js)
    */
-  calculateKeywordMatch(cvText, requirements) {
-    const keywords = this.parseRequirements(requirements);
-    
-    if (keywords.length === 0) {
-      return {
-        score: 50, // Neutral score if no requirements specified
-        matchedKeywords: [],
-        missingKeywords: [],
-        totalKeywords: 0
-      };
+  async extractTextWithOCR(pdf) {
+    let ocrText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2.0 });
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: context, viewport: viewport }).promise;
+      const { data: { text } } = await Tesseract.recognize(canvas, 'eng', { logger: m => console.log(m) });
+      ocrText += text + '\n';
     }
-    
+    return ocrText;
+  }
+
+  /**
+   * Smart keyword matching with fuzzy logic and synonyms
+   */
+  matchKeywords(cvText, keywords) {
+    const cvLower = cvText.toLowerCase();
     const matched = [];
     const missing = [];
     
+    // Common synonyms and variations for skills/keywords
+    const synonyms = {
+      'javascript': ['js', 'ecmascript', 'node.js', 'nodejs'],
+      'python': ['py', 'python3'],
+      'react': ['reactjs', 'react.js'],
+      'communication': ['communicate', 'communicator', 'interpersonal'],
+      'leadership': ['leader', 'lead', 'team lead', 'managing'],
+      'problem solving': ['problem-solving', 'analytical', 'troubleshooting'],
+      'teamwork': ['team player', 'collaboration', 'collaborative'],
+      'project management': ['project manager', 'pm', 'agile', 'scrum'],
+      'data analysis': ['data analyst', 'analytics', 'data science'],
+      'machine learning': ['ml', 'ai', 'artificial intelligence'],
+      'database': ['sql', 'mysql', 'postgresql', 'mongodb', 'nosql'],
+      'frontend': ['front-end', 'front end', 'ui', 'user interface'],
+      'backend': ['back-end', 'back end', 'server-side'],
+      'full stack': ['fullstack', 'full-stack'],
+      'java': ['java programming', 'core java'],
+      'c++': ['cpp', 'c plus plus'],
+      'html': ['html5', 'markup'],
+      'css': ['css3', 'styling', 'stylesheets'],
+      'git': ['github', 'version control', 'gitlab'],
+      'docker': ['containerization', 'containers'],
+      'aws': ['amazon web services', 'cloud computing'],
+      'excel': ['microsoft excel', 'spreadsheet'],
+      'powerpoint': ['microsoft powerpoint', 'presentations'],
+      'word': ['microsoft word', 'ms word'],
+    };
+
     keywords.forEach(keyword => {
-      // Check for keyword or close variations
-      const keywordLower = keyword.toLowerCase();
-      const found = cvText.includes(keywordLower) || 
-                   this.checkKeywordVariations(cvText, keywordLower);
+      const keywordLower = keyword.toLowerCase().trim();
+      let found = false;
       
-      if (found) {
+      // Direct match
+      if (cvLower.includes(keywordLower)) {
+        found = true;
         matched.push(keyword);
-      } else {
+        return;
+      }
+      
+      // Check synonyms
+      const keywordSynonyms = synonyms[keywordLower] || [];
+      for (const syn of keywordSynonyms) {
+        if (cvLower.includes(syn)) {
+          found = true;
+          matched.push(keyword);
+          return;
+        }
+      }
+      
+      // Fuzzy match (for slight variations/typos)
+      const words = cvLower.split(/\s+/);
+      for (const word of words) {
+        if (this.calculateSimilarity(word, keywordLower) > 0.85) {
+          found = true;
+          matched.push(keyword);
+          return;
+        }
+      }
+      
+      if (!found) {
         missing.push(keyword);
       }
     });
     
-    const matchPercentage = (matched.length / keywords.length) * 100;
-    
-    return {
-      score: Math.round(matchPercentage),
-      matchedKeywords: matched,
-      missingKeywords: missing,
-      totalKeywords: keywords.length
-    };
+    return { matched, missing };
   }
 
   /**
-   * Check for keyword variations (e.g., "javascript" matches "js", "react.js" matches "react")
+   * Calculate string similarity (Levenshtein distance based)
    */
-  checkKeywordVariations(text, keyword) {
-    const variations = {
-      'javascript': ['js', 'ecmascript'],
-      'typescript': ['ts'],
-      'python': ['py'],
-      'react': ['reactjs', 'react.js'],
-      'node': ['nodejs', 'node.js'],
-      'database': ['db', 'sql', 'mysql', 'postgresql'],
-      'communication': ['communicate', 'communicating'],
-      'leadership': ['leader', 'leading', 'lead'],
-      'teamwork': ['team', 'collaboration', 'collaborative']
-    };
+  calculateSimilarity(str1, str2) {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
     
-    if (variations[keyword]) {
-      return variations[keyword].some(variant => text.includes(variant));
+    if (longer.length === 0) return 1.0;
+    
+    const editDistance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+
+  /**
+   * Levenshtein distance algorithm
+   */
+  levenshteinDistance(str1, str2) {
+    const matrix = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
     }
     
-    return false;
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    
+    return matrix[str2.length][str1.length];
   }
 
   /**
-   * Analyze CV content quality and structure
+   * Analyze CV quality and completeness
    */
   analyzeCVQuality(cvText) {
-    let qualityScore = 0;
-    const analysis = {
-      hasEducation: false,
-      hasExperience: false,
-      hasSkills: false,
-      hasContact: false,
-      wordCount: 0
-    };
+    const cvLower = cvText.toLowerCase();
     
     // Check for education section
-    if (/education|degree|university|college|bachelor|master|diploma/i.test(cvText)) {
-      qualityScore += 20;
-      analysis.hasEducation = true;
-    }
+    const hasEducation = /\b(education|academic|degree|bachelor|master|phd|university|college|school|bsc|msc|b\.sc|m\.sc)\b/i.test(cvText);
     
     // Check for experience section
-    if (/experience|worked|intern|project|position|role|company/i.test(cvText)) {
-      qualityScore += 25;
-      analysis.hasExperience = true;
-    }
+    const hasExperience = /\b(experience|employment|work|job|position|intern|internship|worked|employed|career)\b/i.test(cvText);
     
     // Check for skills section
-    if (/skills|proficient|knowledge|expertise|competencies/i.test(cvText)) {
-      qualityScore += 20;
-      analysis.hasSkills = true;
-    }
+    const hasSkills = /\b(skills|proficient|expertise|competencies|technologies|tools|technical skills|soft skills)\b/i.test(cvText);
     
     // Check for contact information
-    if (/@|email|phone|contact|linkedin|github/i.test(cvText)) {
-      qualityScore += 15;
-      analysis.hasContact = true;
-    }
+    const hasContact = /\b(email|phone|contact|linkedin|github|@|\.com|tel:|mobile)\b/i.test(cvText);
     
-    // Check CV length (reasonable length indicates completeness)
+    // Check for projects
+    const hasProjects = /\b(project|projects|developed|built|created|implemented|portfolio)\b/i.test(cvText);
+    
+    // Check for certifications
+    const hasCertifications = /\b(certification|certificate|certified|licensed|accredited)\b/i.test(cvText);
+    
+    // Count bullet points (indicates good formatting)
+    const bulletPoints = (cvText.match(/[•●○■▪▫►-]\s/g) || []).length;
+    const hasBullets = bulletPoints > 5;
+    
+    // Check length (good CVs are typically 300-3000 words)
     const wordCount = cvText.split(/\s+/).length;
-    analysis.wordCount = wordCount;
-    
-    if (wordCount >= 200 && wordCount <= 2000) {
-      qualityScore += 20;
-    } else if (wordCount > 100) {
-      qualityScore += 10;
-    }
+    const appropriateLength = wordCount >= 300 && wordCount <= 3000;
     
     return {
-      qualityScore,
-      analysis
+      hasEducation,
+      hasExperience,
+      hasSkills,
+      hasContact,
+      hasProjects,
+      hasCertifications,
+      hasBullets,
+      appropriateLength,
+      wordCount
     };
   }
 
   /**
-   * Main screening function - analyze application
+   * Calculate comprehensive score
    */
-  async screenApplication(applicationId, internshipRequirements, cvUrl) {
+  calculateScore(matched, missing, cvQuality, cvText) {
+    const totalKeywords = matched.length + missing.length;
+    
+    // Keyword matching score (0-70 points)
+    const keywordScore = totalKeywords > 0 
+      ? (matched.length / totalKeywords) * 70 
+      : 0;
+    
+    // CV quality score (0-30 points)
+    let qualityScore = 0;
+    qualityScore += cvQuality.hasEducation ? 5 : 0;
+    qualityScore += cvQuality.hasExperience ? 8 : 0;
+    qualityScore += cvQuality.hasSkills ? 5 : 0;
+    qualityScore += cvQuality.hasContact ? 4 : 0;
+    qualityScore += cvQuality.hasProjects ? 3 : 0;
+    qualityScore += cvQuality.hasCertifications ? 2 : 0;
+    qualityScore += cvQuality.hasBullets ? 2 : 0;
+    qualityScore += cvQuality.appropriateLength ? 1 : 0;
+    
+    const finalScore = Math.round(keywordScore + qualityScore);
+    
+    return Math.min(100, finalScore);
+  }
+
+  /**
+   * Generate reasoning for the score
+   */
+  generateReasoning(score, matched, missing, cvQuality) {
+    const reasons = [];
+    
+    if (matched.length > 0) {
+      reasons.push(`Matched ${matched.length} required keyword(s)`);
+    }
+    
+    if (missing.length > 0) {
+      reasons.push(`Missing ${missing.length} keyword(s)`);
+    }
+    
+    if (cvQuality.hasExperience) {
+      reasons.push('Has relevant experience');
+    } else {
+      reasons.push('Limited or no experience listed');
+    }
+    
+    if (cvQuality.hasEducation) {
+      reasons.push('Education background present');
+    }
+    
+    if (cvQuality.hasSkills) {
+      reasons.push('Skills section included');
+    }
+    
+    if (!cvQuality.appropriateLength) {
+      if (cvQuality.wordCount < 300) {
+        reasons.push('CV appears too brief');
+      } else {
+        reasons.push('CV is overly lengthy');
+      }
+    }
+    
+    if (score >= 70) {
+      return `Strong candidate. ${reasons.join('. ')}.`;
+    } else if (score >= 40) {
+      return `Moderate match. ${reasons.join('. ')}.`;
+    } else {
+      return `Weak match. ${reasons.join('. ')}.`;
+    }
+  }
+
+  /**
+   * Main screening function - analyze application without external API
+   */
+  async screenApplication(applicationId, keywords, cvUrl) {
     try {
-      console.log('Starting AI screening for application:', applicationId);
+      console.log('🚀 Starting smart CV screening for application:', applicationId);
+      console.log('📄 CV URL:', cvUrl);
+      console.log('🔑 Keywords:', keywords);
       
-      if (!cvUrl) {
+      if (!cvUrl || cvUrl === 'undefined' || cvUrl === 'null') {
         throw new Error('No CV uploaded for screening');
       }
       
+      // Parse keywords (handle both string and array)
+      let keywordsList = [];
+      if (typeof keywords === 'string') {
+        keywordsList = keywords.split(',').map(k => k.trim()).filter(k => k);
+      } else if (Array.isArray(keywords)) {
+        keywordsList = keywords;
+      }
+      
+      if (keywordsList.length === 0) {
+        throw new Error('No keywords provided for screening');
+      }
+      
       // Step 1: Extract text from CV
+      console.log('📥 Step 1: Extracting CV text...');
       const cvText = await this.extractTextFromPDF(cvUrl);
       
       if (!cvText || cvText.length < 50) {
         throw new Error('CV appears to be empty or unreadable');
       }
       
-      // Step 2: Calculate keyword match
-      const keywordMatch = this.calculateKeywordMatch(cvText, internshipRequirements);
+      console.log('✅ CV text extracted successfully');
+      
+      // Step 2: Match keywords
+      console.log('🔍 Step 2: Matching keywords...');
+      const { matched, missing } = this.matchKeywords(cvText, keywordsList);
+      console.log('✅ Matched:', matched);
+      console.log('⚠️ Missing:', missing);
       
       // Step 3: Analyze CV quality
+      console.log('📊 Step 3: Analyzing CV quality...');
       const cvQuality = this.analyzeCVQuality(cvText);
+      console.log('✅ CV Quality:', cvQuality);
       
-      // Step 4: Calculate final score (weighted average)
-      const finalScore = Math.round(
-        (keywordMatch.score * 0.70) +  // 70% weight on requirements match
-        (cvQuality.qualityScore * 0.30)  // 30% weight on CV quality
-      );
+      // Step 4: Calculate score
+      console.log('🎯 Step 4: Calculating score...');
+      const score = this.calculateScore(matched, missing, cvQuality, cvText);
+      console.log('✅ Final Score:', score);
       
       // Step 5: Generate reasoning
-      const reasoning = this.generateReasoning(finalScore, keywordMatch, cvQuality);
+      const reasoning = this.generateReasoning(score, matched, missing, cvQuality);
       
       // Step 6: Determine screening status
-      const screeningStatus = this.determineScreeningStatus(finalScore);
+      const screeningStatus = this.determineScreeningStatus(score);
       
       const analysis = {
-        finalScore,
-        keywordMatchScore: keywordMatch.score,
-        qualityScore: cvQuality.qualityScore,
-        matchedKeywords: keywordMatch.matchedKeywords,
-        missingKeywords: keywordMatch.missingKeywords,
-        totalKeywords: keywordMatch.totalKeywords,
-        cvAnalysis: cvQuality.analysis,
-        reasoning,
-        screenedAt: new Date().toISOString()
+        finalScore: score,
+        matchedKeywords: matched,
+        missingKeywords: missing,
+        reasoning: reasoning,
+        cvQuality: cvQuality,
+        screenedAt: new Date().toISOString(),
+        screeningMethod: 'smart-keyword-matching'
       };
       
-      console.log('Screening analysis complete:', analysis);
+      console.log('✅ Screening analysis complete:', analysis);
       
       return {
-        aiScore: finalScore,
+        aiScore: score,
         aiAnalysis: analysis,
         screeningStatus,
         success: true
       };
       
     } catch (error) {
-      console.error('Error in AI screening:', error);
+      console.error('❌ Error in CV screening:', error);
       return {
         aiScore: null,
         aiAnalysis: {
@@ -253,47 +398,6 @@ class AIScreeningService {
         error: error.message
       };
     }
-  }
-
-  /**
-   * Generate human-readable reasoning for the score
-   */
-  generateReasoning(score, keywordMatch, cvQuality) {
-    const reasons = [];
-    
-    // Requirements match reasoning
-    if (keywordMatch.score >= 80) {
-      reasons.push(`Strong match: CV contains ${keywordMatch.matchedKeywords.length} of ${keywordMatch.totalKeywords} required qualifications.`);
-    } else if (keywordMatch.score >= 50) {
-      reasons.push(`Moderate match: CV contains ${keywordMatch.matchedKeywords.length} of ${keywordMatch.totalKeywords} required qualifications.`);
-    } else {
-      reasons.push(`Weak match: CV contains only ${keywordMatch.matchedKeywords.length} of ${keywordMatch.totalKeywords} required qualifications.`);
-    }
-    
-    // Missing critical requirements
-    if (keywordMatch.missingKeywords.length > 0 && keywordMatch.missingKeywords.length <= 3) {
-      reasons.push(`Missing: ${keywordMatch.missingKeywords.slice(0, 3).join(', ')}.`);
-    }
-    
-    // CV quality reasoning
-    if (cvQuality.qualityScore >= 80) {
-      reasons.push('Well-structured CV with comprehensive information.');
-    } else if (cvQuality.qualityScore >= 50) {
-      reasons.push('CV has basic structure but may lack some details.');
-    } else {
-      reasons.push('CV appears incomplete or poorly structured.');
-    }
-    
-    // Overall recommendation
-    if (score >= 70) {
-      reasons.push('RECOMMENDED for interview.');
-    } else if (score >= 40) {
-      reasons.push('Candidate may be suitable with further review.');
-    } else {
-      reasons.push('Does not meet minimum requirements.');
-    }
-    
-    return reasons.join(' ');
   }
 
   /**
@@ -314,6 +418,8 @@ class AIScreeningService {
    */
   async updateApplicationScreening(applicationId, screeningResults) {
     try {
+      console.log('💾 Updating application with screening results...');
+      
       const { data, error } = await supabase
         .from('internship_applications')
         .update({
@@ -326,11 +432,15 @@ class AIScreeningService {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Update error:', error);
+        throw error;
+      }
       
+      console.log('✅ Application updated successfully:', data);
       return { data, error: null };
     } catch (error) {
-      console.error('Error updating application screening:', error);
+      console.error('❌ Error updating application screening:', error);
       return { data: null, error: error.message };
     }
   }
@@ -340,7 +450,6 @@ class AIScreeningService {
    */
   async sendRejectionEmail(applicationId) {
     try {
-      // Get application details
       const { data: application, error } = await supabase
         .from('internship_applications')
         .select(`
@@ -363,7 +472,7 @@ class AIScreeningService {
       
       if (error || !application) {
         console.error('Could not fetch application for email:', error);
-        return;
+        return { success: false };
       }
       
       const studentName = application.students?.profiles?.display_name || 'Applicant';
@@ -373,11 +482,9 @@ class AIScreeningService {
       
       if (!email) {
         console.log('No email found for rejected applicant');
-        return;
+        return { success: false };
       }
       
-      // Here you would integrate with your email service (SendGrid, AWS SES, etc.)
-      // For now, we'll log it
       console.log(`
         ===== AUTO-REJECTION EMAIL =====
         To: ${email}
@@ -387,28 +494,17 @@ class AIScreeningService {
         
         Thank you for your interest in the ${positionTitle} position at ${companyName}.
         
-        After careful review of your application, we regret to inform you that we will not be moving forward with your candidacy at this time. This decision was based on our initial screening process which matches candidate qualifications with our specific requirements.
+        After careful review of your application, we regret to inform you that we will not be moving forward with your candidacy at this time.
         
         We encourage you to:
         - Review the job requirements and enhance relevant skills
         - Update your CV to highlight matching qualifications
         - Apply for other positions that align with your experience
         
-        We appreciate the time you invested in your application and wish you success in your internship search.
-        
         Best regards,
         ${companyName} Recruitment Team
-        
-        Note: This is an automated screening decision. If you believe there was an error, please contact us.
         ================================
       `);
-      
-      // TODO: Replace with actual email sending
-      // await emailService.send({
-      //   to: email,
-      //   subject: `Application Status Update - ${positionTitle}`,
-      //   body: emailBody
-      // });
       
       return { success: true };
     } catch (error) {
@@ -418,136 +514,61 @@ class AIScreeningService {
   }
 
   /**
-   * Process screening for a new application (called automatically on apply)
+   * Get screening statistics
    */
-  async processNewApplication(applicationId) {
-    try {
-      console.log('Processing new application:', applicationId);
-      
-      // Get application details including internship requirements
-      const { data: application, error: fetchError } = await supabase
-        .from('internship_applications')
-        .select(`
-          id,
-          document_url,
-          applicant_email,
-          internships (
-            id,
-            requirements,
-            screening_enabled,
-            auto_reject_threshold,
-            auto_shortlist_threshold
-          )
-        `)
-        .eq('id', applicationId)
-        .single();
-      
-      if (fetchError || !application) {
-        throw new Error('Could not fetch application details');
-      }
-      
-      // Check if screening is enabled for this internship
-      if (!application.internships.screening_enabled) {
-        console.log('Screening disabled for this internship');
-        return { success: true, message: 'Screening disabled' };
-      }
-      
-      // Perform AI screening
-      const screeningResults = await this.screenApplication(
-        applicationId,
-        application.internships.requirements,
-        application.document_url
-      );
-      
-      if (!screeningResults.success) {
-        console.error('Screening failed:', screeningResults.error);
-        return { success: false, error: screeningResults.error };
-      }
-      
-      // Update application with results
-      await this.updateApplicationScreening(applicationId, screeningResults);
-      
-      // Send rejection email if auto-rejected
-      if (screeningResults.screeningStatus === 'auto_rejected') {
-        await this.sendRejectionEmail(applicationId);
-      }
-      
-      console.log(`Application ${applicationId} screened successfully. Status: ${screeningResults.screeningStatus}, Score: ${screeningResults.aiScore}`);
-      
-      return {
-        success: true,
-        score: screeningResults.aiScore,
-        status: screeningResults.screeningStatus
-      };
-      
-    } catch (error) {
-      console.error('Error processing application:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Manually re-screen an application
-   */
-  async reScreenApplication(applicationId) {
-    return await this.processNewApplication(applicationId);
-  }
-
-  /**
-   * Batch screen multiple applications
-   */
-  async batchScreenApplications(applicationIds) {
-    const results = [];
-    
-    for (const id of applicationIds) {
-      const result = await this.processNewApplication(id);
-      results.push({ applicationId: id, ...result });
-    }
-    
-    return results;
-  }
-
   async getScreeningStats(organizationId) {
     try {
-      // Get all internships for organization
       const { data: internships, error: internshipsError } = await supabase
         .from('internships')
         .select('id')
         .eq('organization_id', organizationId);
-      
+
       if (internshipsError || !internships || internships.length === 0) {
         return {
           total: 0,
           screened: 0,
           shortlisted: 0,
           flagged: 0,
-          autoRejected: 0
+          autoRejected: 0,
+          averageScore: 0
         };
       }
-      
+
       const internshipIds = internships.map(i => i.id);
-      
-      // Get screening stats
+
       const { data: applications, error } = await supabase
         .from('internship_applications')
         .select('screening_status, ai_score')
         .in('internship_id', internshipIds);
-      
+
       if (error) throw error;
-      
-      return {
+
+      const stats = {
         total: applications?.length || 0,
         screened: applications?.filter(a => a.screening_status !== 'unscreened').length || 0,
         shortlisted: applications?.filter(a => a.screening_status === 'shortlisted').length || 0,
         flagged: applications?.filter(a => a.screening_status === 'flagged_review').length || 0,
-        autoRejected: applications?.filter(a => a.screening_status === 'auto_rejected').length || 0,
-        averageScore: applications?.filter(a => a.ai_score).reduce((sum, a) => sum + a.ai_score, 0) / (applications?.filter(a => a.ai_score).length || 1) || 0
+        autoRejected: applications?.filter(a => a.screening_status === 'auto_rejected').length || 0
       };
+
+      const scoredApps = applications?.filter(a => a.ai_score !== null) || [];
+      stats.averageScore = scoredApps.length > 0
+        ? Math.round(scoredApps.reduce((sum, a) => sum + a.ai_score, 0) / scoredApps.length)
+        : 0;
+
+      return stats;
     } catch (error) {
       console.error('Error getting screening stats:', error);
-      return null;
+      return {
+        total: 0,
+        screened: 0,
+        shortlisted: 0,
+        flagged: 0,
+        autoRejected: 0,
+        averageScore: 0
+      };
     }
   }
 }
 
-export default new AIScreeningService();
+export default new SmartCVScreeningService();

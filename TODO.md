@@ -1,4 +1,0 @@
-- [x] Add isDeadlinePassed helper function to internship-details.jsx
-- [x] Modify apply button in internship-details.jsx to disable when deadline passed and change text to "Application Closed"
-- [x] Add isDeadlinePassed helper function to internships.jsx
-- [x] Modify apply button in internships.jsx job cards to disable when deadline passed and change label to "Application Closed"

@@ -27,7 +27,7 @@ const Applications = () => {
       setLoading(true);
       setError(null);
       const { data, error } =
-        await organizationService.getOrganizationApplications();
+        await organizationService.getOrganizationApplicationsWithDocument();
 
       if (error) {
         setError(error);
