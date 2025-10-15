@@ -27,13 +27,13 @@
   position: absolute;
   right: 1rem;
   bottom: -1.25rem;
+  z-index: 10;
 }
-
 .prof-edit-btn-modern {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #0f172a;
+  background-color: blue;
   color: white;
   padding: 0.5rem 0.875rem;
   border-radius: 0.5rem;
@@ -43,10 +43,14 @@
   cursor: pointer;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
+  position: relative;
+  z-index: 20;
+  pointer-events: all;
+  text-decoration: none
 }
 
 .prof-edit-btn-modern:hover {
-  background-color: #000000;
+  background-color: rgb(0, 0, 144);
 }
 
 .prof-edit-btn-modern svg {
@@ -59,6 +63,8 @@
   max-width: 72rem;
   margin: 0 auto;
   padding: 0 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .prof-content-wrapper {

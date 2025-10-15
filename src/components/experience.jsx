@@ -1,11 +1,11 @@
-import apply from "../assets/apply.png";
+import { Briefcase } from "lucide-react";
 import "../style/experience.css";
 
 const ExperienceItem = ({ title, company, duration, description }) => (
   <div className="prof-experience-item">
     <div className="prof-experience-header">
       <div className="prof-company-logo">
-        <img src={apply} alt="Company Logo" />
+        <Briefcase className="h-4.5 w-4.5" />
       </div>
       <div className="prof-experience-content">
         <h3>{title}</h3>

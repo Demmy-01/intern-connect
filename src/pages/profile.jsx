@@ -6,12 +6,13 @@ import Footer from "../components/footer";
 import SkillTag from "../components/SkillTag.jsx";
 import ExperienceItem from "../components/experience.jsx";
 import EducationItem from "../components/education.jsx";
-import skill from "../assets/skills.png";
 import phonee from "../assets/phone.png";
 import mail from "../assets/mail.png";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import profileService from "../lib/profileService";
+import image from "../assets/profile-hero-image.png";
+import { BarChart3 } from "lucide-react";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -90,26 +91,30 @@ const Profile = () => {
   return (
     <>
       <Navbar className="profile-nav" />
-      
+
       {/* Cover Section */}
       <section className="prof-cover-section">
         <div className="prof-cover-image">
-          <img
-            src="https://images.unsplash.com/photo-1472457897821-70d3819a0e24?q=80&w=2000&auto=format&fit=crop"
-            alt="Cover"
-          />
+          <img src={image} alt="Cover" />
         </div>
-        <div className="prof-edit-button-wrapper">
-          <Link to="/edit-profile">
-            <button className="prof-edit-btn-modern">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-              {isIncomplete ? "Complete Profile" : "Edit Profile"}
-            </button>
-          </Link>
-        </div>
+        
+          <div className="prof-edit-button-wrapper">
+            <Link to="/edit-profile" className="prof-edit-btn-modern">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            {isIncomplete ? "Complete Profile" : "Edit Profile"}
+            </Link>
+            </div>
+        
       </section>
 
       {/* Main Content */}
@@ -170,7 +175,8 @@ const Profile = () => {
           <section className="prof-card-modern">
             <div className="prof-card-content">
               <div className="prof-section-title-modern">
-                <img src={skill} alt="Skills" className="prof-title-icon" />
+
+                <BarChart3 className="h-5 w-5 text-slate-700" />
                 <h2>Skills</h2>
               </div>
               {skills.length > 0 ? (
@@ -230,7 +236,7 @@ const Profile = () => {
           </section>
         </div>
       </main>
-      
+
       <Footer />
     </>
   );

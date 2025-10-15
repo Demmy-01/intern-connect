@@ -1,11 +1,11 @@
+import { GraduationCap } from "lucide-react";
 import "../style/education.css";
 
-// Reusable Education Component
 const EducationItem = ({ institution, degree, duration, coursework }) => (
   <div className="prof-education-item">
     <div className="prof-education-header">
       <div className="prof-institution-logo">
-        <span>🎓</span>
+        <GraduationCap className="h-4.5 w-4.5" />
       </div>
       <div className="prof-education-content">
         <h3>{institution}</h3>
