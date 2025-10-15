@@ -1,274 +1,347 @@
-.profile-page{
-    min-height: 100vh;
-}
-.prof-container {
-  padding: 20px;
-  background-color: var(--bg-secondary);
+/* Profile Page - Modern Design */
+
+.profile-page {
   min-height: 100vh;
-  padding-top: 100px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: background-color 0.3s ease;
+  background-color: #f8fafc;
 }
 
-.prof-card {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 20px;
+/* Cover Section */
+.prof-cover-section {
+  position: relative;
+  width: 100%;
 }
 
-.prof-left-panel {
-  background: var(--card-bg);
-  padding: 30px;
-  text-align: center;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px var(--card-shadow);
-  border: 1px solid var(--card-border);
-  height: fit-content;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.prof-image {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
+.prof-cover-image {
+  height: 11rem;
+  width: 100%;
   overflow: hidden;
-  border: 4px solid var(--primary);
-  transition: border-color 0.3s ease;
 }
 
-.prof-image img {
+.prof-cover-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.prof-name {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
+.prof-edit-button-wrapper {
+  position: absolute;
+  right: 1rem;
+  bottom: -1.25rem;
 }
 
-.prof-username {
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-  font-size: 15px;
-  transition: color 0.3s ease;
-}
-
-.prof-bio {
-  text-align: left;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 30px;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
-}
-
-.prof-edit-button {
-  background: var(--primary);
-  color: var(--text-on-primary);
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
+.prof-edit-btn-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #0f172a;
+  color: white;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   font-weight: 500;
+  border: none;
   cursor: pointer;
-  width: 100%;
-  margin-bottom: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px var(--card-shadow);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
-.prof-edit-button:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px var(--shadow-medium);
+.prof-edit-btn-modern:hover {
+  background-color: #000000;
 }
 
-.prof-contact-info {
-  text-align: left;
-  border-top: 1px solid var(--card-border);
-  padding-top: 20px;
-  width: 100%;
+.prof-edit-btn-modern svg {
+  width: 1rem;
+  height: 1rem;
 }
 
-.prof-contact-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
+/* Main Container */
+.prof-main-container {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
-.prof-contact-icon {
-  width: 18px;
-  font-size: 16px;
-  color: var(--primary);
-  transition: color 0.3s ease;
+.prof-content-wrapper {
+  position: relative;
 }
 
-.prof-right-panel {
+/* Profile Header */
+.prof-header-section {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1rem;
+  margin-top: -2.5rem;
+  margin-bottom: 1.25rem;
 }
 
-.prof-section {
-  background: var(--card-bg);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 2px 12px var(--card-shadow);
-  border: 1px solid var(--card-border);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+.prof-avatar-container {
+  flex-shrink: 0;
 }
 
-.prof-section-header {
+.prof-avatar-large {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.prof-name-section {
+  padding-bottom: 0.25rem;
+}
+
+.prof-display-name {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+/* Incomplete Banner */
+.profile-incomplete-banner {
+  background: #fef3c7;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid #fde68a;
+  border-radius: 1rem;
+  font-size: 0.9375rem;
+  color: #78350f;
+}
+
+/* Modern Card */
+.prof-card-modern {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  margin-top: 1.5rem;
+}
+
+.prof-card-content {
+  padding: 1rem 1.5rem;
+}
+
+/* Bio & Contact */
+.prof-bio-text {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: #1e293b;
+  margin: 0;
+}
+
+.prof-contact-grid {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prof-contact-item-modern {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 0.75rem;
 }
 
-.prof-section-icon {
-  font-size: 20px;
-  color: var(--primary);
-  transition: color 0.3s ease;
+.prof-icon-wrapper {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  border-radius: 0.5rem;
 }
 
-.prof-section h2, .prof-section-title {
-  font-size: 20px;
+.prof-icon-wrapper img {
+  width: 1.125rem;
+  height: 1.125rem;
+  object-fit: contain;
+}
+
+.prof-contact-link {
+  font-size: 0.9375rem;
+  color: #1e293b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.prof-contact-link:hover {
+  color: #0f172a;
+}
+
+/* Section Titles */
+.prof-section-title-modern {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.prof-title-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.prof-section-title-modern h2,
+.prof-section-heading {
+  font-size: 1.25rem;
   font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.025em;
   margin: 0;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
 }
 
-.prof-skills-list {
+.prof-section-heading {
+  margin-bottom: 1.25rem;
+}
+
+/* Skills Grid */
+.prof-skills-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 1rem;
 }
 
-.prof-container {
-  transition: background-color 0.3s ease;
+/* Timeline */
+.prof-timeline {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
 }
 
-.prof-left-panel,
-.prof-section {
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+/* Empty State */
+.prof-empty-state {
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.9375rem;
+  margin-top: 1rem;
 }
 
-.prof-name {
-  color: var(--text-primary);
-  transition: color 0.3s ease;
+/* Last Section */
+.prof-last-section {
+  margin-bottom: 3rem;
 }
 
-[data-theme="dark"] .prof-username,
-[data-theme="dark"] .prof-contact-item {
-  color: #a0a0a0;
+/* Dark Mode Support */
+[data-theme="dark"] .profile-page {
+  background-color: #0f172a;
 }
 
-[data-theme="dark"] .prof-bio {
-  color: #d1d1d1;
+[data-theme="dark"] .prof-card-modern {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #334155;
 }
 
-[data-theme="dark"] .prof-section h2,
-[data-theme="dark"] .prof-section-title {
+[data-theme="dark"] .prof-display-name,
+[data-theme="dark"] .prof-section-heading,
+[data-theme="dark"] .prof-section-title-modern h2 {
   color: #ffffff;
 }
 
-.prof-stats {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+[data-theme="dark"] .prof-bio-text,
+[data-theme="dark"] .prof-contact-link {
+  color: #e2e8f0;
 }
 
-.prof-stat-card {
-  flex: 1;
-  min-width: 200px;
-  background: var(--card-bg);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 12px var(--card-shadow);
-  border: 1px solid var(--card-border);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+[data-theme="dark"] .prof-icon-wrapper {
+  background-color: #1e293b;
 }
 
-.prof-stat-value {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--primary);
-  margin-bottom: 8px;
-  transition: color 0.3s ease;
+[data-theme="dark"] .prof-empty-state {
+  color: #64748b;
 }
 
-.prof-stat-label {
-  color: var(--text-secondary);
-  font-size: 14px;
-  transition: color 0.3s ease;
+[data-theme="dark"] .prof-avatar-large {
+  border-color: #1e293b;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .prof-container {
-    padding: 15px;
-    padding-top: 100px !important;
+/* Responsive Design */
+@media (min-width: 640px) {
+  .prof-cover-image {
+    height: 14rem;
   }
 
-  .prof-card {
-    grid-template-columns: 1fr;
-    gap: 15px;
+  .prof-edit-button-wrapper {
+    right: 2rem;
+    bottom: -1.5rem;
   }
 
-  .prof-left-panel {
-    padding: 24px;
+  .prof-main-container {
+    padding: 0 1.5rem;
   }
 
-  .prof-section {
-    padding: 20px;
+  .prof-header-section {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-top: -3rem;
   }
 
-  .prof-image {
-    width: 100px;
-    height: 100px;
+  .prof-avatar-large {
+    width: 8rem;
+    height: 8rem;
   }
 
-  .prof-name {
-    font-size: 24px;
+  .prof-display-name {
+    font-size: 1.875rem;
+  }
+
+  .prof-card-content {
+    padding: 1.5rem;
+  }
+
+  .prof-section-heading,
+  .prof-section-title-modern h2 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .prof-card-modern {
+    margin-top: 1.75rem;
   }
 }
 
 @media (max-width: 480px) {
-  .prof-container {
-    padding: 10px;
+  .prof-cover-image {
+    height: 9rem;
   }
 
-  .prof-left-panel,
-  .prof-section {
-    padding: 16px;
+  .prof-edit-button-wrapper {
+    right: 0.75rem;
+    bottom: -1rem;
   }
 
-  .prof-skills-list {
-    gap: 8px;
+  .prof-edit-btn-modern {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
-  .prof-bio {
-    font-size: 13px;
+  .prof-avatar-large {
+    width: 6rem;
+    height: 6rem;
   }
 
-  .prof-section h2,
-  .prof-section-title {
-    font-size: 18px;
+  .prof-display-name {
+    font-size: 1.5rem;
+  }
+
+  .prof-card-content {
+    padding: 1rem;
+  }
+
+  .prof-bio-text,
+  .prof-contact-link {
+    font-size: 0.875rem;
+  }
+
+  .prof-section-heading,
+  .prof-section-title-modern h2 {
+    font-size: 1.125rem;
   }
 }

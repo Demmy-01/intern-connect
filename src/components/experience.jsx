@@ -11,9 +11,12 @@ const ExperienceItem = ({ title, company, duration, description }) => (
         <h3>{title}</h3>
         <div className="prof-company-name">{company}</div>
         <div className="prof-duration">{duration}</div>
-        <p className="prof-description">{description}</p>
       </div>
     </div>
+    <div className="prof-experience-divider">
+      <div className="prof-experience-divider-line"></div>
+    </div>
+    <p className="prof-description">{description}</p>
   </div>
 );
 

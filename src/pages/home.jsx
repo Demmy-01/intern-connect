@@ -426,7 +426,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* How to Apply Section */}
       <section className="how-to-apply-section" id="how-to-apply">
         <div className="section-container">
