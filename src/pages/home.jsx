@@ -19,7 +19,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/footer.jsx";
 import { contactService } from "../lib/contactService";
-import Plasma from "../components/plasma.jsx";
+import heroBackground from "../assets/Rectangle-27.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -211,16 +211,12 @@ export default function Home() {
       <div className="hero-container">
         {/* Background Image */}
         <div className="background-image-container">
-          <div style={{ width: "100%", height: "600px", position: "relative" }}>
-            <Plasma
-              color="#ffffff"
-              speed={0.6}
-              direction="forward"
-              scale={1.1}
-              opacity={0.8}
-              mouseInteractive={true}
-            />
-          </div>
+          <img
+            src={heroBackground}
+            alt="Professional background"
+            className="background-image"
+          />
+          <div className="background-overlay"></div>
         </div>
 
         {/* Content Container */}
@@ -236,6 +232,91 @@ export default function Home() {
 
           {/* Search Form */}
           <div className="hero-search fade-in">
+            <div className="search-grid search-form">
+              {/* Role or Keyword Input */}
+              <div className="input-group">
+                <Search className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="Role or Keyword"
+                  className="form-input"
+                  aria-label="Search for internship role or keyword"
+                />
+              </div>
+
+              {/* Location Input */}
+              <div className="input-group">
+                <MapPin className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="Location"
+                  className="form-input"
+                  aria-label="Internship location"
+                />
+              </div>
+
+              {/* Type Dropdown */}
+              <div className="input-group">
+                <Briefcase className="input-icon" />
+                <select className="form-select" aria-label="Internship type">
+                  <option value="" disabled defaultValue="">
+                    Type
+                  </option>
+                  <option value="remote">Remote</option>
+                  <option value="onsite">On-site</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+                <div className="select-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Duration Dropdown */}
+              <div className="input-group">
+                <Calendar className="input-icon" />
+                <select
+                  className="form-select"
+                  aria-label="Internship duration"
+                >
+                  <option value="" disabled defaultValue="">
+                    Duration
+                  </option>
+                  <option value="3-months">3 months</option>
+                  <option value="6-months">6 months</option>
+                  <option value="12-months">12 months</option>
+                </select>
+                <div className="select-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
             <div className="button-container">
               <Button
                 label="Explore Internships"
