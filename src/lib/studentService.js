@@ -1,5 +1,6 @@
 // services/studentService.js
 import { supabase } from './supabase.js';
+import aiScreeningService from './aiScreeningService.js';
 
 class StudentService {
   // Search internships with exact and fuzzy fallback matching
@@ -399,13 +400,39 @@ class StudentService {
       if (data.id && data.document_url) {
         console.log('Triggering AI screening for application:', data.id);
         
-        aiScreeningService.processNewApplication(data.id)
-          .then(result => {
-            console.log('AI screening completed:', result);
-          })
-          .catch(error => {
-            console.error('AI screening failed (non-critical):', error);
-          });
+        try {
+          // Get internship requirements for screening
+          const { data: internship } = await supabase
+            .from('internships')
+            .select('requirements, skills_required')
+            .eq('id', applicationData.internshipId)
+            .single();
+
+          if (internship) {
+            // Extract keywords from requirements and skills
+            const keywords = [
+              ...(internship.skills_required?.split(',') || []),
+              ...(internship.requirements?.split(',') || [])
+            ].map(kw => kw.trim()).filter(kw => kw);
+
+            console.log('Starting AI screening with keywords:', keywords);
+
+            // Call the screenApplication method and handle the result
+            const screeningResult = await aiScreeningService.screenApplication(
+              data.id,
+              keywords,
+              data.document_url
+            );
+
+            if (screeningResult.error) {
+              console.error('Screening error:', screeningResult.error);
+            } else {
+              console.log('Screening completed successfully:', screeningResult);
+            }
+          }
+        } catch (screeningError) {
+          console.error('Error during CV screening:', screeningError);
+        }
       }
 
       // Step 3: Return success immediately

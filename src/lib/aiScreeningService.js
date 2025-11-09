@@ -1,8 +1,17 @@
 import { supabase } from './supabase.js';
 import * as Tesseract from 'tesseract.js/dist/tesseract.min.js';
 import * as pdfjsLib from 'pdfjs-dist';
+// Vite-friendly import of the PDF.js worker as a URL. The `?url` suffix
+// instructs Vite to emit the file and return a public URL we can assign
+// to pdfjsLib.GlobalWorkerOptions.workerSrc. This avoids dynamic module
+// import/CORS issues with CDN-delivered ESM workers.
+// Use the .mjs build worker that exists in the installed package. Older
+// attempts to import `pdf.worker.min.js` failed because that file isn't
+// present in this pdfjs-dist release; `pdf.worker.mjs` is available.
+import workerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+// Configure PDF.js worker to use the locally-bundled worker URL
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 class SmartCVScreeningService {
   
@@ -17,13 +26,35 @@ class SmartCVScreeningService {
         throw new Error('Invalid PDF URL provided');
       }
       
-      const loadingTask = pdfjsLib.getDocument({
+      // Attempt to load PDF with worker enabled first. If the worker cannot be
+      // loaded (common with Vite/CORS/dynamic import issues), retry with the
+      // worker disabled which runs PDF parsing on the main thread.
+      let pdf = null;
+      const docOptions = {
         url: pdfUrl,
         withCredentials: false,
         disableWorker: false,
-      });
-      
-      const pdf = await loadingTask.promise;
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296/cmaps/',
+        cMapPacked: true,
+      };
+
+      try {
+        const loadingTask = pdfjsLib.getDocument(docOptions);
+        pdf = await loadingTask.promise;
+      } catch (workerErr) {
+        // Log the original worker error and retry without a worker.
+        console.warn('⚠️ PDF.js worker failed to initialize, retrying without worker:', workerErr);
+
+        try {
+          const loadingTask2 = pdfjsLib.getDocument({ ...docOptions, disableWorker: true });
+          pdf = await loadingTask2.promise;
+          console.info('ℹ️ PDF loaded successfully with worker disabled (main-thread parsing).');
+        } catch (noWorkerErr) {
+          console.error('❌ Failed to load PDF with and without worker:', noWorkerErr);
+          // Re-throw the error so the caller handles it as before
+          throw noWorkerErr;
+        }
+      }
       console.log('✅ PDF loaded successfully, pages:', pdf.numPages);
       
       let fullText = '';
