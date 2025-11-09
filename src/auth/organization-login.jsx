@@ -63,7 +63,7 @@ const OrganizationLogin = () => {
   };
 
   return (
-    <>
+    <div className="org-login-container">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -75,71 +75,69 @@ const OrganizationLogin = () => {
         <p>Intern connect</p>
       </div>
 
-      <div className="org-login-container">
-        <div className="org-login-card">
-          <h2 className="org-login-title">Organization Login</h2>
-          <p className="org-login-subtitle">
-            Sign in to your organization dashboard
+      <div className="org-login-card">
+        <h2 className="org-login-title">Organization Login</h2>
+        <p className="org-login-subtitle">
+          Sign in to your organization dashboard
+        </p>
+
+        <form className="org-login-form" onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Organization email address"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError("");
+              setSuccess("");
+            }}
+            disabled={isLoading}
+            required
+            className="org-input-field"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+              setSuccess("");
+            }}
+            disabled={isLoading}
+            required
+            className="org-input-field"
+          />
+
+          {error && <div className="org-error-message">{error}</div>}
+          {success && <div className="org-success-message">{success}</div>}
+
+          <Button
+            type="submit"
+            label={isLoading ? "Signing in..." : "Sign in to Dashboard"}
+            disabled={isLoading}
+            className="org-submit-button"
+          />
+        </form>
+
+        <div className="org-login-links">
+          <p>
+            <Link to="/forgot-password">Forgot your password?</Link>
           </p>
-
-          <form className="org-login-form" onSubmit={handleSubmit}>
-            <input
-              type="email"
-              placeholder="Organization email address"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError("");
-                setSuccess("");
-              }}
-              disabled={isLoading}
-              required
-              className="org-input-field"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError("");
-                setSuccess("");
-              }}
-              disabled={isLoading}
-              required
-              className="org-input-field"
-            />
-
-            {error && <div className="org-error-message">{error}</div>}
-            {success && <div className="org-success-message">{success}</div>}
-
-            <Button
-              type="submit"
-              label={isLoading ? "Signing in..." : "Sign in to Dashboard"}
-              disabled={isLoading}
-              className="org-submit-button"
-            />
-          </form>
-
-          <div className="org-login-links">
-            <p>
-              <Link to="/forgot-password">Forgot your password?</Link>
-            </p>
-            <p>
-              Don't have an organization account?{" "}
-              <Link to="/organization-signup">Sign up here</Link>
-            </p>
-            <p>
-              Back to <Link to="/">Home Page</Link>
-            </p>
-          </div>
+          <p>
+            Don't have an organization account?{" "}
+            <Link to="/organization-signup">Sign up here</Link>
+          </p>
+          <p>
+            Back to <Link to="/">Home Page</Link>
+          </p>
         </div>
       </div>
 
-      <center>
+      <footer style={{ textAlign: 'center', marginTop: '2rem', color: '#6b7280' }}>
         <p>© {currentYear} Intern Connect</p>
-      </center>
-    </>
+      </footer>
+    </div>
   );
 };
 

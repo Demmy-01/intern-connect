@@ -19,7 +19,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isIncomplete, setIsIncomplete] = useState(false);
-
+  
   useEffect(() => {
     fetchProfile();
   }, []);

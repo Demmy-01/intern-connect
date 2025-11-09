@@ -100,7 +100,7 @@ const OrganizationSignup = () => {
   };
 
   return (
-    <>
+    <div className="org-signup-container">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -111,164 +111,160 @@ const OrganizationSignup = () => {
         />
         <p>Intern connect</p>
       </div>
+      <div className="org-signup-card">
+        <div className="org-signup-header">
+          <h2 className="org-signup-title">Create Organization Account</h2>
+          <p className="org-signup-subtitle">
+            Join InternConnect as an organization and start posting internships
+          </p>
+        </div>
 
-      <div className="org-signup-container">
-        <div className="org-signup-card">
-          <div className="org-signup-header">
-            <h2 className="org-signup-title">Create Organization Account</h2>
-            <p className="org-signup-subtitle">
-              Join InternConnect as an organization and start posting
-              internships
-            </p>
-          </div>
-
-          <form className="org-signup-form" onSubmit={handleSubmit}>
-            <div className="org-input-group">
-              <div className="org-input-container">
-                <label htmlFor="organizationName" className="org-sr-only">
-                  Organization Name
-                </label>
-                <input
-                  id="organizationName"
-                  name="organizationName"
-                  type="text"
-                  required
-                  className="org-input-field"
-                  placeholder="Organization Name *"
-                  value={formData.organizationName}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="org-input-container">
-                <label htmlFor="email" className="org-sr-only">
-                  Official Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  className="org-input-field"
-                  placeholder="Official Email Address *"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="org-input-container">
-                <label htmlFor="phone" className="org-sr-only">
-                  Phone Number
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  className="org-input-field"
-                  placeholder="Phone Number"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="org-input-container">
-                <label htmlFor="password" className="org-sr-only">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="org-input-field"
-                  placeholder="Password (min 6 characters) *"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="org-input-container">
-                <label htmlFor="confirmPassword" className="org-sr-only">
-                  Confirm Password
-                </label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  className="org-input-field"
-                  placeholder="Confirm Password *"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="org-input-container checkbox-container">
-                <input type="checkbox" id="terms" name="terms" required />
-                <label htmlFor="terms" className="org-terms-label">
-                  I agree to the{" "}
-                  <Link to="/terms" className="org-terms-link">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link to="/terms" className="org-terms-link">
-                    Privacy Policy
-                  </Link>
-                </label>
-              </div>
-            </div>
-
-            {error && (
-              <div className="org-error-message">
-                <div className="org-error-text">{error}</div>
-              </div>
-            )}
-
-            {success && (
-              <div className="org-success-message">
-                <div className="org-success-text">{success}</div>
-              </div>
-            )}
-
-            <div className="org-submit-container">
-              <Button
-                type="submit"
-                label={
-                  isLoading
-                    ? "Creating Account..."
-                    : "Create Organization Account"
-                }
+        <form className="org-signup-form" onSubmit={handleSubmit}>
+          <div className="org-input-group">
+            <div className="org-input-container">
+              <label htmlFor="organizationName" className="org-sr-only">
+                Organization Name
+              </label>
+              <input
+                id="organizationName"
+                name="organizationName"
+                type="text"
+                required
+                className="org-input-field"
+                placeholder="Organization Name *"
+                value={formData.organizationName}
+                onChange={handleInputChange}
                 disabled={isLoading}
-                className="org-submit-button"
               />
             </div>
 
-            <div className="org-login-links">
-              <p className="org-login-text">
-                Already have an account?{" "}
-                <Link to="/organization-login" className="org-login-link">
-                  Sign in
-                </Link>
-              </p>
-              <p className="org-student-text">
-                Looking to join as a student?{" "}
-                <Link to="/signup" className="org-student-link">
-                  Student Signup
-                </Link>
-              </p>
+            <div className="org-input-container">
+              <label htmlFor="email" className="org-sr-only">
+                Official Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="org-input-field"
+                placeholder="Official Email Address *"
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={isLoading}
+              />
             </div>
-          </form>
-        </div>
+
+            <div className="org-input-container">
+              <label htmlFor="phone" className="org-sr-only">
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                className="org-input-field"
+                placeholder="Phone Number"
+                value={formData.phone}
+                onChange={handleInputChange}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="org-input-container">
+              <label htmlFor="password" className="org-sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="org-input-field"
+                placeholder="Password (min 6 characters) *"
+                value={formData.password}
+                onChange={handleInputChange}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="org-input-container">
+              <label htmlFor="confirmPassword" className="org-sr-only">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                className="org-input-field"
+                placeholder="Confirm Password *"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                disabled={isLoading}
+              />
+            </div>
+            <div className="org-input-container checkbox-container">
+              <input type="checkbox" id="terms" name="terms" required />
+              <label htmlFor="terms" className="org-terms-label">
+                I agree to the{" "}
+                <Link to="/terms" className="org-terms-link">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link to="/terms" className="org-terms-link">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+          </div>
+
+          {error && (
+            <div className="org-error-message">
+              <div className="org-error-text">{error}</div>
+            </div>
+          )}
+
+          {success && (
+            <div className="org-success-message">
+              <div className="org-success-text">{success}</div>
+            </div>
+          )}
+
+          <div className="org-submit-container">
+            <Button
+              type="submit"
+              label={
+                isLoading
+                  ? "Creating Account..."
+                  : "Create Organization Account"
+              }
+              disabled={isLoading}
+              className="org-submit-button"
+            />
+          </div>
+
+          <div className="org-login-links">
+            <p className="org-login-text">
+              Already have an account?{" "}
+              <Link to="/organization-login" className="org-login-link">
+                Sign in
+              </Link>
+            </p>
+            <p className="org-student-text">
+              Looking to join as a student?{" "}
+              <Link to="/signup" className="org-student-link">
+                Student Signup
+              </Link>
+            </p>
+          </div>
+        </form>
       </div>
 
       <center>
         <p>© {currentYear} Intern Connect</p>
       </center>
-    </>
+    </div>
   );
 };
 

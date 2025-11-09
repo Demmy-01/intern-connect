@@ -9,7 +9,7 @@
 .fade-in {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  transition: opacity 1.5s ease-out, transform 1.5s ease-out;
 }
 
 .fade-in-visible {
@@ -20,7 +20,7 @@
 /* Submit Status Message Styles */
 .submit-status-message {
   margin-top: 1rem;
-  padding: 1rem;
+  padding: 1rem;  
   border-radius: 8px;
   text-align: center;
   font-size: 0.95rem;
