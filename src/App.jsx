@@ -1,6 +1,5 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
 import {
   ProtectedRoute,
   StudentProtectedRoute,
@@ -129,7 +128,7 @@ function App() {
           <Route
             path="/applications"
             element={
-              <OrganizationProtectedRoute>
+              <OrganizationProtectedRoute> 
                 <Applications />
               </OrganizationProtectedRoute>
             }

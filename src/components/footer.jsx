@@ -56,18 +56,13 @@ const Footer = () => {
                 </Link>
               </li>
               <li className="link-item">
-                <Link to="/create-cv" className="link">
-                  Create CV
-                </Link>
-              </li>
-              <li className="link-item">
-                <Link to="/interview-prep" className="link">
-                  Interview Prep
-                </Link>
-              </li>
-              <li className="link-item">
                 <Link to="/team" className="link">
                   Meet the team
+                </Link>
+              </li>
+              <li className="link-item">
+                <Link to="/dashboard" className="link">
+                  Dashboard
                 </Link>
               </li>
             </ul>
@@ -108,12 +103,6 @@ const Footer = () => {
                     dandemdig@gmail.com
                   </a>
                 </div>
-              </div>
-              <div className="contact-item">
-                <div className="contact-icon">
-                  <MapPin size={20} />
-                </div>
-                <div>Lagos, Nigeria</div>
               </div>
             </div>
           </div>

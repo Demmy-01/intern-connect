@@ -99,43 +99,6 @@ const Navbar = ({ textColor }) => {
                   Dashboard
                 </Link>
               )}
-              <div
-                className="dropdown"
-                onMouseEnter={() => setIsDesktopDropdownOpen(true)}
-                onMouseLeave={() => setIsDesktopDropdownOpen(false)}
-              >
-                <button
-                  className={`nav-link dropdown-toggle ${
-                    isActive("/cv-generator") || isActive("/interview-prep")
-                      ? "active"
-                      : ""
-                  }`}
-                >
-                  AI Tools
-                </button>
-                <div
-                  className={`dropdown-menu ${
-                    isDesktopDropdownOpen ? "open" : ""
-                  }`}
-                >
-                  <Link
-                    to="/cv-generator"
-                    className={`dropdown-item ${
-                      isActive("/cv-generator") ? "active" : ""
-                    }`}
-                  >
-                    CV Generator
-                  </Link>
-                  <Link
-                    to="/interview-prep"
-                    className={`dropdown-item ${
-                      isActive("/interview-prep") ? "active" : ""
-                    }`}
-                  >
-                    Interview Prep
-                  </Link>
-                </div>
-              </div>
             </div>
 
             {/* Desktop Right Side - Icons and Buttons */}
@@ -230,42 +193,6 @@ const Navbar = ({ textColor }) => {
                       Dashboard
                     </Link>
                   )}
-                  <div className="dropdown">
-                    <button
-                      className={`nav-link dropdown-toggle ${
-                        isActive("/cv-generator") || isActive("/interview-prep")
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={toggleMobileDropdown}
-                      aria-expanded={isMobileDropdownOpen}
-                      aria-haspopup="true"
-                    >
-                      AI Tools
-                    </button>
-                    <div
-                      className={`dropdown-menu ${
-                        isMobileDropdownOpen ? "open" : ""
-                      }`}
-                    >
-                      <Link
-                        to="/cv-generator"
-                        className={`dropdown-item ${
-                          isActive("/cv-generator") ? "active" : ""
-                        }`}
-                      >
-                        CV Generator
-                      </Link>
-                      <Link
-                        to="/interview-prep"
-                        className={`dropdown-item ${
-                          isActive("/interview-prep") ? "active" : ""
-                        }`}
-                      >
-                        Interview Prep
-                      </Link>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Mobile Icons and Buttons */}
