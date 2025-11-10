@@ -96,7 +96,7 @@ const Login = () => {
   };
 
   return (
-    <>
+    <div className="logs">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -163,7 +163,7 @@ const Login = () => {
       <center>
         <p>© {currentYear} Intern Connect</p>
       </center>
-    </>
+    </div>
   );
 };
 

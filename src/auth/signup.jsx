@@ -95,7 +95,7 @@ const SignUp = () => {
   };
 
   return (
-    <>
+    <div className="logs">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -171,7 +171,7 @@ const SignUp = () => {
       <center>
         <p>© {currentYear} Intern Connect</p>
       </center>
-    </>
+    </div>
   );
 };
 

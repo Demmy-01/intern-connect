@@ -423,5 +423,5 @@
 
 /* Smooth transitions */
 * {
-  transition-duration: .3s !important;
+  transition-duration: .5s !important;
 }
