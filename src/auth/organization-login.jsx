@@ -134,7 +134,7 @@ const OrganizationLogin = () => {
         </div>
       </div>
 
-      <footer style={{ textAlign: 'center', marginTop: '2rem', color: '#6b7280' }}>
+      <footer className="footer-org" style={{ textAlign: 'center', marginTop: '2rem', color: '#6b7280' }}>
         <p>© {currentYear} Intern Connect</p>
       </footer>
     </div>

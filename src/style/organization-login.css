@@ -293,7 +293,7 @@
 }
 
 /* Footer */
-footer {
+.footer-org {
   text-align: center;
   margin-top: 3rem;
   color: rgba(255, 255, 255, 0.9);
@@ -304,9 +304,10 @@ footer {
   animation: fadeIn 0.8s ease-out 0.3s both;
 }
 
-footer p {
+.footer-org p {
   margin: 0;
   font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Responsive adjustments */
