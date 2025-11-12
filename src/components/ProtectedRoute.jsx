@@ -54,7 +54,14 @@ export const StudentProtectedRoute = ({ children }) => {
   }
 
   if (userType !== "student") {
-    return <Navigate to="/organization-login" replace />;
+    // Redirect to appropriate login page based on user type
+    if (userType === "organization") {
+      return <Navigate to="/dashboard-overview" replace />;
+    }
+    if (userType === "admin") {
+      return <Navigate to="/admin-dashboard" replace />;
+    }
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -87,7 +94,54 @@ export const OrganizationProtectedRoute = ({ children }) => {
   }
 
   if (userType !== "organization") {
-    return <Navigate to="/login" replace />;
+    // Redirect to appropriate dashboard based on user type
+    if (userType === "student") {
+      return <Navigate to="/dashboard" replace />;
+    }
+    if (userType === "admin") {
+      return <Navigate to="/admin-dashboard" replace />;
+    }
+    return <Navigate to="/organization-login" replace />;
+  }
+
+  return children;
+};
+
+// Admin-only protected route
+export const AdminProtectedRoute = ({ children }) => {
+  const { user, userType, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate to="/admin-login" state={{ from: location }} replace />
+    );
+  }
+
+  if (userType !== "admin") {
+    // Redirect to appropriate dashboard based on user type
+    if (userType === "student") {
+      return <Navigate to="/dashboard" replace />;
+    }
+    if (userType === "organization") {
+      return <Navigate to="/dashboard-overview" replace />;
+    }
+    return <Navigate to="/admin-login" replace />;
   }
 
   return children;

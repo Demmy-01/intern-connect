@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   StudentProtectedRoute,
   OrganizationProtectedRoute,
+  AdminProtectedRoute,
 } from "./components/ProtectedRoute";
 import Home from "./pages/home.jsx";
 import { About } from "./pages/about";
@@ -36,6 +37,8 @@ import InternshipDetails from "./pages/internship-details.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import PublicOrganizationProfile from "./pages/organizations-profile.jsx";
 import Terms from "./pages/terms.jsx";
+import AdminLogin from "./auth/admin-login.jsx";
+import AdminDashboard from "./admin/admin-dashboard.jsx";
 
 function App() {
   return (
@@ -185,14 +188,25 @@ function App() {
             element={<PublicOrganizationProfile />}
           />
 
+          {/* Admin Routes */}
+          <Route
+            path="/admin-dashboard"
+            element={
+              <AdminProtectedRoute>
+                <AdminDashboard />
+              </AdminProtectedRoute>
+            }
+          />
+
           {/* Modal/Component Routes */}
           <Route path="/sent-application" element={<SentApplicationModal />} />
           <Route path="/organization-login" element={<OrganizationLogin />} />
           <Route path="/organization-signup" element={<OrganizationSignup />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="forgot-password" element={<ForgotPassword />} /> 
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/icn-admin-login" element={<AdminLogin />} />
 
           {/* Catch-all Route */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} />

@@ -98,8 +98,38 @@ const OrganizationProfiles = () => {
     return (
       <DashboardLayout>
         <div className="profile-container">
-          <div className="profile-loading">Loading organization profile...</div>
+          <div className="profile-loading">
+            <div className="spinner"></div>
+            <p>Loading organization profile...</p>
+          </div>
         </div>
+        <style jsx>{`
+          .profile-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+          }
+          .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+          }
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
       </DashboardLayout>
     );
   }

@@ -259,8 +259,38 @@ const OrganizationProfileEdit = () => {
     return (
       <DashboardLayout>
         <div className="org-profile-header">
-          <h1>Loading...</h1>
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Loading...</p>
+          </div>
         </div>
+        <style jsx>{`
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+          }
+          .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+          }
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
       </DashboardLayout>
     );
   }
