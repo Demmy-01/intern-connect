@@ -50,6 +50,168 @@ const Toggle = ({ enabled, onChange, id, type }) => (
   </button>
 );
 
+// Student Profile Modal Component
+const StudentProfileModal = ({ student, onClose, onDelete }) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteReason.trim()) {
+      alert("Please provide a reason for deletion");
+      return;
+    }
+    setLoading(true);
+    try {
+      await onDelete(student.id, deleteReason);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!student) return null;
+
+  return (
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalHeader}>
+          <button onClick={onClose} style={styles.closeButton}>
+            <X size={24} />
+          </button>
+        </div>
+
+        <div style={styles.modalBody}>
+          {/* Student Header */}
+          <div style={styles.orgHeader}>
+            {student.avatar_url ? (
+              <img src={student.avatar_url} alt="Avatar" style={styles.orgLogo} />
+            ) : (
+              <div style={styles.orgLogoPlaceholder}>
+                <Users size={40} color="#6b7280" />
+              </div>
+            )}
+            <div>
+              <h2 style={styles.orgName}>{student.display_name || student.username}</h2>
+              <span style={{
+                ...styles.statusBadge,
+                ...(student.is_active ? styles.statusActive : styles.statusInactive)
+              }}>
+                {student.is_active ? "Active" : "Suspended"}
+              </span>
+            </div>
+          </div>
+
+          {/* Personal Information */}
+          <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>Personal Information</h3>
+            <div style={styles.contactGrid}>
+              <div style={styles.contactItem}>
+                <span style={styles.contactLabel}>Username</span>
+                <span style={styles.contactValue}>{student.username}</span>
+              </div>
+              <div style={styles.contactItem}>
+                <span style={styles.contactLabel}>Display Name</span>
+                <span style={styles.contactValue}>{student.display_name || 'N/A'}</span>
+              </div>
+              <div style={styles.contactItem}>
+                <span style={styles.contactLabel}>Email</span>
+                <span style={styles.contactValue}>{student.email}</span>
+              </div>
+              <div style={styles.contactItem}>
+                <span style={styles.contactLabel}>Phone</span>
+                <span style={styles.contactValue}>{student.phone || 'N/A'}</span>
+              </div>
+              <div style={styles.contactItem}>
+                <span style={styles.contactLabel}>Account Created</span>
+                <span style={styles.contactValue}>
+                  {new Date(student.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bio */}
+          {student.students?.bio && (
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>Bio</h3>
+              <p style={styles.sectionText}>{student.students.bio}</p>
+            </div>
+          )}
+
+          {/* Delete Button */}
+          {!showDeleteConfirm ? (
+            <div style={styles.actionButtons}>
+              <button 
+                onClick={() => setShowDeleteConfirm(true)} 
+                style={styles.deleteButton}
+                disabled={loading}
+              >
+                <XCircle size={20} />
+                Delete User
+              </button>
+            </div>
+          ) : (
+            <div style={styles.actionButtons}>
+              <div style={styles.rejectForm}>
+                <label style={styles.rejectLabel}>Reason for Deletion</label>
+                <textarea
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  placeholder="Please provide a detailed reason for deleting this user account..."
+                  style={styles.rejectTextarea}
+                  rows={4}
+                />
+                <div style={styles.rejectActions}>
+                  <button 
+                    onClick={() => setShowDeleteConfirm(false)} 
+                    style={styles.cancelButton}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleDelete} 
+                    style={styles.confirmRejectButton}
+                    disabled={loading}
+                  >
+                    {loading ? 'Processing...' : 'Confirm Deletion'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Logout Confirmation Modal Component
+const LogoutConfirmModal = ({ onClose, onConfirm }) => {
+  return (
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <div style={{...styles.modalContent, maxWidth: '400px'}} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalBody}>
+          <h2 style={{...styles.orgName, textAlign: 'center', marginBottom: '16px'}}>
+            Confirm Logout
+          </h2>
+          <p style={{...styles.sectionText, textAlign: 'center', marginBottom: '24px'}}>
+            Are you sure you want to log out of your admin account?
+          </p>
+          <div style={styles.rejectActions}>
+            <button onClick={onClose} style={styles.cancelButton}>
+              Cancel
+            </button>
+            <button onClick={onConfirm} style={styles.confirmRejectButton}>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Organization Detail Modal Component
 const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject }) => {
   const [rejectionReason, setRejectionReason] = useState("");
@@ -320,6 +482,8 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalOrganizations: 0,
@@ -649,7 +813,58 @@ const AdminDashboard = () => {
       const org = organizations.find(o => o.id === id);
       setSelectedOrg(org);
     } else {
-      console.log(`Viewing student profile for user ID: ${id}`);
+      const student = users.find(u => u.id === id);
+      setSelectedStudent(student);
+    }
+  };
+
+  const handleDeleteUser = async (id, reason) => {
+    try {
+      console.log("Deleting user:", { id, reason });
+
+      // Delete user from auth (this will cascade to related tables via foreign keys)
+      const { data, error } = await supabaseAdmin.auth.admin.deleteUser(id);
+
+      if (error) {
+        console.error("Error deleting user:", error);
+        throw error;
+      }
+
+      console.log("User deleted successfully:", data);
+
+      // Update local state
+      setUsers(users.filter(u => u.id !== id));
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalUsers: prev.totalUsers - 1
+      }));
+
+      setSelectedStudent(null);
+      alert("User deleted successfully");
+      
+      // Refresh data
+      await fetchDashboardData();
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      alert(`Failed to delete user: ${err.message}`);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error logging out:", error);
+        alert("Failed to logout: " + error.message);
+      } else {
+        // Redirect to login page or home
+        window.location.href = '/icn-admin-login'; // Adjust this path to your login route
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("An error occurred while logging out");
     }
   };
 
@@ -767,10 +982,15 @@ const AdminDashboard = () => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Admin Dashboard</h1>
-        <p style={styles.subtitle}>
-          Manage all platform activities from one place.
-        </p>
+        <div>
+          <h1 style={styles.title}>Admin Dashboard</h1>
+          <p style={styles.subtitle}>
+            Manage all platform activities from one place.
+          </p>
+        </div>
+        <button onClick={() => setShowLogoutModal(true)} style={styles.logoutButton}>
+          Logout
+        </button>
       </div>
 
       <div style={styles.statsGrid}>
@@ -957,6 +1177,23 @@ const AdminDashboard = () => {
           onReject={handleRejectOrganization}
         />
       )}
+
+      {/* Student Profile Modal */}
+      {selectedStudent && (
+        <StudentProfileModal
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+          onDelete={handleDeleteUser}
+        />
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <LogoutConfirmModal
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={handleLogout}
+        />
+      )}
     </div>
   );
 };
@@ -1005,6 +1242,9 @@ const styles = {
   },
   header: {
     marginBottom: "40px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   title: {
     fontSize: "36px",
@@ -1015,6 +1255,17 @@ const styles = {
   subtitle: {
     fontSize: "16px",
     color: "#6b7280",
+  },
+  logoutButton: {
+    padding: "10px 24px",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "white",
+    backgroundColor: "#ef4444",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "background-color 0.2s",
   },
   statsGrid: {
     display: "grid",
@@ -1461,6 +1712,22 @@ const styles = {
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
+  },
+  deleteButton: {
+    flex: 1,
+    padding: "12px 24px",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: "white",
+    backgroundColor: "#dc2626",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    transition: "background-color 0.2s",
   },
 };
 

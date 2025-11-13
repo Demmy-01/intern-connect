@@ -217,7 +217,7 @@
 }
 
 .contact-item-ft a:hover {
-  color: var(--text-primary);
+  color: var(--text-tertiary);
 }
 
 /* Divider */
