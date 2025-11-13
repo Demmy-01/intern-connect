@@ -393,19 +393,32 @@ const AdminDashboard = () => {
         return { data: [], error: profilesError };
       }
 
-      // Get auth users data using RPC or directly query auth.users via a database function
-      // For now, we'll fetch email from a custom RPC function you need to create
-      const { data: authUsersData, error: authError } = await supabase
-        .rpc('get_user_emails', { user_ids: profilesData.map(p => p.id) });
+      if (!profilesData || profilesData.length === 0) {
+        return { data: [], error: null };
+      }
 
-      // If RPC doesn't exist, try getting current user session and use profiles email field
-      // Alternative: Add email to profiles table during signup
+      // Get auth users data using admin client
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+      }
+
+      console.log("Auth users data:", authData); // Debug log
+
       const usersWithEmail = profilesData.map(user => {
-        const authUser = authUsersData?.find(au => au.id === user.id);
+        const authUser = authData?.users?.find(au => au.id === user.id);
+        
+        console.log(`User ${user.id}:`, { // Debug log
+          found: !!authUser,
+          email: authUser?.email,
+          banned: authUser?.banned_until
+        });
+
         return {
           ...user,
-          email: authUser?.email || user.email || 'N/A',
-          is_active: authUser ? !authUser.banned_until : true,
+          email: authUser?.email || 'N/A',
+          is_active: authUser ? (authUser.banned_until ? false : true) : true,
           banned_until: authUser?.banned_until
         };
       });
@@ -448,15 +461,30 @@ const AdminDashboard = () => {
         return { data: [], error };
       }
 
-      // Try to get emails using RPC
-      const { data: authUsersData } = await supabase
-        .rpc('get_user_emails', { user_ids: data.map(o => o.id) });
+      if (!data || data.length === 0) {
+        return { data: [], error: null };
+      }
+
+      // Get emails using admin client
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
       
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+      }
+
+      console.log("Auth users for orgs:", authData); // Debug log
+
       const orgsWithEmail = data.map(org => {
-        const authUser = authUsersData?.find(au => au.id === org.id);
+        const authUser = authData?.users?.find(au => au.id === org.id);
+        
+        console.log(`Org ${org.id}:`, { // Debug log
+          found: !!authUser,
+          email: authUser?.email
+        });
+
         return {
           ...org,
-          email: authUser?.email || org.email || 'N/A',
+          email: authUser?.email || 'N/A',
           username: org.profiles?.username,
           display_name: org.profiles?.display_name,
           phone: org.profiles?.phone
@@ -491,6 +519,13 @@ const AdminDashboard = () => {
       const user = users.find(u => u.id === id);
       const newStatus = !user.is_active;
       
+      console.log("Toggle user ban:", { // Debug log
+        userId: id,
+        currentStatus: user.is_active,
+        newStatus: newStatus,
+        action: newStatus ? 'UNBAN' : 'BAN'
+      });
+      
       // Update local state immediately for better UX
       setUsers(
         users.map((u) =>
@@ -499,33 +534,65 @@ const AdminDashboard = () => {
       );
 
       try {
-        // Call RPC function to ban/unban user (you need to create this)
-        const { data, error } = await supabase.rpc('toggle_user_ban', {
-          user_id: id,
-          should_ban: !newStatus
-        });
-
-        if (error) {
-          console.error("Error updating user status:", error);
-          // Revert on error
-          setUsers(
-            users.map((u) =>
-              u.id === id ? { ...u, is_active: user.is_active } : u
-            )
+        if (newStatus) {
+          // UNBAN USER - Remove ban
+          console.log("Attempting to unban user...");
+          const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+            id,
+            { 
+              ban_duration: 'none'
+            }
           );
-          alert(`Failed to ${newStatus ? 'activate' : 'suspend'} user: ${error.message}`);
+
+          console.log("Unban response:", { data, error }); // Debug log
+
+          if (error) {
+            console.error("Error activating user:", error);
+            setUsers(
+              users.map((u) =>
+                u.id === id ? { ...u, is_active: user.is_active } : u
+              )
+            );
+            alert(`Failed to activate user: ${error.message}`);
+          } else {
+            console.log("User activated successfully");
+            alert("User activated successfully");
+            await fetchDashboardData();
+          }
         } else {
-          alert(`User ${newStatus ? 'activated' : 'suspended'} successfully`);
+          // BAN USER - Add ban
+          console.log("Attempting to ban user...");
+          const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+            id,
+            { 
+              ban_duration: '876000h' // 100 years
+            }
+          );
+
+          console.log("Ban response:", { data, error }); // Debug log
+
+          if (error) {
+            console.error("Error suspending user:", error);
+            setUsers(
+              users.map((u) =>
+                u.id === id ? { ...u, is_active: user.is_active } : u
+              )
+            );
+            alert(`Failed to suspend user: ${error.message}`);
+          } else {
+            console.log("User suspended successfully");
+            alert("User suspended successfully");
+            await fetchDashboardData();
+          }
         }
       } catch (err) {
-        console.error("Error:", err);
-        // Revert on error
+        console.error("Caught error:", err);
         setUsers(
           users.map((u) =>
             u.id === id ? { ...u, is_active: user.is_active } : u
           )
         );
-        alert("An error occurred while updating user status");
+        alert("An error occurred while updating user status: " + err.message);
       }
     }
   };
@@ -542,14 +609,15 @@ const AdminDashboard = () => {
     );
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('organizations')
         .update({ 
           verification_status: newStatus,
           verification_notes: newStatus === "verified" ? "Approved by admin" : null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) {
         console.error("Error updating verification status:", error);
@@ -559,8 +627,9 @@ const AdminDashboard = () => {
             o.id === id ? { ...o, verification_status: org.verification_status } : o
           )
         );
-        alert("Failed to update verification status");
+        alert("Failed to update verification status: " + error.message);
       } else {
+        console.log("Update successful:", data);
         alert(`Organization ${newStatus === "verified" ? "approved" : "unapproved"} successfully`);
       }
     } catch (err) {
@@ -571,6 +640,7 @@ const AdminDashboard = () => {
           o.id === id ? { ...o, verification_status: org.verification_status } : o
         )
       );
+      alert("An error occurred: " + err.message);
     }
   };
 
@@ -585,19 +655,22 @@ const AdminDashboard = () => {
 
   const handleApproveOrganization = async (id) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('organizations')
         .update({ 
           verification_status: 'verified',
           verification_notes: 'Approved by admin',
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) {
         console.error("Error approving organization:", error);
         throw error;
       }
+
+      console.log("Approval successful:", data);
 
       // Update local state
       setOrganizations(
@@ -623,19 +696,22 @@ const AdminDashboard = () => {
 
   const handleRejectOrganization = async (id, reason) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('organizations')
         .update({ 
           verification_status: 'rejected',
           verification_notes: reason,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) {
         console.error("Error rejecting organization:", error);
         throw error;
       }
+
+      console.log("Rejection successful:", data);
 
       // Update local state
       setOrganizations(
