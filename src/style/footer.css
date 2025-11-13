@@ -81,7 +81,7 @@
 }
 
 .company-name-ft {
-  color: var(--text-primary);
+  color: rgb(227, 227, 227);
   font-weight: 700;
   margin: 0;
   font-size: 1.5rem;
@@ -98,7 +98,7 @@
 }
 
 .company-tagline-ft {
-  color: var(--text-secondary);
+  color: rgb(227, 227, 227);
   line-height: 1.7;
   font-size: 0.9375rem;
   max-width: 350px;
@@ -106,7 +106,7 @@
 
 /* Section Title */
 .section-title-ft {
-  color: var(--text-primary);
+  color: var(--text-tertiary);
   font-weight: 600;
   margin-bottom: 0.5rem;
   font-size: 1.125rem;
@@ -140,7 +140,7 @@
 }
 
 .link-ft {
-  color: var(--text-secondary);
+  color: rgb(227, 227, 227);
   text-decoration: none;
   font-size: 0.9375rem;
   transition: all 0.3s ease;
@@ -161,7 +161,7 @@
 }
 
 .link-ft:hover {
-  color: var(--text-primary);
+  color: var(--text-tertiary);
   padding-left: 8px;
 }
 
@@ -209,7 +209,7 @@
 }
 
 .contact-item-ft a {
-  color: var(--text-secondary);
+  color: rgb(227, 227, 227);
   font-size: 0.9375rem;
   line-height: 1.6;
   text-decoration: none;
