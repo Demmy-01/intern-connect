@@ -72,7 +72,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <>
+    <div className="logs">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -85,7 +85,7 @@ const ResetPassword = () => {
       </div>
       <div className="forgot-password-page">
         <div className="forgot-password-container">
-          <h2>Set New Password</h2>
+          <h2><b>Set New Password</b></h2>
 
           <p className="instruction-text">
             Please enter your new password below.
@@ -126,10 +126,10 @@ const ResetPassword = () => {
         </div>
       </div>
 
-      <center>
+      <center className="year">
         <p>© {currentYear} Intern Connect</p>
       </center>
-    </>
+    </div>
   );
 };
 

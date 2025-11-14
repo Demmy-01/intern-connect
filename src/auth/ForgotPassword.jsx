@@ -43,7 +43,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <>
+    <div className="logs">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -56,7 +56,7 @@ const ForgotPassword = () => {
       </div>
       <div className="forgot-password-page">
         <div className="forgot-password-container">
-          <h2>Reset Password</h2>
+          <h2><b>Reset Password</b></h2>
 
           <p className="instruction-text">
             Enter your email address and we&apos;ll send you instructions to
@@ -90,10 +90,10 @@ const ForgotPassword = () => {
         </div>
       </div>
 
-      <center>
+      <center className="year">
         <p>© {currentYear} Intern Connect</p>
       </center>
-    </>
+    </div>
   );
 };
 
