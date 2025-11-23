@@ -229,12 +229,64 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
 
   const fetchOrganizationDetails = async () => {
     try {
-      // Fetch documents
-      const { data: docsData } = await supabase
+      // Fetch documents from database
+      const { data: docsData, error: docsError } = await supabase
         .from('organization_documents')
         .select('*')
         .eq('organization_id', organization.id);
-      setDocuments(docsData || []);
+      
+      if (docsError) {
+        console.error('Error fetching documents:', docsError);
+      }
+
+      // For each document, get the signed URL from storage
+      if (docsData && docsData.length > 0) {
+        const documentsWithUrls = await Promise.all(
+          docsData.map(async (doc) => {
+            try {
+              // Extract the file path from document_url
+              // If document_url is already a full URL, extract the path
+              let filePath = doc.document_url;
+              
+              // If it's a full URL, extract just the path part
+              if (filePath.includes('organization-documents/')) {
+                const pathMatch = filePath.match(/organization-documents\/(.+)$/);
+                if (pathMatch) {
+                  filePath = pathMatch[0]; // Keep the full path including folder
+                }
+              }
+              
+              // Get signed URL from storage
+              const { data: urlData, error: urlError } = await supabase
+                .storage
+                .from('organization-documents')
+                .createSignedUrl(filePath, 3600); // URL valid for 1 hour
+
+              if (urlError) {
+                console.error(`Error getting signed URL for ${doc.document_name}:`, urlError);
+                return {
+                  ...doc,
+                  downloadUrl: doc.document_url // Fallback to original URL
+                };
+              }
+
+              return {
+                ...doc,
+                downloadUrl: urlData.signedUrl
+              };
+            } catch (err) {
+              console.error(`Error processing document ${doc.document_name}:`, err);
+              return {
+                ...doc,
+                downloadUrl: doc.document_url
+              };
+            }
+          })
+        );
+        setDocuments(documentsWithUrls);
+      } else {
+        setDocuments([]);
+      }
 
       // Fetch contacts
       const { data: contactsData } = await supabase
@@ -377,12 +429,17 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
                 {documents.map(doc => (
                   <a
                     key={doc.id}
-                    href={doc.document_url}
+                    href={doc.downloadUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={styles.documentLink}
                   >
-                    {doc.document_name}
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                      <span style={{fontWeight: '500'}}>{doc.document_name}</span>
+                      <span style={{fontSize: '12px', color: '#6b7280', textTransform: 'capitalize'}}>
+                        {doc.document_type.replace('_', ' ')}
+                      </span>
+                    </div>
                     <Download size={16} />
                   </a>
                 ))}
@@ -533,7 +590,6 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      // First get profiles with student data
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -561,24 +617,15 @@ const AdminDashboard = () => {
         return { data: [], error: null };
       }
 
-      // Get auth users data using admin client
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
 
       if (authError) {
         console.error("Error fetching auth users:", authError);
       }
 
-      console.log("Auth users data:", authData); // Debug log
-
       const usersWithEmail = profilesData.map(user => {
         const authUser = authData?.users?.find(au => au.id === user.id);
         
-        console.log(`User ${user.id}:`, { // Debug log
-          found: !!authUser,
-          email: authUser?.email,
-          banned: authUser?.banned_until
-        });
-
         return {
           ...user,
           email: authUser?.email || 'N/A',
@@ -629,23 +676,15 @@ const AdminDashboard = () => {
         return { data: [], error: null };
       }
 
-      // Get emails using admin client
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
       
       if (authError) {
         console.error("Error fetching auth users:", authError);
       }
 
-      console.log("Auth users for orgs:", authData); // Debug log
-
       const orgsWithEmail = data.map(org => {
         const authUser = authData?.users?.find(au => au.id === org.id);
         
-        console.log(`Org ${org.id}:`, { // Debug log
-          found: !!authUser,
-          email: authUser?.email
-        });
-
         return {
           ...org,
           email: authUser?.email || 'N/A',
@@ -683,14 +722,6 @@ const AdminDashboard = () => {
       const user = users.find(u => u.id === id);
       const newStatus = !user.is_active;
       
-      console.log("Toggle user ban:", { // Debug log
-        userId: id,
-        currentStatus: user.is_active,
-        newStatus: newStatus,
-        action: newStatus ? 'UNBAN' : 'BAN'
-      });
-      
-      // Update local state immediately for better UX
       setUsers(
         users.map((u) =>
           u.id === id ? { ...u, is_active: newStatus } : u
@@ -699,16 +730,12 @@ const AdminDashboard = () => {
 
       try {
         if (newStatus) {
-          // UNBAN USER - Remove ban
-          console.log("Attempting to unban user...");
           const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
             id,
             { 
               ban_duration: 'none'
             }
           );
-
-          console.log("Unban response:", { data, error }); // Debug log
 
           if (error) {
             console.error("Error activating user:", error);
@@ -719,21 +746,16 @@ const AdminDashboard = () => {
             );
             alert(`Failed to activate user: ${error.message}`);
           } else {
-            console.log("User activated successfully");
             alert("User activated successfully");
             await fetchDashboardData();
           }
         } else {
-          // BAN USER - Add ban
-          console.log("Attempting to ban user...");
           const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
             id,
             { 
-              ban_duration: '876000h' // 100 years
+              ban_duration: '876000h'
             }
           );
-
-          console.log("Ban response:", { data, error }); // Debug log
 
           if (error) {
             console.error("Error suspending user:", error);
@@ -744,7 +766,6 @@ const AdminDashboard = () => {
             );
             alert(`Failed to suspend user: ${error.message}`);
           } else {
-            console.log("User suspended successfully");
             alert("User suspended successfully");
             await fetchDashboardData();
           }
@@ -765,7 +786,6 @@ const AdminDashboard = () => {
     const org = organizations.find(o => o.id === id);
     const newStatus = org.verification_status === "verified" ? "pending" : "verified";
     
-    // Update local state immediately
     setOrganizations(
       organizations.map((o) =>
         o.id === id ? { ...o, verification_status: newStatus } : o
@@ -785,7 +805,6 @@ const AdminDashboard = () => {
 
       if (error) {
         console.error("Error updating verification status:", error);
-        // Revert on error
         setOrganizations(
           organizations.map((o) =>
             o.id === id ? { ...o, verification_status: org.verification_status } : o
@@ -793,12 +812,10 @@ const AdminDashboard = () => {
         );
         alert("Failed to update verification status: " + error.message);
       } else {
-        console.log("Update successful:", data);
         alert(`Organization ${newStatus === "verified" ? "approved" : "unapproved"} successfully`);
       }
     } catch (err) {
       console.error("Error:", err);
-      // Revert on error
       setOrganizations(
         organizations.map((o) =>
           o.id === id ? { ...o, verification_status: org.verification_status } : o
@@ -820,17 +837,82 @@ const AdminDashboard = () => {
 
   const handleDeleteUser = async (id, reason) => {
     try {
-      console.log("Deleting user:", { id, reason });
+      console.log("Starting user deletion process for:", id);
 
-      // Delete user from auth (this will cascade to related tables via foreign keys)
-      const { data, error } = await supabaseAdmin.auth.admin.deleteUser(id);
-
-      if (error) {
-        console.error("Error deleting user:", error);
-        throw error;
+      // Use the service role client to delete in correct order
+      // Delete all foreign key references first
+      
+      // 1. Delete internship applications (references students table)
+      const { error: appsError } = await supabase
+        .from('internship_applications')
+        .delete()
+        .eq('student_id', id);
+      
+      if (appsError) {
+        console.error("Error deleting applications:", appsError);
       }
 
-      console.log("User deleted successfully:", data);
+      // 2. Delete student skills
+      const { error: skillsError } = await supabase
+        .from('student_skills')
+        .delete()
+        .eq('student_id', id);
+      
+      if (skillsError) {
+        console.error("Error deleting skills:", skillsError);
+      }
+
+      // 3. Delete student education
+      const { error: eduError } = await supabase
+        .from('student_education')
+        .delete()
+        .eq('student_id', id);
+      
+      if (eduError) {
+        console.error("Error deleting education:", eduError);
+      }
+
+      // 4. Delete experiences
+      const { error: expError } = await supabase
+        .from('experiences')
+        .delete()
+        .eq('student_id', id);
+      
+      if (expError) {
+        console.error("Error deleting experiences:", expError);
+      }
+
+      // 5. Delete from students table (references profiles)
+      const { error: studentError } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', id);
+      
+      if (studentError) {
+        console.error("Error deleting from students table:", studentError);
+        throw new Error(`Failed to delete student record: ${studentError.message}`);
+      }
+
+      // 6. Delete from profiles table (references auth.users)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+      
+      if (profileError) {
+        console.error("Error deleting from profiles table:", profileError);
+        throw new Error(`Failed to delete profile: ${profileError.message}`);
+      }
+
+      // 7. Finally, delete from auth.users using admin client
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+
+      if (authError) {
+        console.error("Error deleting user from auth:", authError);
+        throw new Error(`Failed to delete auth user: ${authError.message}`);
+      }
+
+      console.log("User deleted successfully");
 
       // Update local state
       setUsers(users.filter(u => u.id !== id));
@@ -842,13 +924,15 @@ const AdminDashboard = () => {
       }));
 
       setSelectedStudent(null);
-      alert("User deleted successfully");
+      alert("User deleted successfully!");
       
       // Refresh data
       await fetchDashboardData();
     } catch (err) {
       console.error("Error deleting user:", err);
       alert(`Failed to delete user: ${err.message}`);
+      // Refresh to get accurate state
+      await fetchDashboardData();
     }
   };
 
@@ -859,8 +943,7 @@ const AdminDashboard = () => {
         console.error("Error logging out:", error);
         alert("Failed to logout: " + error.message);
       } else {
-        // Redirect to login page or home
-        window.location.href = '/icn-admin-login'; // Adjust this path to your login route
+        window.location.href = '/icn-admin-login';
       }
     } catch (err) {
       console.error("Error:", err);
@@ -887,7 +970,6 @@ const AdminDashboard = () => {
 
       console.log("Approval successful:", data);
 
-      // Update local state
       setOrganizations(
         organizations.map((o) =>
           o.id === id ? { 
@@ -901,7 +983,6 @@ const AdminDashboard = () => {
       setSelectedOrg(null);
       alert("Organization approved successfully!");
       
-      // Refresh data to ensure sync
       await fetchDashboardData();
     } catch (err) {
       console.error("Error approving organization:", err);
@@ -928,7 +1009,6 @@ const AdminDashboard = () => {
 
       console.log("Rejection successful:", data);
 
-      // Update local state
       setOrganizations(
         organizations.map((o) =>
           o.id === id ? { 
@@ -942,7 +1022,6 @@ const AdminDashboard = () => {
       setSelectedOrg(null);
       alert("Organization rejected successfully");
       
-      // Refresh data to ensure sync
       await fetchDashboardData();
     } catch (err) {
       console.error("Error rejecting organization:", err);
@@ -1168,7 +1247,6 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Organization Detail Modal */}
       {selectedOrg && (
         <OrganizationDetailModal
           organization={selectedOrg}
@@ -1178,7 +1256,6 @@ const AdminDashboard = () => {
         />
       )}
 
-      {/* Student Profile Modal */}
       {selectedStudent && (
         <StudentProfileModal
           student={selectedStudent}
@@ -1187,7 +1264,6 @@ const AdminDashboard = () => {
         />
       )}
 
-      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <LogoutConfirmModal
           onClose={() => setShowLogoutModal(false)}

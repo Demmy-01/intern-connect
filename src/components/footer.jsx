@@ -99,8 +99,8 @@ const Footer = () => {
                   <Mail size={20} />
                 </div>
                 <div>
-                  <a href="mailto:dandemdig@gmail.com" className="link-ft">
-                    dandemdig@gmail.com
+                  <a href="mailto:info@d-internconnect.com" className="link-ft">
+                    info@d-internconnect.com
                   </a>
                 </div>
               </div>

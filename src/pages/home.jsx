@@ -594,7 +594,7 @@ export default function Home() {
                   <Mail className="contact-icon" />
                   <div className="contact-text">
                     <h4>Email Address</h4>
-                    <p>info@internshipplatform.com</p>
+                    <p>info@d-internconnect.com</p>
                   </div>
                 </div>
 
@@ -602,7 +602,8 @@ export default function Home() {
                   <Phone className="contact-icon" />
                   <div className="contact-text">
                     <h4>Phone Number</h4>
-                    <p>+234 123 456 7890</p>
+                    <p>+234 913 580 4703</p>
+                    <p>+234 810 777 3828</p>
                   </div>
                 </div>
 
