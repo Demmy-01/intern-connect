@@ -126,7 +126,7 @@ const AuthCallback = () => {
   };
 
   return (
-    <>
+    <div className="logs">
       <div className="login-logo-container">
         <img
           src={logo}
@@ -195,7 +195,7 @@ const AuthCallback = () => {
       <center>
         <p>© 2025 Intern Connect</p>
       </center>
-    </>
+    </div>
   );
 };
 
