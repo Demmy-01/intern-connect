@@ -150,10 +150,21 @@ const MultiStepApplyForm = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.size > 5 * 1024 * 1024) {
-      alert("File size must be less than 5MB");
+
+    // Check if file is PDF
+    if (file && file.type !== "application/pdf") {
+      setError(
+        "Only PDF files are allowed. Please upload a valid PDF document."
+      );
       return;
     }
+
+    if (file && file.size > 5 * 1024 * 1024) {
+      setError("File size must be less than 5MB");
+      return;
+    }
+
+    setError(null); // Clear error if file is valid
     setFormData((prev) => ({
       ...prev,
       cvFile: file,
@@ -182,7 +193,20 @@ const MultiStepApplyForm = () => {
     e.preventDefault();
 
     if (applicationStatus.hasApplied) {
-      alert("You have already applied for this internship");
+      setError("You have already applied for this internship");
+      return;
+    }
+
+    // Validate that a PDF file is provided
+    if (!formData.cvFile) {
+      setError("Please upload a CV/Resume in PDF format");
+      return;
+    }
+
+    if (formData.cvFile.type !== "application/pdf") {
+      setError(
+        "Only PDF files are allowed. Please upload a valid PDF document."
+      );
       return;
     }
 
@@ -589,16 +613,18 @@ const MultiStepApplyForm = () => {
             type="file"
             id="cvFile"
             onChange={handleFileChange}
-            accept=".pdf,.doc,.docx"
+            accept=".pdf"
             style={{ display: "none" }}
           />
           <Upload className="upload-icon" />
           <div className="upload-text">
             <h3>
-              {formData.cvFile ? formData.cvFile.name : "Upload CV/Resume"}
+              {formData.cvFile
+                ? formData.cvFile.name
+                : "Upload CV/Resume (PDF only)"}
             </h3>
             <p>Drag and drop or click to browse</p>
-            <small>Supported formats: PDF, DOC, DOCX (Max 5MB)</small>
+            <small>📄 Only PDF documents are allowed (Max 5MB)</small>
           </div>
         </div>
       </div>
