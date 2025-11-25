@@ -6,6 +6,8 @@ import Footer from "../components/footer.jsx";
 import { useNavigate } from "react-router-dom";
 import studentService from "../lib/studentService.js";
 import "../style/it.css";
+import { useTheme } from "../context/ThemeContext.jsx";
+import { MapPin, Calendar, Clock, Info, X, Check } from "lucide-react";
 
 const getCompanyLogo = (logoUrl) => {
   return logoUrl || "https://via.placeholder.com/60x60/3498db/ffffff?text=ORG";
@@ -32,7 +34,7 @@ const InternshipSearchPage = () => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const navigate = useNavigate();
-
+  const { darkMode } = useTheme();
   // Fetch available roles on component mount
   useEffect(() => {
     fetchAvailableRoles();
@@ -76,6 +78,7 @@ const InternshipSearchPage = () => {
           "Software Engineer",
           "Web Developer",
           "Graphic Designer",
+          "App Developer",
         ];
 
         const allRoles = [...new Set([...roles, ...commonRoles])].sort();
@@ -416,15 +419,32 @@ const InternshipSearchPage = () => {
             {/* Fuzzy Search Notice */}
             {searchType === "fuzzy" && internships.length > 0 && (
               <div className="fuzzy-search-notice-new">
-                <div className="notice-icon-new">ℹ️</div>
+                <div className="notice-icon-new">
+                  <Info size={24} />
+                </div>
                 <div className="notice-content-new">
                   <p className="notice-title-new">
-                    ❌ No exact matches found for "
-                    <strong>{searchedTerm}</strong>"
+                    <X
+                      size={18}
+                      style={{
+                        display: "inline-block",
+                        marginRight: "8px",
+                        verticalAlign: "middle",
+                      }}
+                    />
+                    No exact matches found for "<strong>{searchedTerm}</strong>"
                   </p>
                   <p className="notice-subtitle-new">
-                    ✅ Here are some related internship opportunities you might
-                    be interested in:
+                    <Check
+                      size={18}
+                      style={{
+                        display: "inline-block",
+                        marginRight: "8px",
+                        verticalAlign: "middle",
+                      }}
+                    />
+                    Here are some related internship opportunities you might be
+                    interested in:
                   </p>
                 </div>
               </div>
@@ -460,15 +480,15 @@ const InternshipSearchPage = () => {
 
                       <div className="job-details-new">
                         <div className="detail-item-new">
-                          <span className="icon-new">📍</span>
+                          <MapPin size={18} />
                           <span>{formattedData.location}</span>
                         </div>
                         <div className="detail-item-new">
-                          <span className="icon-new">📅</span>
+                          <Calendar size={18} />
                           <span>{formattedData.duration}</span>
                         </div>
                         <div className="detail-item-new">
-                          <span className="icon-new">🕒</span>
+                          <Clock size={18} />
                           <span>{formattedData.timePosted}</span>
                         </div>
                       </div>

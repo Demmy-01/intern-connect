@@ -491,3 +491,160 @@
             text-align: center;
           }
         }
+
+        /* Dark Mode Styles */
+        [data-theme="dark"] .search-page-new {
+          background-color: var(--bg-secondary);
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .search-card-new {
+          background-color: var(--card-bg);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+          border: 1px solid var(--card-border);
+        }
+
+        [data-theme="dark"] .filter-label-new {
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .dropdown-toggle-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .role-pill-new {
+          background: rgba(139, 92, 246, 0.15);
+          color: #a78bfa;
+        }
+
+        [data-theme="dark"] .remove-role-new {
+          color: #a78bfa;
+        }
+
+        [data-theme="dark"] .role-dropdown-new {
+          background-color: var(--card-bg);
+          border-color: var(--card-border);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] .dropdown-header-new {
+          border-bottom-color: var(--card-border);
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .close-dropdown-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .role-option-new:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .no-roles-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .filter-input-new,
+        [data-theme="dark"] .filter-select-new {
+          background-color: var(--card-bg);
+          border-color: var(--card-border);
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .filter-input-new:focus,
+        [data-theme="dark"] .filter-select-new:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        [data-theme="dark"] .results-title-new {
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .results-subtitle-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .error-message-new {
+          background-color: rgba(220, 38, 38, 0.1);
+          border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        [data-theme="dark"] .error-message-new p {
+          color: #fca5a5;
+        }
+
+        [data-theme="dark"] .fuzzy-search-notice-new {
+          background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+          border-color: rgba(217, 119, 6, 0.4);
+        }
+
+        [data-theme="dark"] .notice-title-new {
+          color: #fcd34d;
+        }
+
+        [data-theme="dark"] .notice-subtitle-new {
+          color: #d4a574;
+        }
+
+        [data-theme="dark"] .notice-icon-new svg {
+          color: #fcd34d;
+        }
+
+        [data-theme="dark"] .job-card-new {
+          background-color: var(--card-bg);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          border: 1px solid var(--card-border);
+        }
+
+        [data-theme="dark"] .job-card-new:hover {
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] .job-title-new {
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .company-name-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .job-details-new {
+          border-top-color: var(--card-border);
+          border-bottom-color: var(--card-border);
+        }
+
+        [data-theme="dark"] .detail-item-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .detail-item-new svg {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .no-results-state-new h3,
+        [data-theme="dark"] .initial-state-new h3 {
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .no-results-state-new p,
+        [data-theme="dark"] .initial-state-new p {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .no-results-state-new ul {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .load-more-container-new {
+          border-top-color: var(--card-border);
+        }
+
+        [data-theme="dark"] .load-more-info-new {
+          color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .spinner-new {
+          border-color: rgba(255, 255, 255, 0.1);
+          border-top-color: #667eea;
+        }

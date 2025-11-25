@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/logo_blue.png";
 import "../style/verification.css";
-import authService from "../lib/authService";
+import { supabase } from "../lib/supabase";
 
 const EmailVerification = () => {
   const [loading, setLoading] = useState(false);
@@ -45,12 +45,19 @@ const EmailVerification = () => {
     setSuccess("");
 
     try {
-      const result = await authService.resetPassword(userEmail);
+      // Use Supabase's resend method to resend the confirmation email
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: userEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?type=${userType}`
+        }
+      });
 
-      if (result.success) {
-        setSuccess("Verification email sent! Please check your inbox.");
+      if (resendError) {
+        setError(resendError.message);
       } else {
-        setError(result.message);
+        setSuccess("Verification email sent! Please check your inbox.");
       }
     } catch (error) {
       setError("An error occurred while sending the verification email.");
@@ -72,7 +79,7 @@ const EmailVerification = () => {
   };
 
   return (
-    <>
+    <div className="logs">
       <div className="email-verification-wrapper">
         <div className="login-logo-container">
           <img
@@ -153,7 +160,7 @@ const EmailVerification = () => {
         <p>© {currentYear} Intern Connect</p>
       </center>
       </div>
-    </>
+    </div>
   );
 };
 
