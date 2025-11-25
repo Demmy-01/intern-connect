@@ -121,7 +121,7 @@ const SignUp = () => {
             <InputField
               type="text"
               placeholder="Username"
-              icon="account_circle"
+              icon="user"
               name="username"
               value={formData.username}
               onChange={handleChange}

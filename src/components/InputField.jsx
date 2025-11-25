@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Mail, User, Lock, Eye, EyeOff } from "lucide-react";
 
 const InputField = ({ type, placeholder, icon, value, onChange, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,9 +10,22 @@ const InputField = ({ type, placeholder, icon, value, onChange, ...props }) => {
 
   const inputType = type === "password" && showPassword ? "text" : type;
 
+  const renderIcon = () => {
+    switch (icon) {
+      case "mail":
+        return <Mail size={24} />;
+      case "lock":
+        return <Lock size={24} />;
+      case "user":
+        return <User size={24} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="input-wrapper">
-      <i className="material-symbols-rounded">{icon}</i>
+      {renderIcon()}
       <input
         type={inputType}
         className="input-field"
@@ -22,13 +36,17 @@ const InputField = ({ type, placeholder, icon, value, onChange, ...props }) => {
         required
       />
       {type === "password" && (
-        <i
-          className="material-symbols-rounded show-password-icon"
+        <div
+          className="show-password-icon"
           onClick={togglePasswordVisibility}
           style={{ cursor: "pointer" }}
         >
-          {showPassword ? "visibility" : "visibility_off"}
-        </i>
+          {showPassword ? (
+            <EyeOff size={24} />
+          ) : (
+            <Eye size={24} />
+          )}
+        </div>
       )}
     </div>
   );
