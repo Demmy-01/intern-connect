@@ -11,13 +11,24 @@ const InputField = ({ type, placeholder, icon, value, onChange, ...props }) => {
   const inputType = type === "password" && showPassword ? "text" : type;
 
   const renderIcon = () => {
+    const iconProps = {
+      size: 20,
+      strokeWidth: 2.5,
+      color: "#2a5298",
+      className: "input-icon-svg",
+    };
+
     switch (icon) {
       case "mail":
-        return <Mail size={24} />;
+      case "email":
+        return <Mail {...iconProps} />;
       case "lock":
-        return <Lock size={24} />;
+      case "password":
+        return <Lock {...iconProps} />;
       case "user":
-        return <User size={24} />;
+      case "username":
+      case "account_circle":
+        return <User {...iconProps} />;
       default:
         return null;
     }
@@ -42,9 +53,19 @@ const InputField = ({ type, placeholder, icon, value, onChange, ...props }) => {
           style={{ cursor: "pointer" }}
         >
           {showPassword ? (
-            <EyeOff size={24} />
+            <EyeOff
+              size={24}
+              strokeWidth={2.5}
+              color="#2a5298"
+              className="password-toggle-icon"
+            />
           ) : (
-            <Eye size={24} />
+            <Eye
+              size={24}
+              strokeWidth={2.5}
+              color="#2a5298"
+              className="password-toggle-icon"
+            />
           )}
         </div>
       )}
