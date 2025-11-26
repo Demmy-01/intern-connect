@@ -8,6 +8,8 @@ import faith from "../assets/faith.jpg";
 import boma from "../assets/boma.jpg";
 import jade from "../assets/jade.jpg";
 import feranmi from "../assets/feranmi.jpg";
+import tolu from "../assets/tolu.jpeg";
+import bobzi from "../assets/bobzi.jpeg";
 
 export function Team() {
   const teamMembers = [
@@ -54,10 +56,24 @@ export function Team() {
       linkedin: "https://www.linkedin.com/in/boma-amos-atuboyedia-3355a2245/",
     },
     {
-      name: "Adewunmi Omojolaade",
+      name: "Shonola Omojolaade",
       duty: "Software Tester",
       image: jade,
       linkedin: "https://www.linkedin.com/in/shonola-omojolaade-500653376/",
+    },
+    {
+      name: "Afolabi-Ige Omobobola",
+      duty: "Social Media Manager",
+      role: "CEO GizmosHaus",
+      image: bobzi,
+      linkedin: "https://www.linkedin.com/in/omobobola-afolabi-ige-759b1928b/",
+    },
+    {
+      name: "Ogundare Toluwase",
+      duty: "Frontend Developer",
+      role: "Software Developer",
+      image: tolu,
+      linkedin: "https://www.linkedin.com/in/toluwaseogundare/",
     },
   ];
   return (
@@ -73,9 +89,7 @@ export function Team() {
           {teamMembers.map((member, index) => (
             <div
               key={index}
-              className={`team-member ${
-                index === teamMembers.length - 1 ? "team-single" : ""
-              }`}
+              className={`team-member`}
             >
               <div className="team-avatar">
                 <img src={member.image} alt={member.name} />

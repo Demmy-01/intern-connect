@@ -59,6 +59,7 @@ const Navbar = ({ textColor }) => {
         <div className="nav-container">
           <div className="nav-flex">
             {/* Logo */}
+            <Link to="/" className="logo-link">
             <div className="logo-container">
               <div className="logo-flex">
                 <div className="logo-icon">
@@ -74,6 +75,7 @@ const Navbar = ({ textColor }) => {
                 <span className="logo-title">INTERN CONNECT</span>
               </div>
             </div>
+            </Link>
 
             {/* Desktop Navigation - Center */}
             <div className="desktop-nav">

@@ -1238,11 +1238,11 @@ const MultiStepApplyForm = () => {
             flex: 1;
             justify-content: center;
             min-height: 48px; /* Larger touch target on mobile */
-          }
+          
 
           .step-counter {
             position: absolute;
-            top: -2rem;
+            top: 6rem;
             left: 50%;
             transform: translateX(-50%);
             font-size: 0.8rem;

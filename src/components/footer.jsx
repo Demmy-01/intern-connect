@@ -9,6 +9,7 @@ import {
   Twitter,
   Linkedin,
   Instagram,
+  Youtube,
 } from "lucide-react";
 
 const Footer = () => {
@@ -118,10 +119,10 @@ const Footer = () => {
             <a
               href="#"
               className="social-link-ft"
-              aria-label="Facebook"
+              aria-label="Youtube"
               target="_blank"
             >
-              <Facebook size={18} />
+              <Youtube size={18} />
             </a>
             <a
               href="#"

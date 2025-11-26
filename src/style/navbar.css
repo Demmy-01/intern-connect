@@ -154,8 +154,17 @@ body {
   font-size: 12px;
   transition: color 0.3s ease;
   white-space: nowrap;
+  margin-bottom: -5px;
 }
 
+.logo-link{
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--text-color) !important;
+  font-size: 12px;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+}
 .desktop-nav {
   display: none;
   align-items: center;
