@@ -2,6 +2,7 @@ import { Buttons } from "./button-1.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
+import { User } from "lucide-react";
 import profileService from "../lib/profileService";
 import LogoutModal from "./LogoutModal";
 
@@ -11,9 +12,8 @@ const DashboardHeader = () => {
   const navigate = useNavigate();
 
   const [profileUsername, setProfileUsername] = useState("User");
-  const [profileImage, setProfileImage] = useState(
-    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face"
-  );
+  const [profileImage, setProfileImage] = useState(null);
+  const [useDefaultIcon, setUseDefaultIcon] = useState(true);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -22,10 +22,10 @@ const DashboardHeader = () => {
           const result = await profileService.getProfile(user.id);
           if (result.success && result.data) {
             setProfileUsername(result.data.username || "User");
-            setProfileImage(
-              result.data.profileImage ||
-                "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face"
-            );
+            if (result.data.profileImage) {
+              setProfileImage(result.data.profileImage);
+              setUseDefaultIcon(false);
+            }
           }
         } catch (error) {
           console.error("Failed to fetch profile data:", error);
@@ -59,7 +59,23 @@ const DashboardHeader = () => {
     <div className="dashboard-header">
       <div className="dashboard-profile-section">
         <div className="dashboard-avatar">
-          <img src={profileImage} alt="Profile" />
+          {useDefaultIcon ? (
+            <div
+              style={{
+                width: "60px",
+                height: "60px",
+                borderRadius: "50%",
+                backgroundColor: "#e0e7ff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <User size={32} color="#4f46e5" />
+            </div>
+          ) : (
+            <img src={profileImage} alt="Profile" />
+          )}
         </div>
         <div className="dashboard-welcome-text">
           <h1>Welcome back, {profileUsername}!</h1>

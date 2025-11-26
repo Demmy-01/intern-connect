@@ -11,6 +11,7 @@ import location from "../assets/location.png";
 import time from "../assets/time.png";
 import school from "../assets/school.png";
 import organizationService from "../lib/organizationService.js";
+import Loader from "../components/Loader.jsx";
 
 const ApplicationDetails = () => {
   const { id: applicationId } = useParams();
@@ -169,8 +170,7 @@ const ApplicationDetails = () => {
     return (
       <DashboardLayout>
         <div className="loading-container">
-          <div className="spinner"></div>
-          <p>Loading application details...</p>
+          <Loader message="Loading application details..." />
         </div>
       </DashboardLayout>
     );

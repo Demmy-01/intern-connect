@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./org.css";
 import InternshipRow from "../components/InternhipRow.jsx";
+import Loader from "../components/Loader.jsx";
 import { Button } from "../components/button.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout";
@@ -14,7 +15,13 @@ const PostedInternship = () => {
   const navigate = useNavigate();
 
   // Check verification status
-  const { isVerified, isPending, isRejected, loading: verificationLoading, restrictionMessage } = useVerificationStatus();
+  const {
+    isVerified,
+    isPending,
+    isRejected,
+    loading: verificationLoading,
+    restrictionMessage,
+  } = useVerificationStatus();
 
   // Load internships on component mount
   useEffect(() => {
@@ -22,13 +29,14 @@ const PostedInternship = () => {
 
     // Set up real-time subscription
     const setupSubscription = async () => {
-      const subscription = await internshipService.subscribeToOrganizationInternships(
-        (payload) => {
-          console.log('Real-time update:', payload);
-          // Reload internships when there's a change
-          loadInternships();
-        }
-      );
+      const subscription =
+        await internshipService.subscribeToOrganizationInternships(
+          (payload) => {
+            console.log("Real-time update:", payload);
+            // Reload internships when there's a change
+            loadInternships();
+          }
+        );
 
       // Cleanup subscription on unmount
       return () => {
@@ -39,13 +47,14 @@ const PostedInternship = () => {
     };
 
     const cleanup = setupSubscription();
-    return () => cleanup.then(fn => fn && fn());
+    return () => cleanup.then((fn) => fn && fn());
   }, []);
 
   const loadInternships = async () => {
     try {
       setLoading(true);
-      const { data, error } = await internshipService.getOrganizationInternships();
+      const { data, error } =
+        await internshipService.getOrganizationInternships();
 
       if (error) {
         setError(error);
@@ -61,22 +70,25 @@ const PostedInternship = () => {
 
   const handleToggleStatus = async (internshipId, isActive) => {
     try {
-      const { error } = await internshipService.toggleInternshipStatus(internshipId, isActive);
+      const { error } = await internshipService.toggleInternshipStatus(
+        internshipId,
+        isActive
+      );
 
       if (error) {
         throw new Error(error);
       }
 
       // Update local state optimistically
-      setInternships(prev =>
-        prev.map(internship =>
+      setInternships((prev) =>
+        prev.map((internship) =>
           internship.id === internshipId
             ? { ...internship, is_active: isActive }
             : internship
         )
       );
     } catch (err) {
-      console.error('Error toggling internship status:', err);
+      console.error("Error toggling internship status:", err);
       setError(err.message);
     }
   };
@@ -95,9 +107,11 @@ const PostedInternship = () => {
       }
 
       // Remove from local state
-      setInternships(prev => prev.filter(internship => internship.id !== internshipId));
+      setInternships((prev) =>
+        prev.filter((internship) => internship.id !== internshipId)
+      );
     } catch (err) {
-      console.error('Error deleting internship:', err);
+      console.error("Error deleting internship:", err);
       setError(err.message);
     }
   };
@@ -105,12 +119,7 @@ const PostedInternship = () => {
   if (loading || verificationLoading) {
     return (
       <DashboardLayout>
-        <div className="post-container">
-          <div className="loading-container">
-              <div className="spinner"></div>
-              <p>Loading internships...</p>
-            </div>
-          </div>
+        <Loader message="Loading internships..." />
       </DashboardLayout>
     );
   }
@@ -122,11 +131,9 @@ const PostedInternship = () => {
           <div className="post-header">
             <h1 className="post-title">Posted Internships</h1>
             <div className="post-stats">
+              <span className="stat-item">Total: {internships.length}</span>
               <span className="stat-item">
-                Total: {internships.length}
-              </span>
-              <span className="stat-item">
-                Active: {internships.filter(i => i.is_active).length}
+                Active: {internships.filter((i) => i.is_active).length}
               </span>
             </div>
           </div>
@@ -134,7 +141,12 @@ const PostedInternship = () => {
           {error && (
             <div className="error-message">
               <p>Error: {error}</p>
-              <button onClick={() => { setError(null); loadInternships(); }}>
+              <button
+                onClick={() => {
+                  setError(null);
+                  loadInternships();
+                }}
+              >
                 Retry
               </button>
             </div>
@@ -142,9 +154,15 @@ const PostedInternship = () => {
 
           {/* Verification Status Restriction */}
           {restrictionMessage && (
-            <div className={`verification-restriction ${restrictionMessage.type === 'error' ? 'verification-restriction--error' : 'verification-restriction--warning'}`}>
+            <div
+              className={`verification-restriction ${
+                restrictionMessage.type === "error"
+                  ? "verification-restriction--error"
+                  : "verification-restriction--warning"
+              }`}
+            >
               <div className="restriction-icon">
-                {restrictionMessage.type === 'error' ? '⚠️' : '⏳'}
+                {restrictionMessage.type === "error" ? "⚠️" : "⏳"}
               </div>
               <div className="restriction-content">
                 <h3>{restrictionMessage.title}</h3>

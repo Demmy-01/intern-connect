@@ -63,7 +63,7 @@ export function Team() {
     },
     {
       name: "Afolabi-Ige Omobobola",
-      duty: "Social Media Manager",
+      duty: "Social Media and Outreach Manager",
       role: "CEO GizmosHaus",
       image: bobzi,
       linkedin: "https://www.linkedin.com/in/omobobola-afolabi-ige-759b1928b/",

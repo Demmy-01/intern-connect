@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../style/internship-details.css";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import Loader from "../components/Loader.jsx";
 import studentService from "../lib/studentService.js";
 
 const InternshipDetails = () => {
@@ -135,14 +136,7 @@ const InternshipDetails = () => {
     return (
       <>
         <Navbar />
-        <div className="internship-details-page">
-          <div className="it-container">
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <p>Loading internship details...</p>
-            </div>
-          </div>
-        </div>
+        <Loader message="Loading internship details..." />
         <Footer />
       </>
     );

@@ -1,4 +1,3 @@
-// Profile.jsx
 import { useState, useEffect } from "react";
 import "../style/profile.css";
 import Navbar from "../components/navbar.jsx";
@@ -6,6 +5,7 @@ import Footer from "../components/footer";
 import SkillTag from "../components/SkillTag.jsx";
 import ExperienceItem from "../components/experience.jsx";
 import EducationItem from "../components/education.jsx";
+import Loader from "../components/Loader.jsx";
 import phonee from "../assets/phone.png";
 import mail from "../assets/mail.png";
 import { Link } from "react-router-dom";
@@ -19,7 +19,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isIncomplete, setIsIncomplete] = useState(false);
-  
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -67,7 +67,7 @@ const Profile = () => {
     }
   };
 
-  if (loading) return <div>Loading profile...</div>;
+  if (loading) return <Loader message="Loading profile..." />;
   if (error) return <div>Error: {error}</div>;
   if (!profile)
     return (
@@ -97,9 +97,9 @@ const Profile = () => {
         <div className="prof-cover-image">
           <img src={image} alt="Cover" />
         </div>
-        
-          <div className="prof-edit-button-wrapper">
-            <Link to="/edit-profile" className="prof-edit-btn-modern">
+
+        <div className="prof-edit-button-wrapper">
+          <Link to="/edit-profile" className="prof-edit-btn-modern">
             <svg
               width="16"
               height="16"
@@ -112,9 +112,8 @@ const Profile = () => {
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
             {isIncomplete ? "Complete Profile" : "Edit Profile"}
-            </Link>
-            </div>
-        
+          </Link>
+        </div>
       </section>
 
       {/* Main Content */}
@@ -175,7 +174,6 @@ const Profile = () => {
           <section className="prof-card-modern">
             <div className="prof-card-content">
               <div className="prof-section-title-modern">
-
                 <BarChart3 className="h-5 w-5 text-slate-700" />
                 <h2>Skills</h2>
               </div>

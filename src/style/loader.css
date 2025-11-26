@@ -1,0 +1,42 @@
+/* Reusable Loader Styles */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 100vh;
+}
+
+.loader-logo {
+  width: 3rem;
+  height: 3rem;
+  animation: blinkBounce 1.5s ease-in-out infinite;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+}
+
+@keyframes blinkBounce {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.3;
+  }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .loader-container {
+  background-color: #0f172a !important;
+}
+
+[data-theme="dark"] .spinner {
+  border-color: #1e293b;
+  border-top-color: #3b82f6;
+}

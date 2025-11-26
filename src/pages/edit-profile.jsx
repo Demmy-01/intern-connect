@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import "../style/edit-profile.css";
 import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer";
+import Loader from "../components/Loader.jsx";
 import { Button } from "../components/button.jsx";
 import skill from "../assets/skills.png";
 import { supabase } from "../lib/supabase";
@@ -196,7 +197,7 @@ const EditProfile = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader message="Loading your profile..." />;
   if (error)
     return <div style={{ color: "red", padding: "20px" }}>Error: {error}</div>;
 

@@ -7,6 +7,7 @@ import { Button } from "../components/button.jsx";
 import { Link } from "react-router-dom";
 import organizationService from "../lib/organizationService.js";
 import ManualScreeningPanel from "../components/ManualScreeningPanel.jsx";
+import Loader from "../components/Loader.jsx";
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
@@ -157,8 +158,7 @@ const Applications = () => {
           <h1>Applications</h1>
         </div>
         <div className="loading-container">
-          <div className="spinner"></div>
-          <p>Loading applications...</p>
+          <Loader message="Loading applications..." />
         </div>
       </DashboardLayout>
     );

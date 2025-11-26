@@ -5,6 +5,7 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import logo from "../assets/logo_blue.png";
 import studentService from "../lib/studentService.js";
+import Loader from "../components/Loader.jsx";
 import {
   ChevronLeft,
   ChevronRight,
@@ -663,14 +664,7 @@ const MultiStepApplyForm = () => {
     return (
       <>
         <Navbar />
-        <div className="apply-form-container">
-          <div className="form-wrapper">
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <p>Loading application form...</p>
-            </div>
-          </div>
-        </div>
+        <Loader message="Loading application form..." />
         <Footer />
       </>
     );

@@ -7,6 +7,7 @@ import organizationService from "../lib/organizationService.js";
 import { Button } from '../components/button.jsx'
 import { Buttons } from "../components/button-1.jsx";
 import useVerificationStatus from "../hooks/useVerificationStatus";
+import Loader from "../components/Loader.jsx";
 
 const OrganizationDashboard = () => {
   const [stats, setStats] = useState({
@@ -87,10 +88,7 @@ const OrganizationDashboard = () => {
   if (loading || verificationLoading) {
     return (
       <DashboardLayout>
-        <div className="dashboard-loading">
-          <div className="spinner"></div>
-          <p>Loading dashboard...</p>
-        </div>
+       <Loader message="Loading your dashboard..." />
       </DashboardLayout>
     );
   }

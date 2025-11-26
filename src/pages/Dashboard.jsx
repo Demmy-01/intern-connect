@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer.jsx";
 import PageTransition from "../components/PageTransition";
+import Loader from "../components/Loader.jsx";
 import "../style/dashboard.css";
 import DashboardHeader from "../components/DashboardHeader.jsx";
 import StatsCard from "../components/StatsCard.jsx";
@@ -26,11 +27,11 @@ const Dashboard = () => {
       pendingApplications: 0,
       acceptedApplications: 0,
       rejectedApplications: 0,
-      offers: 0
+      offers: 0,
     },
     applications: [],
     recommendedJobs: [],
-    upcomingEvents: []
+    upcomingEvents: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,34 +43,40 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Load all dashboard data in parallel
-      const [statsResult, applicationsResult, recommendedResult, eventsResult] = await Promise.all([
-        studentDashboardService.getDashboardStats(),
-        studentDashboardService.getStudentApplications(),
-        studentDashboardService.getRecommendedInternships(3), // Limit to exactly 3
-        studentDashboardService.getUpcomingEvents()
-      ]);
 
-      console.log('Dashboard data loaded:', {
+      // Load all dashboard data in parallel
+      const [statsResult, applicationsResult, recommendedResult, eventsResult] =
+        await Promise.all([
+          studentDashboardService.getDashboardStats(),
+          studentDashboardService.getStudentApplications(),
+          studentDashboardService.getRecommendedInternships(3), // Limit to exactly 3
+          studentDashboardService.getUpcomingEvents(),
+        ]);
+
+      console.log("Dashboard data loaded:", {
         stats: statsResult.data,
         applications: applicationsResult.data,
         recommended: recommendedResult.data,
-        events: eventsResult.data
+        events: eventsResult.data,
       });
 
       setDashboardData({
         stats: statsResult.data,
         applications: applicationsResult.data || [],
         recommendedJobs: recommendedResult.data || [],
-        upcomingEvents: eventsResult.data || []
+        upcomingEvents: eventsResult.data || [],
       });
 
-      if (statsResult.error || applicationsResult.error || recommendedResult.error || eventsResult.error) {
-        setError('Some data could not be loaded');
+      if (
+        statsResult.error ||
+        applicationsResult.error ||
+        recommendedResult.error ||
+        eventsResult.error
+      ) {
+        setError("Some data could not be loaded");
       }
     } catch (err) {
-      console.error('Dashboard loading error:', err);
+      console.error("Dashboard loading error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -103,9 +110,12 @@ const Dashboard = () => {
     {
       title: "Offers",
       value: dashboardData.stats.offers.toString(),
-      subtitle: dashboardData.stats.offers > 0 
-        ? `Congrats on your ${dashboardData.stats.offers} offer${dashboardData.stats.offers > 1 ? 's' : ''}!`
-        : "Keep applying for more opportunities",
+      subtitle:
+        dashboardData.stats.offers > 0
+          ? `Congrats on your ${dashboardData.stats.offers} offer${
+              dashboardData.stats.offers > 1 ? "s" : ""
+            }!`
+          : "Keep applying for more opportunities",
       icon: <img src={offer} alt="Offer Icon" />,
       onClick: dashboardData.stats.offers > 0 ? handleOffersClick : undefined,
     },
@@ -118,14 +128,16 @@ const Dashboard = () => {
   ];
 
   const formatRecommendedJobs = () => {
-    return dashboardData.recommendedJobs.slice(0, 3).map(job => ({
+    return dashboardData.recommendedJobs.slice(0, 3).map((job) => ({
       id: job.id,
       title: job.position_title,
-      company: job.organizations?.organization_name || 'Unknown Company',
-      logo: job.organizations?.logo_url || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=50&h=50&fit=crop",
+      company: job.organizations?.organization_name || "Unknown Company",
+      logo:
+        job.organizations?.logo_url ||
+        "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=50&h=50&fit=crop",
       department: job.department,
       location: job.location,
-      workType: job.work_type
+      workType: job.work_type,
     }));
   };
 
@@ -146,26 +158,7 @@ const Dashboard = () => {
     return (
       <PageTransition>
         <Navbar />
-        <div className="dashboard-main">
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            minHeight: '400px',
-            flexDirection: 'column' 
-          }}>
-            <div className="spinner" style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid #f3f3f3',
-              borderTop: '4px solid #1070e5',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              marginBottom: '1rem'
-            }}></div>
-            <p>Loading your dashboard...</p>
-          </div>
-        </div>
+        <Loader message="Loading your dashboard..." />
         <Footer />
       </PageTransition>
     );
@@ -176,16 +169,18 @@ const Dashboard = () => {
       <Navbar />
       <div className="dashboard-main">
         <DashboardHeader />
-        
+
         {error && (
-          <div style={{ 
-            background: '#fef2f2', 
-            color: '#dc2626', 
-            padding: '1rem', 
-            borderRadius: '8px', 
-            margin: '1rem 0',
-            border: '1px solid #fecaca'
-          }}>
+          <div
+            style={{
+              background: "#fef2f2",
+              color: "#dc2626",
+              padding: "1rem",
+              borderRadius: "8px",
+              margin: "1rem 0",
+              border: "1px solid #fecaca",
+            }}
+          >
             {error}
           </div>
         )}
@@ -205,24 +200,29 @@ const Dashboard = () => {
             <div className="dashboard-job-list">
               {formatRecommendedJobs().length > 0 ? (
                 formatRecommendedJobs().map((job, index) => (
-                  <JobCard 
-                    key={index} 
-                    {...job} 
-                    onClick={() => window.location.href = `/internship-details/${job.id}`}
+                  <JobCard
+                    key={index}
+                    {...job}
+                    onClick={() =>
+                      (window.location.href = `/internship-details/${job.id}`)
+                    }
                   />
                 ))
               ) : (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '2rem', 
-                  color: '#64748b',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                  border: '1px solid #e5e7eb'
-                }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "2rem",
+                    color: "#64748b",
+                    background: "#f8fafc",
+                    borderRadius: "8px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
                   <p>No new recommendations available.</p>
-                  <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                    You've applied to all relevant internships! Check back later for new opportunities.
+                  <p style={{ fontSize: "0.875rem", marginTop: "0.5rem" }}>
+                    You've applied to all relevant internships! Check back later
+                    for new opportunities.
                   </p>
                 </div>
               )}
@@ -238,12 +238,14 @@ const Dashboard = () => {
                     <EventItem key={index} {...event} />
                   ))
                 ) : (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '1.5rem', 
-                    color: '#64748b',
-                    fontSize: '0.875rem'
-                  }}>
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "1.5rem",
+                      color: "#64748b",
+                      fontSize: "0.875rem",
+                    }}
+                  >
                     No upcoming events
                   </div>
                 )}
@@ -264,23 +266,27 @@ const Dashboard = () => {
       <Footer />
 
       {/* Applications Modal */}
-      <SentApplicationModal 
-        isOpen={isApplicationsModalOpen} 
+      <SentApplicationModal
+        isOpen={isApplicationsModalOpen}
         onClose={handleCloseApplicationsModal}
         applications={dashboardData.applications}
       />
 
       {/* Accepted Internships Modal */}
-      <AcceptedInternshipsModal 
-        isOpen={isOffersModalOpen} 
+      <AcceptedInternshipsModal
+        isOpen={isOffersModalOpen}
         onClose={handleCloseOffersModal}
         applications={dashboardData.applications}
       />
 
       <style jsx>{`
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </PageTransition>
