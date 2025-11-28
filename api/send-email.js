@@ -16,7 +16,8 @@ export default async function handler(req, res) {
   const port = Number(process.env.ZOHO_SMTP_PORT || 587);
   const user = process.env.ZOHO_SMTP_USER;
   const pass = process.env.ZOHO_SMTP_PASS;
-  const from = process.env.ZOHO_FROM_EMAIL || user;
+  const emailAddress = process.env.ZOHO_FROM_EMAIL || user;
+  const from = `Intern Connect <${emailAddress}>`;
 
   if (!user || !pass) {
     console.error('SMTP credentials not configured');
