@@ -53,7 +53,6 @@ const SignUp = () => {
       return;
     }
 
-
     // Validate email format
     if (!securityService.validateEmail(formData.email)) {
       setError("Invalid email format");
