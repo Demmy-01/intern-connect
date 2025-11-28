@@ -22,6 +22,7 @@ const InternshipSearchPage = () => {
   const [compensation, setCompensation] = useState("");
   const [internships, setInternships] = useState([]);
   const [allInternships, setAllInternships] = useState([]);
+  const [suggestedInternships, setSuggestedInternships] = useState([]);
   const [availableRoles, setAvailableRoles] = useState([]);
   const [filteredRoles, setFilteredRoles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -60,170 +61,169 @@ const InternshipSearchPage = () => {
         const roles = [...new Set(data.map((i) => i.position_title))];
 
         const commonRoles = [
-  // --- Tech & IT ---
-  "Frontend Developer",
-  "Backend Developer",
-  "Full Stack Developer",
-  "UI/UX Designer",
-  "Product Designer",
-  "Data Analyst",
-  "Data Scientist",
-  "Marketing",
-  "Content Writer",
-  "Social Media Manager",
-  "Business Analyst",
-  "Project Manager",
-  "Mobile Developer",
-  "DevOps Engineer",
-  "QA Engineer",
-  "Software Engineer",
-  "Web Developer",
-  "Graphic Designer",
-  "App Developer",
-  "Cybersecurity Analyst",
-  "Cloud Engineer",
-  "Machine Learning Engineer",
-  "AI Engineer",
-  "IT Support Specialist",
-  "Network Administrator",
-  "Database Administrator",
-  "Systems Analyst",
-  "Blockchain Developer",
-  "Game Developer",
-  "Software Architect",
+          // --- Tech & IT ---
+          "Frontend Developer",
+          "Backend Developer",
+          "Full Stack Developer",
+          "UI/UX Designer",
+          "Product Designer",
+          "Data Analyst",
+          "Data Scientist",
+          "Marketing",
+          "Content Writer",
+          "Social Media Manager",
+          "Business Analyst",
+          "Project Manager",
+          "Mobile Developer",
+          "DevOps Engineer",
+          "QA Engineer",
+          "Software Engineer",
+          "Web Developer",
+          "Graphic Designer",
+          "App Developer",
+          "Cyber security Analyst",
+          "Cloud Engineer",
+          "Machine Learning Engineer",
+          "AI Engineer",
+          "IT Support Specialist",
+          "Network Administrator",
+          "Database Administrator",
+          "Systems Analyst",
+          "Blockchain Developer",
+          "Game Developer",
+          "Software Architect",
 
-  // --- Business & Management ---
-  "Operations Manager",
-  "Human Resource Manager",
-  "Sales Manager",
-  "Business Development Executive",
-  "Customer Service Representative",
-  "Entrepreneur",
-  "Procurement Officer",
-  "Account Manager",
-  "Administrative Assistant",
-  "Quality Assurance Manager",
-  "Supply Chain Manager",
-  "Logistics Coordinator",
+          // --- Business & Management ---
+          "Operations Manager",
+          "Human Resource Manager",
+          "Sales Manager",
+          "Business Development Executive",
+          "Customer Service Representative",
+          "Entrepreneur",
+          "Procurement Officer",
+          "Account Manager",
+          "Administrative Assistant",
+          "Quality Assurance Manager",
+          "Supply Chain Manager",
+          "Logistics Coordinator",
 
-  // --- Finance & Accounting ---
-  "Accountant",
-  "Financial Analyst",
-  "Auditor",
-  "Tax Consultant",
-  "Investment Banker",
-  "Loan Officer",
-  "Economist",
-  "Bookkeeper",
-  "Risk Manager",
-  "Insurance Underwriter",
+          // --- Finance & Accounting ---
+          "Accountant",
+          "Financial Analyst",
+          "Auditor",
+          "Tax Consultant",
+          "Investment Banker",
+          "Loan Officer",
+          "Economist",
+          "Bookkeeper",
+          "Risk Manager",
+          "Insurance Underwriter",
 
-  // --- Health & Medical ---
-  "Nurse",
-  "Medical Doctor",
-  "Pharmacist",
-  "Medical Laboratory Scientist",
-  "Physiotherapist",
-  "Radiographer",
-  "Dentist",
-  "Public Health Officer",
-  "Nutritionist",
-  "Psychologist",
-  "Health Records Officer",
-  "Optometrist",
+          // --- Health & Medical ---
+          "Nurse",
+          "Medical Doctor",
+          "Pharmacist",
+          "Medical Laboratory Scientist",
+          "Physiotherapist",
+          "Radiographer",
+          "Dentist",
+          "Public Health Officer",
+          "Nutritionist",
+          "Psychologist",
+          "Health Records Officer",
+          "Optometrist",
 
-  // --- Engineering ---
-  "Civil Engineer",
-  "Mechanical Engineer",
-  "Electrical Engineer",
-  "Chemical Engineer",
-  "Petroleum Engineer",
-  "Aerospace Engineer",
-  "Biomedical Engineer",
-  "Environmental Engineer",
-  "Structural Engineer",
-  "Industrial Engineer",
-  "Automotive Engineer",
+          // --- Engineering ---
+          "Civil Engineer",
+          "Mechanical Engineer",
+          "Electrical Engineer",
+          "Chemical Engineer",
+          "Petroleum Engineer",
+          "Aerospace Engineer",
+          "Biomedical Engineer",
+          "Environmental Engineer",
+          "Structural Engineer",
+          "Industrial Engineer",
+          "Automotive Engineer",
 
-  // --- Sciences & Research ---
-  "Biologist",
-  "Chemist",
-  "Physicist",
-  "Research Assistant",
-  "Laboratory Technician",
-  "Geographer",
-  "Geologist",
-  "Meteorologist",
-  "Ecologist",
-  "Agricultural Scientist",
+          // --- Sciences & Research ---
+          "Biologist",
+          "Chemist",
+          "Physicist",
+          "Research Assistant",
+          "Laboratory Technician",
+          "Geographer",
+          "Geologist",
+          "Meteorologist",
+          "Ecologist",
+          "Agricultural Scientist",
 
-  // --- Arts, Media & Creative ---
-  "Photographer",
-  "Video Editor",
-  "Animator",
-  "Music Producer",
-  "Actor",
-  "Fashion Designer",
-  "Interior Designer",
-  "Author",
-  "Journalist",
-  "TV Presenter",
-  "Creative Director",
+          // --- Arts, Media & Creative ---
+          "Photographer",
+          "Video Editor",
+          "Animator",
+          "Music Producer",
+          "Actor",
+          "Fashion Designer",
+          "Interior Designer",
+          "Author",
+          "Journalist",
+          "TV Presenter",
+          "Creative Director",
 
-  // --- Law & Politics ---
-  "Lawyer",
-  "Legal Advisor",
-  "Paralegal",
-  "Judge",
-  "Policy Analyst",
-  "Political Scientist",
-  "Legislative Aide",
+          // --- Law & Politics ---
+          "Lawyer",
+          "Legal Advisor",
+          "Paralegal",
+          "Judge",
+          "Policy Analyst",
+          "Political Scientist",
+          "Legislative Aide",
 
-  // --- Education ---
-  "Teacher",
-  "Lecturer",
-  "Researcher",
-  "Tutor",
-  "Curriculum Developer",
-  "Academic Advisor",
-  "Librarian",
+          // --- Education ---
+          "Teacher",
+          "Lecturer",
+          "Researcher",
+          "Tutor",
+          "Curriculum Developer",
+          "Academic Advisor",
+          "Librarian",
 
-  // --- Construction & Skilled Trades ---
-  "Architect",
-  "Builder",
-  "Plumber",
-  "Electrician",
-  "Welder",
-  "Surveyor",
-  "Construction Manager",
+          // --- Construction & Skilled Trades ---
+          "Architect",
+          "Builder",
+          "Plumber",
+          "Electrician",
+          "Welder",
+          "Surveyor",
+          "Construction Manager",
 
-  // --- Hospitality & Tourism ---
-  "Chef",
-  "Hotel Manager",
-  "Waiter",
-  "Travel Consultant",
-  "Event Planner",
-  "Tour Guide",
+          // --- Hospitality & Tourism ---
+          "Chef",
+          "Hotel Manager",
+          "Waiter",
+          "Travel Consultant",
+          "Event Planner",
+          "Tour Guide",
 
-  // --- Agriculture ---
-  "Farmer",
-  "Agronomist",
-  "Food Technologist",
-  "Fisheries Officer",
-  "Livestock Manager",
+          // --- Agriculture ---
+          "Farmer",
+          "Agronomist",
+          "Food Technologist",
+          "Fisheries Officer",
+          "Livestock Manager",
 
-  // --- Other Important Roles ---
-  "Customer Success Manager",
-  "Community Manager",
-  "Technical Writer",
-  "Virtual Assistant",
-  "Real Estate Agent",
-  "Security Officer",
-  "Driver",
-  "Logistics Driver",
-  "Store Keeper"
-];
-
+          // --- Other Important Roles ---
+          "Customer Success Manager",
+          "Community Manager",
+          "Technical Writer",
+          "Virtual Assistant",
+          "Real Estate Agent",
+          "Security Officer",
+          "Logistics Driver",
+          "Store Keeper",
+          "Others",
+        ];
 
         const allRoles = [...new Set([...roles, ...commonRoles])].sort();
         setAvailableRoles(allRoles);
@@ -256,12 +256,10 @@ const InternshipSearchPage = () => {
       setHasSearched(true);
       setDisplayCount(7);
 
-      // Build search query from selected roles
-      const roleQuery =
-        selectedRoles.length > 0 ? selectedRoles.join(" ") : searchQuery.trim();
-
+      // Send selected roles as an array so backend can search for any matching role
       const searchParams = {
-        query: roleQuery,
+        query: searchQuery.trim(),
+        roles: selectedRoles,
         location: location.trim(),
         workType: jobType,
         duration: duration,
@@ -281,13 +279,40 @@ const InternshipSearchPage = () => {
         setError(error);
         setAllInternships([]);
         setInternships([]);
+        setSuggestedInternships([]);
         setSearchType("none");
       } else {
         const results = data || [];
         setAllInternships(results);
         setInternships(results.slice(0, 7));
         setSearchType(resultType);
-        setSearchedTerm(term || roleQuery);
+        // use the backend returned searched term when available,
+        // otherwise show the selected roles joined or the plain query
+        const fallbackTerm =
+          selectedRoles && selectedRoles.length > 0
+            ? selectedRoles.join(", ")
+            : searchQuery;
+        setSearchedTerm(resultType);
+
+        // Fetch all available internships and get 5 random ones not in results
+        try {
+          const { data: allActive } =
+            await studentService.getAllActiveInternships();
+          if (allActive && allActive.length > 0) {
+            // Filter out internships already in search results
+            const resultIds = new Set(results.map((r) => r.id));
+            const otherInternships = allActive.filter(
+              (item) => !resultIds.has(item.id)
+            );
+
+            // Shuffle and get max 5
+            const shuffled = otherInternships.sort(() => Math.random() - 0.5);
+            setSuggestedInternships(shuffled.slice(0, 5));
+          }
+        } catch (err) {
+          console.warn("Failed to fetch suggestions:", err);
+          setSuggestedInternships([]);
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -316,6 +341,7 @@ const InternshipSearchPage = () => {
     setCompensation("");
     setInternships([]);
     setAllInternships([]);
+    setSuggestedInternships([]);
     setError(null);
     setHasSearched(false);
     setDisplayCount(7);
@@ -720,6 +746,92 @@ const InternshipSearchPage = () => {
                   Showing {internships.length} of {allInternships.length}{" "}
                   internships
                 </p>
+              </div>
+            )}
+
+            {/* "You Might Also Like These" Section */}
+            {hasSearched && suggestedInternships.length > 0 && (
+              <div className="suggested-section-new">
+                <h3 className="suggested-title-new">
+                  You might also like these
+                </h3>
+                <div className="suggested-grid-new">
+                  {suggestedInternships.map((internship) => {
+                    const formattedData = formatInternshipData(internship);
+                    return (
+                      <div key={internship.id} className="job-card-new">
+                        <div className="job-card-header-new">
+                          <img
+                            src={formattedData.logo}
+                            alt={formattedData.company}
+                            className="company-logo-new"
+                          />
+                          <div className="job-info-new">
+                            <h3 className="job-title-new">
+                              {formattedData.jobTitle}
+                            </h3>
+                            <p className="company-name-new">
+                              {formattedData.company}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="job-details-new">
+                          <div className="detail-item-new">
+                            <MapPin size={18} />
+                            <span>{formattedData.location}</span>
+                          </div>
+                          <div className="detail-item-new">
+                            <Calendar size={18} />
+                            <span>{formattedData.duration}</span>
+                          </div>
+                          <div className="detail-item-new">
+                            <Clock size={18} />
+                            <span>{formattedData.timePosted}</span>
+                          </div>
+                        </div>
+
+                        <div className="job-tags-new">
+                          {formattedData.tags.map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className={`tag-new tag-${tag.toLowerCase()}-new`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="job-actions-new">
+                          <Button
+                            label={
+                              isDeadlinePassed(internship.application_deadline)
+                                ? "Application Closed"
+                                : "Apply Now"
+                            }
+                            onClick={() => {
+                              if (
+                                !isDeadlinePassed(
+                                  internship.application_deadline
+                                )
+                              ) {
+                                handleApply(internship.id);
+                              }
+                            }}
+                            disabled={isDeadlinePassed(
+                              internship.application_deadline
+                            )}
+                          />
+                          <Button
+                            label="View Details"
+                            onClick={() => handleViewDetails(internship.id)}
+                            variant="secondary"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

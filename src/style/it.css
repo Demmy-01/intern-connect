@@ -648,3 +648,32 @@
           border-color: rgba(255, 255, 255, 0.1);
           border-top-color: #667eea;
         }
+
+        /* "You Might Also Like These" Section */
+        .suggested-section-new {
+          margin-top: 4rem;
+          padding-top: 3rem;
+          border-top: 2px solid #f3f4f6;
+        }
+
+        .suggested-title-new {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #111827;
+          margin-bottom: 2rem;
+          text-align: center;
+        }
+
+        .suggested-grid-new {
+          display: grid;
+          gap: 1.5rem;
+        }
+
+        [data-theme="dark"] .suggested-section-new {
+          border-top-color: var(--card-border);
+        }
+
+        [data-theme="dark"] .suggested-title-new {
+          color: var(--text-primary);
+        }
+      

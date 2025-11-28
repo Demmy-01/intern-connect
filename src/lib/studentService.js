@@ -8,6 +8,7 @@ class StudentService {
     try {
       const { 
         query = '', 
+        roles = [],
         location = '', 
         workType = '', 
         duration = '',
@@ -19,6 +20,7 @@ class StudentService {
       // Step 1: Try exact/full-text search first
       const exactResults = await this.executeExactSearch({
         query,
+        roles,
         location,
         workType,
         duration,
@@ -34,11 +36,12 @@ class StudentService {
         };
       }
 
-      // Step 2: If no exact results and query exists, try fuzzy search
-      if (query.trim()) {
+      // Step 2: If no exact results and (query or roles) exists, try fuzzy search
+      if (query.trim() || (roles && roles.length > 0)) {
         console.log('No exact results, trying fuzzy search...');
         const fuzzyResults = await this.executeFuzzySearch({
           query,
+          roles,
           location,
           workType,
           duration,
@@ -51,7 +54,7 @@ class StudentService {
             data: fuzzyResults, 
             error: null,
             searchType: 'fuzzy', // Indicate fuzzy match
-            searchedTerm: query.trim() // Return what was searched
+            searchedTerm: query.trim() || (roles && roles.length > 0 ? roles.join(', ') : '') // Return what was searched
           };
         }
       }
@@ -71,7 +74,7 @@ class StudentService {
   }
 
   // Execute exact search with keyword matching
-  async executeExactSearch({ query, location, workType, duration, compensation }) {
+  async executeExactSearch({ query, roles = [], location, workType, duration, compensation }) {
     let supabaseQuery = supabase
       .from('internships')
       .select(`
@@ -86,8 +89,21 @@ class StudentService {
       `)
       .eq('is_active', true);
 
-    // Exact keyword search across multiple fields
-    if (query.trim()) {
+    // If roles array provided, build OR conditions for each role across fields
+    if (roles && Array.isArray(roles) && roles.length > 0) {
+      const roleConditions = [];
+      roles.forEach(role => {
+        const term = role.toLowerCase().trim();
+        if (!term) return;
+        roleConditions.push(`position_title.ilike.%${term}%`);
+        roleConditions.push(`department.ilike.%${term}%`);
+        roleConditions.push(`description.ilike.%${term}%`);
+        roleConditions.push(`requirements.ilike.%${term}%`);
+      });
+      if (roleConditions.length > 0) {
+        supabaseQuery = supabaseQuery.or(roleConditions.join(','));
+      }
+    } else if (query.trim()) {
       const searchTerm = query.toLowerCase().trim();
       
       const searchConditions = [
@@ -129,12 +145,32 @@ class StudentService {
 
     if (error) throw error;
 
-    // Also search by organization name
+    // Also search by organization name (for roles or query)
     let orgResults = [];
-    if (query.trim()) {
-      const searchTerm = query.toLowerCase().trim();
-      
-      try {
+    try {
+      if (roles && roles.length > 0) {
+        for (const role of roles) {
+          const term = role.toLowerCase().trim();
+          if (!term) continue;
+          const { data: orgData } = await supabase
+            .from('internships')
+            .select(`
+              *,
+              organizations!inner(
+                id,
+                organization_name,
+                logo_url,
+                company_type,
+                location
+              )
+            `)
+            .eq('is_active', true)
+            .ilike('organizations.organization_name', `%${term}%`)
+            .order('created_at', { ascending: false });
+          if (orgData && orgData.length) orgResults = orgResults.concat(orgData);
+        }
+      } else if (query.trim()) {
+        const searchTerm = query.toLowerCase().trim();
         const { data: orgData } = await supabase
           .from('internships')
           .select(`
@@ -150,11 +186,10 @@ class StudentService {
           .eq('is_active', true)
           .ilike('organizations.organization_name', `%${searchTerm}%`)
           .order('created_at', { ascending: false });
-        
         orgResults = orgData || [];
-      } catch (orgError) {
-        console.warn('Organization search failed:', orgError);
       }
+    } catch (orgError) {
+      console.warn('Organization search failed:', orgError);
     }
 
     // Merge and deduplicate results
@@ -171,8 +206,8 @@ class StudentService {
   }
 
   // Execute fuzzy search using pg_trgm similarity
-  async executeFuzzySearch({ query, location, workType, duration, compensation }) {
-    const searchTerm = query.toLowerCase().trim();
+  async executeFuzzySearch({ query, roles = [], location, workType, duration, compensation }) {
+    const searchTerm = (roles && roles.length > 0) ? roles.join(' ').toLowerCase().trim() : (query || '').toLowerCase().trim();
     
     // Get all active internships for client-side fuzzy matching
     let supabaseQuery = supabase
@@ -195,6 +230,9 @@ class StudentService {
     if (error) throw error;
     if (!data || data.length === 0) return [];
 
+    // Helper to normalize text for comparison (remove spaces/punctuation)
+    const normalize = (s = '') => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
     // Calculate similarity scores for each internship
     const scoredResults = data.map(internship => {
       const title = (internship.position_title || '').toLowerCase();
@@ -202,29 +240,47 @@ class StudentService {
       const desc = (internship.description || '').toLowerCase();
       const orgName = (internship.organizations?.organization_name || '').toLowerCase();
 
-      // Calculate similarity score (simple word overlap algorithm)
+      const normTitle = normalize(title);
+      const normDept = normalize(dept);
+      const normDesc = normalize(desc);
+      const normOrg = normalize(orgName);
+
+      // Calculate similarity score (improved word overlap + normalized comparisons)
       let similarityScore = 0;
       const searchWords = searchTerm.split(/\s+/);
       
-      searchWords.forEach(word => {
+      searchWords.forEach(wordRaw => {
+        const word = (wordRaw || '').toLowerCase().trim();
         if (word.length < 3) return; // Skip very short words
-        
-        // Check partial matches in different fields
+
+        const normWord = normalize(word);
+
+        // Direct substring matches (original strings)
         if (title.includes(word)) similarityScore += 10;
         if (dept.includes(word)) similarityScore += 8;
         if (orgName.includes(word)) similarityScore += 6;
         if (desc.includes(word)) similarityScore += 3;
 
-        // Bonus for word proximity (e.g., "front" matches "frontend")
-        const titleWords = title.split(/\s+/);
-        const deptWords = dept.split(/\s+/);
-        
+        // Normalized comparisons to handle spacing/punctuation differences
+        if (normTitle.includes(normWord) || normWord.includes(normTitle)) similarityScore += 10;
+        if (normDept.includes(normWord) || normWord.includes(normDept)) similarityScore += 8;
+        if (normOrg.includes(normWord) || normWord.includes(normOrg)) similarityScore += 6;
+        if (normDesc.includes(normWord) || normWord.includes(normDesc)) similarityScore += 3;
+
+        // Bonus for matching individual tokens in title/department (normalized)
+        const titleWords = title.split(/\s+/).map(t => t.trim()).filter(Boolean);
+        const deptWords = dept.split(/\s+/).map(t => t.trim()).filter(Boolean);
+
         titleWords.forEach(tw => {
-          if (tw.includes(word) || word.includes(tw)) similarityScore += 5;
+          const nTw = normalize(tw);
+          if (!nTw) return;
+          if (nTw.includes(normWord) || normWord.includes(nTw)) similarityScore += 5;
         });
-        
+
         deptWords.forEach(dw => {
-          if (dw.includes(word) || word.includes(dw)) similarityScore += 4;
+          const nDw = normalize(dw);
+          if (!nDw) return;
+          if (nDw.includes(normWord) || normWord.includes(nDw)) similarityScore += 4;
         });
       });
 
@@ -232,8 +288,10 @@ class StudentService {
     });
 
     // Filter out results with very low scores and sort by similarity
+    // Lowered threshold to > 2 so single-word matches show up (e.g., "cyber" matches "Cyber Security Technician")
+    // Scoring: title match +10, dept +8, org +6, desc +3; token bonuses +5/+4
     let fuzzyResults = scoredResults
-      .filter(item => item.similarityScore > 5) // Minimum threshold
+      .filter(item => item.similarityScore > 2) // Lowered from > 5 for better recall
       .sort((a, b) => b.similarityScore - a.similarityScore);
 
     // Apply additional filters (more lenient for fuzzy search)
