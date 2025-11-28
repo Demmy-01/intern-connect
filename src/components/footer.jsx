@@ -1,6 +1,7 @@
 import "../style/footer.css";
 import logo_blue from "../assets/logo_blue.png";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+// Use plain anchors in footer to force full page reloads on navigation
 import {
   Phone,
   Mail,
@@ -155,4 +156,5 @@ const Footer = () => {
   );
 };
 
-export default Footer;2
+export default Footer;
+2;
