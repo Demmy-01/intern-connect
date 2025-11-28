@@ -6,6 +6,7 @@ import SocialLogin from "../components/SocialLogin";
 import "../style/login.css";
 import logo from "../assets/logo_blue.png";
 import authService from "../lib/authService";
+import securityService from "../lib/securityService";
 const currentYear = new Date().getFullYear();
 
 const Login = () => {
@@ -48,8 +49,24 @@ const Login = () => {
     setError("");
     setSuccess("");
 
+    // Validate email and password
     if (!formData.email || !formData.password) {
       setError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+
+    // Check email format
+    if (!securityService.validateEmail(formData.email)) {
+      setError("Invalid email format");
+      setLoading(false);
+      return;
+    }
+
+    // Check rate limiting (max 5 attempts per 15 minutes)
+    const rateLimit = securityService.checkLoginAttempt(formData.email);
+    if (!rateLimit.allowed) {
+      setError(rateLimit.message);
       setLoading(false);
       return;
     }
@@ -61,14 +78,27 @@ const Login = () => {
       );
 
       if (result.success) {
+        // Log successful login
+        await securityService.logAuthAttempt(formData.email, true);
         setSuccess(result.message);
         setTimeout(() => {
           navigate("/dashboard");
         }, 1500);
       } else {
+        // Log failed login
+        await securityService.logAuthAttempt(
+          formData.email,
+          false,
+          result.message
+        );
         setError(result.message);
       }
     } catch (error) {
+      await securityService.logAuthAttempt(
+        formData.email,
+        false,
+        error.message
+      );
       setError("An unexpected error occurred. Please try again.");
     }
     setLoading(false);

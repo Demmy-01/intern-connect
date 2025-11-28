@@ -281,7 +281,8 @@ async getApplicationDetails(applicationId) {
         .from('internship_applications')
         .update({
           status: status,
-          notes: notes
+          notes: notes,
+          updated_at: new Date().toISOString()
         })
         .eq('id', applicationId)
         .select('*')
@@ -289,6 +290,22 @@ async getApplicationDetails(applicationId) {
 
       if (error) {
         throw error;
+      }
+
+      // Send email notification based on status
+      if (data) {
+        try {
+          const emailNotificationService = (await import('./emailNotificationService.js')).default;
+          
+          if (status === 'accepted') {
+            await emailNotificationService.sendAcceptanceEmail(applicationId);
+          } else if (status === 'rejected') {
+            await emailNotificationService.sendRejectionEmail(applicationId);
+          }
+        } catch (emailError) {
+          console.warn('Email notification failed (non-critical):', emailError);
+          // Don't throw error - status was still updated successfully
+        }
       }
 
       return { data, error: null };

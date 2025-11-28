@@ -1,9 +1,41 @@
 import { supabase } from './supabase';
 
 class AuthService {
+  // Check if email already exists in the system
+  async checkEmailExists(email) {
+    try {
+      // Check in auth.users (if accessible)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .limit(1);
+
+      if (error) {
+        console.warn('Error checking email:', error);
+        // If we can't check, assume it might exist to be safe
+        return false;
+      }
+
+      return data && data.length > 0; // True if email exists
+    } catch (error) {
+      console.warn('Error checking email existence:', error);
+      return false;
+    }
+  }
+
   // Student Authentication Methods
   async signUpStudent(email, password, username) {
     try {
+      // Check if email already exists
+      const emailExists = await this.checkEmailExists(email);
+      if (emailExists) {
+        return {
+          success: false,
+          message: "This email is already registered. Please use a different email or try logging in."
+        };
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -18,6 +50,13 @@ class AuthService {
       });
 
       if (error) {
+        // Check if error is about email already existing
+        if (error.message && error.message.toLowerCase().includes('user already registered')) {
+          return {
+            success: false,
+            message: "This email is already registered. Please use a different email or try logging in."
+          };
+        }
         return {
           success: false,
           message: error.message

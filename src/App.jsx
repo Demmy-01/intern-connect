@@ -1,10 +1,12 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import {
   StudentProtectedRoute,
   OrganizationProtectedRoute,
   AdminProtectedRoute,
 } from "./components/ProtectedRoute";
+import securityService from "./lib/securityService";
 import Home from "./pages/home.jsx";
 import { About } from "./pages/about";
 import { Team } from "./pages/team";
@@ -41,6 +43,11 @@ import AdminLogin from "./auth/admin-login.jsx";
 import AdminDashboard from "./admin/admin-dashboard.jsx";
 
 function App() {
+  useEffect(() => {
+    // Setup auto-logout after 30 minutes of inactivity
+    securityService.setupInactivityTimeout(30);
+  }, []);
+
   return (
     <Router
       future={{
@@ -130,7 +137,7 @@ function App() {
           <Route
             path="/applications"
             element={
-              <OrganizationProtectedRoute> 
+              <OrganizationProtectedRoute>
                 <Applications />
               </OrganizationProtectedRoute>
             }
@@ -203,7 +210,7 @@ function App() {
           <Route path="/organization-login" element={<OrganizationLogin />} />
           <Route path="/organization-signup" element={<OrganizationSignup />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="forgot-password" element={<ForgotPassword />} /> 
+          <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/icn-admin-login" element={<AdminLogin />} />

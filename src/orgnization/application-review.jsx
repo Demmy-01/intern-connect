@@ -52,8 +52,8 @@ const ApplicationDetails = () => {
 
     const confirmMessage =
       status === "accepted"
-        ? "Are you sure you want to accept this application?"
-        : "Are you sure you want to reject this application?";
+        ? "Are you sure you want to accept this application? An acceptance email will be sent to the applicant."
+        : "Are you sure you want to reject this application? A rejection email will be sent to the applicant.";
 
     if (window.confirm(confirmMessage)) {
       try {
@@ -74,7 +74,7 @@ const ApplicationDetails = () => {
           alert(
             `Application ${
               status === "accepted" ? "accepted" : "rejected"
-            } successfully!`
+            } successfully! Email notification has been sent to the applicant.`
           );
           setApplicationData((prev) => ({ ...prev, status }));
         }
