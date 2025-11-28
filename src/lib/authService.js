@@ -3,47 +3,30 @@ import { supabase } from './supabase';
 class AuthService {
   // Check if email already exists in the system
   async checkEmailExists(email) {
-    try {
-      // Check in auth.users (if accessible)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email.toLowerCase())
-        .limit(1);
-
-      if (error) {
-        console.warn('Error checking email:', error);
-        // If we can't check, assume it might exist to be safe
-        return false;
-      }
-
-      return data && data.length > 0; // True if email exists
-    } catch (error) {
-      console.warn('Error checking email existence:', error);
-      return false;
-    }
+    // Browser clients cannot reliably query auth.users for other users.
+    // To avoid incorrect queries against the `profiles` table (which doesn't
+    // store email), return false here and rely on Supabase's signup error
+    // response for detecting existing emails. For server-side checks, use an
+    // admin API or an RPC.
+    return false;
   }
 
   // Student Authentication Methods
   async signUpStudent(email, password, username) {
     try {
-      // Check if email already exists
-      const emailExists = await this.checkEmailExists(email);
-      if (emailExists) {
-        return {
-          success: false,
-          message: "This email is already registered. Please use a different email or try logging in."
-        };
-      }
+      // Ensure username is always provided (fallback to email prefix)
+      const finalUsername = username && username.trim() ? username : email.split('@')[0];
+      const finalDisplayName = finalUsername;
 
+      // Rely on Supabase to return a proper error if the email already exists.
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             user_type: 'student',
-            username: username,
-            display_name: username
+            username: finalUsername,
+            display_name: finalDisplayName
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?type=student`
         }
@@ -61,6 +44,30 @@ class AuthService {
           success: false,
           message: error.message
         };
+      }
+
+      // After successful signup, ensure profile exists
+      // (in case the auto-trigger fails, create it manually)
+      if (data.user) {
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              user_type: 'student',
+              username: finalUsername,
+              display_name: finalDisplayName
+            })
+            .select();
+
+          if (profileError && profileError.code !== '23505') {
+            // 23505 = unique constraint (profile already exists, which is fine)
+            console.error('Error creating profile:', profileError);
+          }
+        } catch (profileCreateError) {
+          console.error('Error during profile creation:', profileCreateError);
+          // Don't fail the signup if profile creation fails; user can still verify email
+        }
       }
 
       return {
@@ -131,6 +138,8 @@ class AuthService {
   async signUpOrganization(formData) {
     try {
       const { organizationName, email, phone, password } = formData;
+      const finalUsername = organizationName || email.split('@')[0];
+      const finalDisplayName = organizationName || email.split('@')[0];
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -138,9 +147,9 @@ class AuthService {
         options: {
           data: {
             user_type: 'organization',
-            username: organizationName,
+            username: finalUsername,
             company_name: organizationName,
-            display_name: organizationName,
+            display_name: finalDisplayName,
             phone: phone || null
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?type=organization`
@@ -152,6 +161,27 @@ class AuthService {
           success: false,
           message: error.message
         };
+      }
+
+      // After successful signup, ensure profile exists
+      if (data.user) {
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              user_type: 'organization',
+              username: finalUsername,
+              display_name: finalDisplayName
+            })
+            .select();
+
+          if (profileError && profileError.code !== '23505') {
+            console.error('Error creating profile:', profileError);
+          }
+        } catch (profileCreateError) {
+          console.error('Error during profile creation:', profileCreateError);
+        }
       }
 
       return {
@@ -317,6 +347,8 @@ class AuthService {
         }
       }
 
+      const finalUsername = email.split('@')[0];
+
       // Create auth user
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -324,7 +356,7 @@ class AuthService {
         options: {
           data: {
             user_type: 'admin',
-            username: email.split('@')[0],
+            username: finalUsername,
             display_name: displayName
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?type=admin`
@@ -338,9 +370,29 @@ class AuthService {
         };
       }
 
-      // The profile should be created by a database trigger or you need to create it manually
+      // Manually create profile if trigger didn't
+      if (data.user) {
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              user_type: 'admin',
+              username: finalUsername,
+              display_name: displayName
+            })
+            .select();
+
+          if (profileError && profileError.code !== '23505') {
+            console.error('Error creating profile:', profileError);
+          }
+        } catch (profileCreateError) {
+          console.error('Error during profile creation:', profileCreateError);
+        }
+      }
+
       // Wait a bit for the profile to be created
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Create admin record
       const { error: adminError } = await supabase

@@ -17,8 +17,7 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState(0);
-  const [passwordRequirements, setPasswordRequirements] = useState({});
+  // removed detailed password strength UI; enforce simple min length check
   const currentYear = new Date().getFullYear();
 
   const navigate = useNavigate();
@@ -54,6 +53,7 @@ const SignUp = () => {
       return;
     }
 
+
     // Validate email format
     if (!securityService.validateEmail(formData.email)) {
       setError("Invalid email format");
@@ -61,28 +61,9 @@ const SignUp = () => {
       return;
     }
 
-    // Check if email already exists
-    if (emailExists) {
-      setError(
-        "This email is already registered. Please use a different email or try logging in."
-      );
-      await securityService.logAuthAttempt(
-        formData.email,
-        false,
-        "Email already exists - signup attempt"
-      );
-      setLoading(false);
-      return;
-    }
-
-    // Validate password strength (must pass all requirements)
-    const passwordValidation = securityService.validatePassword(
-      formData.password
-    );
-    if (!passwordValidation.isValid) {
-      setError(
-        "Password must have: 12+ chars, uppercase, lowercase, number, special character"
-      );
+    // Ensure password is at least 6 characters
+    if (!formData.password || formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
@@ -195,117 +176,7 @@ const SignUp = () => {
               onChange={handleChange}
             />
 
-            {/* Password Strength Indicator */}
-            {formData.password && (
-              <div style={{ marginTop: "10px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "5px",
-                    marginBottom: "8px",
-                  }}
-                >
-                  {[1, 2, 3, 4, 5].map((segment) => (
-                    <div
-                      key={segment}
-                      style={{
-                        flex: 1,
-                        height: "6px",
-                        backgroundColor:
-                          passwordStrength >= segment * 20
-                            ? passwordStrength < 40
-                              ? "#ff4444"
-                              : passwordStrength < 70
-                              ? "#ffbb33"
-                              : "#00C851"
-                            : "#ddd",
-                        borderRadius: "3px",
-                        transition: "background-color 0.3s",
-                      }}
-                    />
-                  ))}
-                </div>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color:
-                      passwordStrength < 40
-                        ? "#ff4444"
-                        : passwordStrength < 70
-                        ? "#ffbb33"
-                        : "#00C851",
-                    margin: "5px 0",
-                  }}
-                >
-                  Strength: {passwordStrength}% -{" "}
-                  {passwordStrength < 40
-                    ? "Weak"
-                    : passwordStrength < 70
-                    ? "Medium"
-                    : "Strong"}
-                </p>
-
-                {/* Requirements Checklist */}
-                <div
-                  style={{ fontSize: "12px", color: "#666", marginTop: "8px" }}
-                >
-                  <p
-                    style={{
-                      margin: "4px 0",
-                      color: passwordRequirements.minLength
-                        ? "#00C851"
-                        : "#ff4444",
-                    }}
-                  >
-                    {passwordRequirements.minLength ? "✓" : "✗"} At least 12
-                    characters
-                  </p>
-                  <p
-                    style={{
-                      margin: "4px 0",
-                      color: passwordRequirements.hasUppercase
-                        ? "#00C851"
-                        : "#ff4444",
-                    }}
-                  >
-                    {passwordRequirements.hasUppercase ? "✓" : "✗"} Uppercase
-                    letter (A-Z)
-                  </p>
-                  <p
-                    style={{
-                      margin: "4px 0",
-                      color: passwordRequirements.hasLowercase
-                        ? "#00C851"
-                        : "#ff4444",
-                    }}
-                  >
-                    {passwordRequirements.hasLowercase ? "✓" : "✗"} Lowercase
-                    letter (a-z)
-                  </p>
-                  <p
-                    style={{
-                      margin: "4px 0",
-                      color: passwordRequirements.hasNumbers
-                        ? "#00C851"
-                        : "#ff4444",
-                    }}
-                  >
-                    {passwordRequirements.hasNumbers ? "✓" : "✗"} Number (0-9)
-                  </p>
-                  <p
-                    style={{
-                      margin: "4px 0",
-                      color: passwordRequirements.hasSpecialChar
-                        ? "#00C851"
-                        : "#ff4444",
-                    }}
-                  >
-                    {passwordRequirements.hasSpecialChar ? "✓" : "✗"} Special
-                    character (!@#$%^&*)
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* password strength UI removed per request; only min-length check enforced */}
 
             <div className="checkbox">
               <input type="checkbox" id="terms" name="terms" required />
