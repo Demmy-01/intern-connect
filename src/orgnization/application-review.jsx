@@ -11,6 +11,7 @@ import location from "../assets/location.png";
 import time from "../assets/time.png";
 import school from "../assets/school.png";
 import organizationService from "../lib/organizationService.js";
+import { toast } from "../components/ui/sonner";
 import Loader from "../components/Loader.jsx";
 
 const ApplicationDetails = () => {
@@ -37,11 +38,17 @@ const ApplicationDetails = () => {
 
       if (error) {
         setError(error);
+        try {
+          toast.error(`Failed to load application details: ${error}`);
+        } catch (e) {}
       } else {
         setApplicationData(data);
       }
     } catch (err) {
       setError(err.message);
+      try {
+        toast.error(`Failed to load application details: ${err.message}`);
+      } catch (e) {}
     } finally {
       setLoading(false);
     }
@@ -65,21 +72,27 @@ const ApplicationDetails = () => {
           );
 
         if (error) {
-          alert(
-            `Error ${
-              status === "accepted" ? "accepting" : "rejecting"
-            } application: ${error}`
-          );
+          try {
+            toast.error(
+              `Error ${
+                status === "accepted" ? "accepting" : "rejecting"
+              } application: ${error}`
+            );
+          } catch (e) {}
         } else {
-          alert(
-            `Application ${
-              status === "accepted" ? "accepted" : "rejected"
-            } successfully! Email notification has been sent to the applicant.`
-          );
+          try {
+            toast.success(
+              `Application ${
+                status === "accepted" ? "accepted" : "rejected"
+              } successfully! Email notification has been sent to the applicant.`
+            );
+          } catch (e) {}
           setApplicationData((prev) => ({ ...prev, status }));
         }
       } catch (err) {
-        alert(`Error updating application: ${err.message}`);
+        try {
+          toast.error(`Error updating application: ${err.message}`);
+        } catch (e) {}
       } finally {
         setUpdating(false);
       }
@@ -440,7 +453,9 @@ const ApplicationDetails = () => {
                             "flagged_review"
                           );
                         if (!error) {
-                          alert("Application moved to manual review");
+                          try {
+                            toast.info("Application moved to manual review");
+                          } catch (e) {}
                           loadApplicationDetails();
                         }
                       }

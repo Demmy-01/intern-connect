@@ -3,6 +3,7 @@ import { CheckCircle, Circle, Upload, FileText, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../style/organization-onboarding.css";
 import organizationProfileService from "../lib/OrganizationProfileService.js";
+import { toast } from "../components/ui/sonner";
 import authService from "../lib/authService.js";
 
 const OrganizationOnboarding = () => {
@@ -11,7 +12,7 @@ const OrganizationOnboarding = () => {
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState("");
+  // Success message will be shown via toast
 
   const [profileData, setProfileData] = useState({
     // Company Information (only essential for onboarding)
@@ -199,11 +200,58 @@ const OrganizationOnboarding = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const getValidationErrors = (step) => {
+    const newErrors = {};
+    switch (step) {
+      case 1:
+        if (!profileData.companyName.trim())
+          newErrors.companyName = "Company name is required";
+        if (!profileData.companyType.trim())
+          newErrors.companyType = "Company type is required";
+        if (!profileData.industry) newErrors.industry = "Industry is required";
+        if (!profileData.companyDescription.trim())
+          newErrors.companyDescription = "Company description is required";
+        if (!profileData.location.trim())
+          newErrors.location = "Location is required";
+        break;
+      case 2:
+        if (!profileData.contactName.trim())
+          newErrors.contactName = "Contact name is required";
+        if (!profileData.contactRole.trim())
+          newErrors.contactRole = "Contact role is required";
+        if (!profileData.contactEmail.trim())
+          newErrors.contactEmail = "Contact email is required";
+        else if (!/\S+@\S+\.\S+/.test(profileData.contactEmail))
+          newErrors.contactEmail = "Please enter a valid email address";
+        break;
+      case 3:
+        if (!profileData.cacDocument)
+          newErrors.cacDocument = "CAC document is required";
+        break;
+      case 4:
+        if (!profileData.termsAccepted)
+          newErrors.termsAccepted = "You must accept the terms and conditions";
+        if (!profileData.guidelinesAccepted)
+          newErrors.guidelinesAccepted =
+            "You must accept the internship guidelines";
+        break;
+    }
+    return newErrors;
+  };
+
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCompletedSteps((prev) => [...prev, currentStep]);
       if (currentStep < 4) {
         setCurrentStep(currentStep + 1);
+      }
+    } else {
+      const validationErrors = getValidationErrors(currentStep);
+      const firstKey = Object.keys(validationErrors)[0];
+      if (firstKey) {
+        try {
+          toast.error(validationErrors[firstKey]);
+        } catch (e) {}
       }
     }
   };
@@ -253,15 +301,20 @@ const OrganizationOnboarding = () => {
 
       console.log("Onboarding completed:", result);
 
-      setSuccessMessage(
-        "Onboarding completed successfully! Your organization is now registered and pending verification."
-      );
+      try {
+        toast.success(
+          "Onboarding completed successfully! Your organization is now registered and pending verification."
+        );
+      } catch (e) {}
+      navigate("/dashboard-overview");
     } catch (error) {
       console.error("Onboarding error:", error);
-      setErrors({
-        general:
-          error.message || "Failed to complete onboarding. Please try again.",
-      });
+      const message =
+        error.message || "Failed to complete onboarding. Please try again.";
+      setErrors({ general: message });
+      try {
+        toast.error(message);
+      } catch (e) {}
     } finally {
       // Always reset loading state
       setIsLoading(false);
@@ -272,9 +325,10 @@ const OrganizationOnboarding = () => {
     <div className="org-step-content">
       <h3 className="org-step-title">Company Information</h3>
 
-      {errors.general && (
-        <div className="org-error-message">{errors.general}</div>
-      )}
+      {errors.general &&
+        {
+          /* general errors shown via toast; per-field errors remain inline */
+        }}
 
       <div className="org-form-grid">
         <div className="org-form-field">
@@ -562,9 +616,10 @@ const OrganizationOnboarding = () => {
     <div className="org-step-content">
       <h3 className="org-step-title">Terms & Compliance</h3>
 
-      {errors.general && (
-      <div className="org-error-message">{errors.general}</div>
-    )}
+      {errors.general &&
+        {
+          /* general errors shown via toast; per-field errors remain inline */
+        }}
 
       <div className="org-compliance-content">
         <div className="org-terms-box">
@@ -729,17 +784,7 @@ const OrganizationOnboarding = () => {
         <div className="org-step-container">{renderStepContent()}</div>
 
         {/* Success Message */}
-        {successMessage && (
-          <div className="org-success-message">
-            {successMessage}
-            <button
-              className="org-nav-button org-nav-button--primary"
-              onClick={() => navigate("/dashboard-overview")}
-            >
-              Go to Dashboard
-            </button>
-          </div>
-        )}
+        {/* Success UI replaced by toast */}
 
         {/* Navigation Buttons */}
         {!successMessage && (

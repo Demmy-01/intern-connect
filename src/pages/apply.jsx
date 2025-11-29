@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "../components/ui/sonner";
 import { supabase } from "../lib/supabase.js";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
@@ -135,6 +136,9 @@ const MultiStepApplyForm = () => {
       if (hasApplied) {
         setApplicationStatus({ hasApplied, application });
         setError("You have already applied for this internship.");
+        try {
+          toast.info("You have already applied for this internship.");
+        } catch (e) {}
       }
     } catch (err) {
       console.error("Error checking application status:", err);
@@ -154,14 +158,18 @@ const MultiStepApplyForm = () => {
 
     // Check if file is PDF
     if (file && file.type !== "application/pdf") {
-      setError(
-        "Only PDF files are allowed. Please upload a valid PDF document."
-      );
+      try {
+        toast.error(
+          "Only PDF files are allowed. Please upload a valid PDF document."
+        );
+      } catch (e) {}
       return;
     }
 
     if (file && file.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5MB");
+      try {
+        toast.error("File size must be less than 5MB");
+      } catch (e) {}
       return;
     }
 
@@ -195,19 +203,26 @@ const MultiStepApplyForm = () => {
 
     if (applicationStatus.hasApplied) {
       setError("You have already applied for this internship");
+      try {
+        toast.error("You have already applied for this internship");
+      } catch (e) {}
       return;
     }
 
     // Validate that a PDF file is provided
     if (!formData.cvFile) {
-      setError("Please upload a CV/Resume in PDF format");
+      try {
+        toast.error("Please upload a CV/Resume in PDF format");
+      } catch (e) {}
       return;
     }
 
     if (formData.cvFile.type !== "application/pdf") {
-      setError(
-        "Only PDF files are allowed. Please upload a valid PDF document."
-      );
+      try {
+        toast.error(
+          "Only PDF files are allowed. Please upload a valid PDF document."
+        );
+      } catch (e) {}
       return;
     }
 
@@ -281,13 +296,18 @@ const MultiStepApplyForm = () => {
         throw new Error(error);
       }
 
-      alert("Application submitted successfully!");
+      try {
+        toast.success("Application submitted successfully!");
+      } catch (e) {}
       navigate(`/internship-details/${internshipId}`);
     } catch (err) {
       console.error("Application submission error:", err);
-      setError(
-        err.message || "Failed to submit application. Please try again."
-      );
+      const message =
+        err.message || "Failed to submit application. Please try again.";
+      setError(message);
+      try {
+        toast.error(message);
+      } catch (e) {}
     } finally {
       setSubmitting(false);
     }
@@ -715,11 +735,7 @@ const MultiStepApplyForm = () => {
             <p className="form-subtitle">{internshipData?.position_title}</p>
           </div>
 
-          {error && (
-            <div className="error-message">
-              <p>{error}</p>
-            </div>
-          )}
+          {/* Inline error messages for form submission replaced by toasts */}
 
           <div className="progress-bar">
             <div className="progress-steps">

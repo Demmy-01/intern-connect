@@ -12,6 +12,7 @@ import phone from "../assets/phone.png";
 import email from "../assets/email.png";
 import person from "../assets/person.png";
 import organizationProfileService from "../lib/OrganizationProfileService.js";
+import { toast } from "../components/ui/sonner";
 import { useAuth } from "../context/AuthContext";
 
 const OrganizationProfiles = () => {
@@ -45,6 +46,11 @@ const OrganizationProfiles = () => {
     } catch (error) {
       console.error("Error fetching organization data:", error);
       setError(error.message);
+      try {
+        toast.error(
+          `Error loading organization profile: ${error.message || error}`
+        );
+      } catch (e) {}
     } finally {
       setLoading(false);
     }

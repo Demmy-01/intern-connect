@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "../components/button.jsx";
 import React, { useState, useEffect } from "react";
+import { toast } from "../components/ui/sonner";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/footer.jsx";
 import { contactService } from "../lib/contactService";
@@ -24,10 +25,6 @@ import heroBackground from "../assets/Rectangle-27.png";
 export default function Home() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState({
-    success: false,
-    message: "",
-  });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -83,17 +80,6 @@ export default function Home() {
     });
   }, []);
 
-  // Auto-hide submit status message after 4 seconds
-  useEffect(() => {
-    if (submitStatus.message) {
-      const timer = setTimeout(() => {
-        setSubmitStatus({ success: false, message: "" });
-      }, 4000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [submitStatus.message]);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -113,11 +99,9 @@ export default function Home() {
       !formData.message.trim()
     ) {
       console.log("Validation failed");
-      setSubmitStatus({
-        success: false,
-        message:
-          "Please fill in all required fields (Name, Email, and Message).",
-      });
+      toast.error(
+        "Please fill in all required fields (Name, Email, and Message)."
+      );
       return;
     }
 
@@ -125,10 +109,7 @@ export default function Home() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       console.log("Email validation failed");
-      setSubmitStatus({
-        success: false,
-        message: "Please enter a valid email address.",
-      });
+      toast.error("Please enter a valid email address.");
       return;
     }
 
@@ -141,12 +122,9 @@ export default function Home() {
 
       if (result.success) {
         console.log("SUCCESS: Showing success toast");
-
-        // Show success message
-        setSubmitStatus({
-          success: true,
-          message: "Thank you for your message! We'll get back to you soon.",
-        });
+        toast.success(
+          "Thank you for your message! We'll get back to you soon."
+        );
 
         // Reset form
         setFormData({
@@ -157,17 +135,11 @@ export default function Home() {
         });
       } else {
         console.log("FAILURE: Showing error toast");
-        setSubmitStatus({
-          success: false,
-          message: result.error || "Failed to submit contact form",
-        });
+        toast.error(result.error || "Failed to submit contact form");
       }
     } catch (error) {
       console.error("CATCH: Unexpected error:", error);
-      setSubmitStatus({
-        success: false,
-        message: "An unexpected error occurred. Please try again.",
-      });
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -574,15 +546,7 @@ export default function Home() {
                   className="contact-submit-btn"
                   disabled={isSubmitting}
                 />
-                {submitStatus.message && (
-                  <div
-                    className={`submit-status-message ${
-                      submitStatus.success ? "success" : "error"
-                    }`}
-                  >
-                    {submitStatus.message}
-                  </div>
-                )}
+                {/* Using toast notifications now; inline status messages removed */}
               </form>
             </div>
 

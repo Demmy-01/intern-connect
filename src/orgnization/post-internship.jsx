@@ -4,6 +4,7 @@ import "./org.css";
 import "./dashboard-layout.css";
 import { Button } from "../components/button.jsx";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "../components/ui/sonner";
 import DashboardLayout from "./DashboardLayout";
 import internshipService from "../lib/internshipService.js";
 import organizationService from "../lib/organizationService.js";
@@ -81,7 +82,13 @@ const PostInternship = () => {
     const missing = required.filter((field) => !formData[field].trim());
 
     if (missing.length > 0) {
-      setError(`Please fill in all required fields: ${missing.join(", ")}`);
+      const message = `Please fill in all required fields: ${missing.join(
+        ", "
+      )}`;
+      try {
+        toast.error(message);
+      } catch (e) {}
+      setError(message);
       return false;
     }
 
@@ -89,7 +96,11 @@ const PostInternship = () => {
     const maxDur = parseInt(formData.maxDuration);
 
     if (minDur >= maxDur) {
-      setError("Maximum duration must be greater than minimum duration");
+      const message = "Maximum duration must be greater than minimum duration";
+      try {
+        toast.error(message);
+      } catch (e) {}
+      setError(message);
       return false;
     }
 
@@ -99,7 +110,11 @@ const PostInternship = () => {
     today.setHours(0, 0, 0, 0);
 
     if (deadlineDate < today) {
-      setError("Application deadline must be in the future");
+      const message = "Application deadline must be in the future";
+      try {
+        toast.error(message);
+      } catch (e) {}
+      setError(message);
       return false;
     }
 
@@ -111,6 +126,11 @@ const PostInternship = () => {
 
     // Check verification status before allowing submission
     if (!isVerified) {
+      try {
+        toast.error(
+          "Your organization must be verified before posting internships."
+        );
+      } catch (e) {}
       setError(
         "Your organization must be verified before posting internships."
       );
@@ -139,6 +159,9 @@ const PostInternship = () => {
 
       if (error) {
         setError(error);
+        try {
+          toast.error(error);
+        } catch (e) {}
       } else {
         setSuccess(true);
         // Reset form
@@ -156,6 +179,9 @@ const PostInternship = () => {
         });
 
         // Show success message briefly then redirect
+        try {
+          toast.success("Internship posted successfully!");
+        } catch (e) {}
         setTimeout(() => {
           navigate("/posted-internship");
         }, 2000);
@@ -187,7 +213,10 @@ const PostInternship = () => {
             You need to complete your organization profile before posting
             internships.
           </p>
-          <p>Missing information: {profileStatus.missingFields.map(f => f.label).join(", ")}</p>
+          <p>
+            Missing information:{" "}
+            {profileStatus.missingFields.map((f) => f.label).join(", ")}
+          </p>
           <Link to="/organization-profile">
             <Button>Complete Profile</Button>
           </Link>
@@ -196,23 +225,8 @@ const PostInternship = () => {
     );
   }
 
-  if (success) {
-    return (
-      <DashboardLayout>
-        <div className="success-container">
-          <div className="success-message">
-            <div className="success-icon">
-              <img src={check} alt="success" width={"120px"} height={"120px"} />
-            </div>
-            <h2>Internship Posted Successfully!</h2>
-            <p>
-              Your internship has been created and is now visible to students.
-            </p>
-            <p>Redirecting to your posted internships...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
+  {
+    /* Success UI removed — using toast for feedback */
   }
 
   return (
@@ -344,7 +358,7 @@ const PostInternship = () => {
               name="applicationDeadline"
               value={formData.applicationDeadline}
               onChange={handleInputChange}
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
               required
               disabled={loading || !isVerified}
             />

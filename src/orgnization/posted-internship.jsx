@@ -6,6 +6,7 @@ import { Button } from "../components/button.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout";
 import internshipService from "../lib/internshipService.js";
+import { toast } from "../components/ui/sonner";
 import useVerificationStatus from "../hooks/useVerificationStatus";
 
 const PostedInternship = () => {
@@ -87,9 +88,18 @@ const PostedInternship = () => {
             : internship
         )
       );
+      try {
+        toast.success(
+          isActive ? "Internship activated" : "Internship deactivated"
+        );
+      } catch (e) {}
     } catch (err) {
       console.error("Error toggling internship status:", err);
-      setError(err.message);
+      const message = err.message || "Failed to toggle internship status";
+      setError(message);
+      try {
+        toast.error(message);
+      } catch (e) {}
     }
   };
 
@@ -110,9 +120,16 @@ const PostedInternship = () => {
       setInternships((prev) =>
         prev.filter((internship) => internship.id !== internshipId)
       );
+      try {
+        toast.success("Internship deleted");
+      } catch (e) {}
     } catch (err) {
       console.error("Error deleting internship:", err);
-      setError(err.message);
+      const message = err.message || "Failed to delete internship";
+      setError(message);
+      try {
+        toast.error(message);
+      } catch (e) {}
     }
   };
 
@@ -138,19 +155,7 @@ const PostedInternship = () => {
             </div>
           </div>
 
-          {error && (
-            <div className="error-message">
-              <p>Error: {error}</p>
-              <button
-                onClick={() => {
-                  setError(null);
-                  loadInternships();
-                }}
-              >
-                Retry
-              </button>
-            </div>
-          )}
+          {/* Inline error UI removed in favor of toast notifications */}
 
           {/* Verification Status Restriction */}
           {restrictionMessage && (

@@ -1,5 +1,6 @@
 // EditProfile.jsx - Using ProfileService
 import { useState, useEffect } from "react";
+import { toast } from "../components/ui/sonner";
 import "../style/edit-profile.css";
 import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer";
@@ -154,11 +155,12 @@ const EditProfile = () => {
         throw new Error(result.message);
       }
 
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       window.history.back();
     } catch (err) {
       console.error("Save error:", err);
       setError(`Save error: ${err.message}`);
+      toast.error(`Save error: ${err.message}`);
     } finally {
       setSaving(false);
     }

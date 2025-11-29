@@ -6,6 +6,7 @@ import DashboardLayout from "./DashboardLayout";
 import { Button } from "../components/button.jsx";
 import { Link } from "react-router-dom";
 import organizationService from "../lib/organizationService.js";
+import { toast } from "../components/ui/sonner";
 import ManualScreeningPanel from "../components/ManualScreeningPanel.jsx";
 import Loader from "../components/Loader.jsx";
 
@@ -32,6 +33,9 @@ const Applications = () => {
 
       if (error) {
         setError(error);
+        try {
+          toast.error(`Error loading applications: ${error}`);
+        } catch (e) {}
         console.error("Applications error:", error);
       } else {
         setApplications(data || []);
@@ -39,6 +43,9 @@ const Applications = () => {
       }
     } catch (err) {
       setError(err.message);
+      try {
+        toast.error(`Error loading applications: ${err.message}`);
+      } catch (e) {}
       console.error("Applications exception:", err);
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "../components/ui/sonner";
 import aiScreeningService from "../lib/aiScreeningService.js";
 
 const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
@@ -19,7 +20,9 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
     e.stopPropagation();
 
     if (!keywords.trim()) {
-      alert("Please enter keywords to screen for");
+      try {
+        toast.error("Please enter keywords to screen for");
+      } catch (e) {}
       return;
     }
 
@@ -35,7 +38,9 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
       });
 
       if (appsToScreen.length === 0) {
-        alert("No applications found for selected position");
+        try {
+          toast.info("No applications found for selected position");
+        } catch (e) {}
         setScreening(false);
         return;
       }
@@ -140,7 +145,9 @@ const ManualScreeningPanel = ({ applications, onScreeningComplete }) => {
     } catch (error) {
       console.error("Error during screening:", error);
       setError(error.message);
-      alert("Error during screening: " + error.message);
+      try {
+        toast.error("Error during screening: " + error.message);
+      } catch (e) {}
     } finally {
       setScreening(false);
     }

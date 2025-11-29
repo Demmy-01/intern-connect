@@ -5,6 +5,7 @@ import { Button } from "../components/button.jsx";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout.jsx";
 import organizationProfileService from "../lib/OrganizationProfileService.js";
+import { toast } from "../components/ui/sonner";
 import { useAuth } from "../context/AuthContext";
 
 const OrganizationProfileEdit = () => {
@@ -46,6 +47,9 @@ const OrganizationProfileEdit = () => {
     } else {
       setLoading(false);
       setError("User not authenticated");
+      try {
+        toast.error("User not authenticated");
+      } catch (e) {}
     }
   }, [user]);
 
@@ -123,12 +127,18 @@ const OrganizationProfileEdit = () => {
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
       setError("Please select a valid image file (JPG, PNG, or WebP)");
+      try {
+        toast.error("Please select a valid image file (JPG, PNG, or WebP)");
+      } catch (e) {}
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError("Image size must be less than 5MB");
+      try {
+        toast.error("Image size must be less than 5MB");
+      } catch (e) {}
       return;
     }
 
@@ -156,6 +166,9 @@ const OrganizationProfileEdit = () => {
     } catch (error) {
       console.error("Error uploading logo:", error);
       setError(error.message);
+      try {
+        toast.error(error.message);
+      } catch (e) {}
       return null;
     } finally {
       setLogoUploading(false);
@@ -197,6 +210,9 @@ const OrganizationProfileEdit = () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setError("Please fill in all required fields correctly");
+      try {
+        toast.error("Please fill in all required fields correctly");
+      } catch (e) {}
       return;
     }
 
@@ -241,15 +257,18 @@ const OrganizationProfileEdit = () => {
         contactData
       );
 
-      setSuccess(true);
-
-      // Redirect to profile view after successful update
+      try {
+        toast.success("Profile updated successfully! Redirecting...");
+      } catch (e) {}
       setTimeout(() => {
         navigate("/organization-profile");
-      }, 2000);
+      }, 1500);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError(error.message || "Failed to update profile");
+      try {
+        toast.error(error.message || "Failed to update profile");
+      } catch (e) {}
     } finally {
       setSaving(false);
     }
@@ -310,12 +329,7 @@ const OrganizationProfileEdit = () => {
     <DashboardLayout>
       <div className="org-profile-header">
         <h1>Edit Organization Profile</h1>
-        {success && (
-          <div className="success-message">
-            Profile updated successfully! Redirecting...
-          </div>
-        )}
-        {error && <div className="error-message">{error}</div>}
+        {/* Using toasts to display success/error messages (inline messages removed) */}
       </div>
 
       <div className="org-profile-content">

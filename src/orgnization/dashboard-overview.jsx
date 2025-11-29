@@ -4,7 +4,8 @@ import "./org.css";
 import "./dashboard-layout.css";
 import DashboardLayout from "./DashboardLayout";
 import organizationService from "../lib/organizationService.js";
-import { Button } from '../components/button.jsx'
+import { toast } from "../components/ui/sonner";
+import { Button } from "../components/button.jsx";
 import { Buttons } from "../components/button-1.jsx";
 import useVerificationStatus from "../hooks/useVerificationStatus";
 import Loader from "../components/Loader.jsx";
@@ -16,7 +17,7 @@ const OrganizationDashboard = () => {
     totalApplications: 0,
     pendingApplications: 0,
     acceptedApplications: 0,
-    rejectedApplications: 0
+    rejectedApplications: 0,
   });
   const [recentApplications, setRecentApplications] = useState([]);
   const [internships, setInternships] = useState([]);
@@ -24,7 +25,13 @@ const OrganizationDashboard = () => {
   const [error, setError] = useState(null);
 
   // Check verification status
-  const { isVerified, isPending, isRejected, loading: verificationLoading, restrictionMessage } = useVerificationStatus();
+  const {
+    isVerified,
+    isPending,
+    isRejected,
+    loading: verificationLoading,
+    restrictionMessage,
+  } = useVerificationStatus();
 
   useEffect(() => {
     loadDashboardData();
@@ -35,32 +42,46 @@ const OrganizationDashboard = () => {
       setLoading(true);
 
       // Load all dashboard data
-      const [statsResult, applicationsResult, internshipsResult] = await Promise.all([
-        organizationService.getOrganizationStats(),
-        organizationService.getRecentApplications(5),
-        organizationService.getOrganizationInternships()
-      ]);
+      const [statsResult, applicationsResult, internshipsResult] =
+        await Promise.all([
+          organizationService.getOrganizationStats(),
+          organizationService.getRecentApplications(5),
+          organizationService.getOrganizationInternships(),
+        ]);
 
       if (statsResult.error) {
-        console.error('Stats error:', statsResult.error);
+        console.error("Stats error:", statsResult.error);
+        try {
+          toast.error(`Error loading dashboard stats: ${statsResult.error}`);
+        } catch (e) {}
       } else {
         setStats(statsResult.data);
       }
 
       if (applicationsResult.error) {
-        console.error('Applications error:', applicationsResult.error);
+        console.error("Applications error:", applicationsResult.error);
+        try {
+          toast.error(
+            `Error loading applications: ${applicationsResult.error}`
+          );
+        } catch (e) {}
       } else {
         setRecentApplications(applicationsResult.data);
       }
 
       if (internshipsResult.error) {
-        console.error('Internships error:', internshipsResult.error);
+        console.error("Internships error:", internshipsResult.error);
+        try {
+          toast.error(`Error loading internships: ${internshipsResult.error}`);
+        } catch (e) {}
       } else {
         setInternships(internshipsResult.data.slice(0, 5)); // Show only 5 most recent
       }
-
     } catch (err) {
       setError(err.message);
+      try {
+        toast.error(`Error loading dashboard: ${err.message}`);
+      } catch (e) {}
     } finally {
       setLoading(false);
     }
@@ -68,27 +89,31 @@ const OrganizationDashboard = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'accepted': return '#22c55e';
-      case 'rejected': return '#ef4444';
-      case 'reviewed': return '#f59e0b';
-      case 'pending':
-      default: return '#6b7280';
+      case "accepted":
+        return "#22c55e";
+      case "rejected":
+        return "#ef4444";
+      case "reviewed":
+        return "#f59e0b";
+      case "pending":
+      default:
+        return "#6b7280";
     }
   };
 
   if (loading || verificationLoading) {
     return (
       <DashboardLayout>
-       <Loader message="Loading your dashboard..." />
+        <Loader message="Loading your dashboard..." />
       </DashboardLayout>
     );
   }
@@ -104,9 +129,15 @@ const OrganizationDashboard = () => {
 
         {/* Verification Status Restriction */}
         {restrictionMessage && (
-          <div className={`verification-restriction ${restrictionMessage.type === 'error' ? 'verification-restriction--error' : 'verification-restriction--warning'}`}>
+          <div
+            className={`verification-restriction ${
+              restrictionMessage.type === "error"
+                ? "verification-restriction--error"
+                : "verification-restriction--warning"
+            }`}
+          >
             <div className="restriction-icon">
-              {restrictionMessage.type === 'error' ? '⚠️' : '⏳'}
+              {restrictionMessage.type === "error" ? "⚠️" : "⏳"}
             </div>
             <div className="restriction-content">
               <h3>{restrictionMessage.title}</h3>
@@ -119,34 +150,53 @@ const OrganizationDashboard = () => {
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon blue">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z" />
               </svg>
             </div>
             <div className="stat-info">
               <div className="stat-number">{stats.totalInternships}</div>
               <div className="stat-label">Total Internships</div>
-              <div className="stat-sublabel">{stats.activeInternships} active</div>
+              <div className="stat-sublabel">
+                {stats.activeInternships} active
+              </div>
             </div>
           </div>
 
           <div className="stat-card">
             <div className="stat-icon green">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-6h2.5l6-6L11 4.5l-6 6H4zm-2-2h2v2H2v-2zm0-2h2v2H2v-2zm10-6H10v2h2v-2z"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-6h2.5l6-6L11 4.5l-6 6H4zm-2-2h2v2H2v-2zm0-2h2v2H2v-2zm10-6H10v2h2v-2z" />
               </svg>
             </div>
             <div className="stat-info">
               <div className="stat-number">{stats.totalApplications}</div>
               <div className="stat-label">Total Applications</div>
-              <div className="stat-sublabel">{stats.pendingApplications} pending</div>
+              <div className="stat-sublabel">
+                {stats.pendingApplications} pending
+              </div>
             </div>
           </div>
 
           <div className="stat-card">
             <div className="stat-icon success">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
             <div className="stat-info">
@@ -158,8 +208,13 @@ const OrganizationDashboard = () => {
 
           <div className="stat-card">
             <div className="stat-icon warning">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
             </div>
             <div className="stat-info">
@@ -175,7 +230,9 @@ const OrganizationDashboard = () => {
           <div className="dashboard-section">
             <div className="section-header">
               <h2>Recent Applications</h2>
-              <Link to="/applications" className="view-all-link">View all</Link>
+              <Link to="/applications" className="view-all-link">
+                View all
+              </Link>
             </div>
 
             <div className="applications-list">
@@ -191,13 +248,16 @@ const OrganizationDashboard = () => {
                           />
                         ) : (
                           <div className="avatar-placeholder">
-                            {application.students?.profiles?.display_name?.charAt(0) || 'U'}
+                            {application.students?.profiles?.display_name?.charAt(
+                              0
+                            ) || "U"}
                           </div>
                         )}
                       </div>
                       <div className="applicant-details">
                         <div className="applicant-name">
-                          {application.students?.profiles?.display_name || 'Unknown'}
+                          {application.students?.profiles?.display_name ||
+                            "Unknown"}
                         </div>
                         <div className="application-position">
                           {application.internships?.position_title}
@@ -207,7 +267,9 @@ const OrganizationDashboard = () => {
                     <div className="application-meta">
                       <span
                         className="status-badge"
-                        style={{ backgroundColor: getStatusColor(application.status) }}
+                        style={{
+                          backgroundColor: getStatusColor(application.status),
+                        }}
                       >
                         {application.status}
                       </span>
@@ -229,7 +291,9 @@ const OrganizationDashboard = () => {
           <div className="dashboard-section">
             <div className="section-header">
               <h2>Your Internships</h2>
-              <Link to="/posted-internship" className="view-all-link">View all</Link>
+              <Link to="/posted-internship" className="view-all-link">
+                View all
+              </Link>
             </div>
 
             <div className="internships-list">
@@ -244,13 +308,19 @@ const OrganizationDashboard = () => {
                         {internship.department}
                       </div>
                       <div className="internship-meta">
-                        <span className="internship-type">{internship.work_type}</span>
-                        <span className="internship-compensation">{internship.compensation}</span>
+                        <span className="internship-type">
+                          {internship.work_type}
+                        </span>
+                        <span className="internship-compensation">
+                          {internship.compensation}
+                        </span>
                       </div>
                     </div>
                     <div className="internship-stats">
                       <div className="stat-item">
-                        <span className="stat-number">{internship.applicationCount}</span>
+                        <span className="stat-number">
+                          {internship.applicationCount}
+                        </span>
                         <span className="stat-label">Applications</span>
                       </div>
                       {internship.pendingCount > 0 && (
@@ -286,7 +356,10 @@ const OrganizationDashboard = () => {
               <Button label="Post New Internship" />
             </Link>
           ) : (
-            <div className="action-button disabled" title="Organization must be verified to post internships">
+            <div
+              className="action-button disabled"
+              title="Organization must be verified to post internships"
+            >
               <Button label="Post New Internship" />
             </div>
           )}
@@ -317,8 +390,12 @@ const OrganizationDashboard = () => {
         }
 
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         .dashboard-content {
@@ -415,10 +492,18 @@ const OrganizationDashboard = () => {
           color: white;
         }
 
-        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
-        .stat-icon.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
-        .stat-icon.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .stat-icon.blue {
+          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        .stat-icon.green {
+          background: linear-gradient(135deg, #10b981, #059669);
+        }
+        .stat-icon.success {
+          background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        .stat-icon.warning {
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
 
         .stat-number {
           font-size: 2rem;
