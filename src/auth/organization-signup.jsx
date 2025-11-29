@@ -4,6 +4,7 @@ import authService from "../lib/authService";
 import { Button } from "../components/button";
 import "../style/organization-signup.css";
 import logo from "../assets/logo_blue.png";
+import { toast } from "../components/ui/sonner";
 
 const OrganizationSignup = () => {
   const navigate = useNavigate();
@@ -32,33 +33,25 @@ const OrganizationSignup = () => {
   };
 
   const validateForm = () => {
+    let errorMsg = "";
+    
     if (!formData.organizationName.trim()) {
-      setError("Organization name is required");
-      return false;
+      errorMsg = "Organization name is required";
+    } else if (!formData.email.trim()) {
+      errorMsg = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errorMsg = "Please enter a valid email address";
+    } else if (!formData.password) {
+      errorMsg = "Password is required";
+    } else if (formData.password.length < 6) {
+      errorMsg = "Password must be at least 6 characters long";
+    } else if (formData.password !== formData.confirmPassword) {
+      errorMsg = "Passwords do not match";
     }
-
-    if (!formData.email.trim()) {
-      setError("Email is required");
-      return false;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError("Please enter a valid email address");
-      return false;
-    }
-
-    if (!formData.password) {
-      setError("Password is required");
-      return false;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return false;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+    
+    if (errorMsg) {
+      setError(errorMsg);
+      toast.error(errorMsg);
       return false;
     }
 
@@ -80,6 +73,7 @@ const OrganizationSignup = () => {
 
       if (result.success) {
         setSuccess(result.message);
+        toast.success(result.message || "Account created successfully");
         setTimeout(() => {
           navigate("/email-verification", {
             state: {
@@ -90,9 +84,12 @@ const OrganizationSignup = () => {
         }, 2000);
       } else {
         setError(result.message);
+        toast.error(result.message || "Signup failed");
       }
     } catch (error) {
-      setError("An error occurred during signup. Please try again.");
+      const errorMsg = "An error occurred during signup. Please try again.";
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
@@ -218,18 +215,6 @@ const OrganizationSignup = () => {
               </label>
             </div>
           </div>
-
-          {error && (
-            <div className="org-error-message">
-              <div className="org-error-text">{error}</div>
-            </div>
-          )}
-
-          {success && (
-            <div className="org-success-message">
-              <div className="org-success-text">{success}</div>
-            </div>
-          )}
 
           <div className="org-submit-container">
             <Button

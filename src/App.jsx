@@ -27,6 +27,7 @@ import SentApplicationModal from "./components/sent-application.jsx";
 import InternshipSearchPage from "./pages/internships.jsx";
 import Login from "./auth/login";
 import SignUp from "./auth/signup";
+import { Toaster } from "./components/ui/sonner";
 import EmailVerification from "./auth/EmailVerification";
 import ForgotPassword from "./auth/ForgotPassword";
 import AuthCallback from "./pages/AuthCallback";
@@ -218,6 +219,7 @@ function App() {
           {/* Catch-all Route */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} />
         </Routes>
+        <Toaster />
       </div>
     </Router>
   );

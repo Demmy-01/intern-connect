@@ -7,6 +7,7 @@ import "../style/login.css";
 import logo from "../assets/logo_blue.png";
 import authService from "../lib/authService";
 import securityService from "../lib/securityService";
+import { toast } from "../components/ui/sonner";
 const currentYear = new Date().getFullYear();
 
 const Login = () => {
@@ -81,6 +82,12 @@ const Login = () => {
         // Log successful login
         await securityService.logAuthAttempt(formData.email, true);
         setSuccess(result.message);
+        // show success toast
+        try {
+          toast.success(result.message || "Logged in successfully");
+        } catch (e) {
+          // ignore toast errors
+        }
         setTimeout(() => {
           navigate("/dashboard");
         }, 1500);
@@ -92,6 +99,11 @@ const Login = () => {
           result.message
         );
         setError(result.message);
+        try {
+          toast.error(result.message || "Login failed");
+        } catch (e) {
+          // ignore
+        }
       }
     } catch (error) {
       await securityService.logAuthAttempt(
@@ -100,6 +112,9 @@ const Login = () => {
         error.message
       );
       setError("An unexpected error occurred. Please try again.");
+      try {
+        toast.error("An unexpected error occurred. Please try again.");
+      } catch (e) {}
     }
     setLoading(false);
   };
@@ -114,9 +129,15 @@ const Login = () => {
 
       if (result.success) {
         setSuccess(result.message);
+        try {
+          toast.success(result.message || "Logged in successfully");
+        } catch (e) {}
         // Google will handle the redirect through the callback
       } else {
         setError(result.message);
+        try {
+          toast.error(result.message || "Google sign-in failed");
+        } catch (e) {}
         setLoading(false);
       }
     } catch (error) {
@@ -147,9 +168,6 @@ const Login = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && <p className="error-message">{error}</p>}
-            {success && <p className="success-message">{success}</p>}
-
             <InputField
               type="email"
               placeholder="Email address"

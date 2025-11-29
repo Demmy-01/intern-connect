@@ -4,6 +4,7 @@ import authService from "../lib/authService";
 import { Button } from "../components/button";
 import "../style/organization-login.css";
 import logo from "../assets/logo_blue.png";
+import { toast } from "../components/ui/sonner";
 
 const OrganizationLogin = () => {
   const navigate = useNavigate();
@@ -35,7 +36,9 @@ const OrganizationLogin = () => {
     setIsLoading(true);
 
     if (!email || !password) {
-      setError("Please fill in all fields");
+      const errorMsg = "Please fill in all fields";
+      setError(errorMsg);
+      toast.error(errorMsg);
       setIsLoading(false);
       return;
     }
@@ -45,7 +48,9 @@ const OrganizationLogin = () => {
       console.log("Organization login result:", result);
 
       if (result.success) {
-        setSuccess("Login successful! Redirecting to dashboard...");
+        const successMsg = "Login successful! Redirecting to dashboard...";
+        setSuccess(successMsg);
+        toast.success(successMsg);
 
         // Navigate to dashboard overview
         setTimeout(() => {
@@ -53,9 +58,12 @@ const OrganizationLogin = () => {
         }, 1500);
       } else {
         setError(result.message);
+        toast.error(result.message || "Login failed");
       }
     } catch (error) {
-      setError("An error occurred during login. Please try again.");
+      const errorMsg = "An error occurred during login. Please try again.";
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -108,9 +116,6 @@ const OrganizationLogin = () => {
             required
             className="org-input-field"
           />
-
-          {error && <div className="org-error-message">{error}</div>}
-          {success && <div className="org-success-message">{success}</div>}
 
           <Button
             type="submit"

@@ -7,6 +7,7 @@ import "../style/login.css";
 import logo from "../assets/logo_blue.png";
 import authService from "../lib/authService";
 import securityService from "../lib/securityService";
+import { toast } from "../components/ui/sonner";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -40,6 +41,7 @@ const SignUp = () => {
 
     if (!formData.username || !formData.email || !formData.password) {
       setError("Please fill in all fields");
+      toast.error("Please fill in all fields");
       setLoading(false);
       return;
     }
@@ -49,6 +51,7 @@ const SignUp = () => {
       setError(
         "Username must be 3-50 characters, alphanumeric with underscore/hyphen only"
       );
+      toast.error("Username must be 3-50 characters, alphanumeric with underscore/hyphen only");
       setLoading(false);
       return;
     }
@@ -56,6 +59,7 @@ const SignUp = () => {
     // Validate email format
     if (!securityService.validateEmail(formData.email)) {
       setError("Invalid email format");
+      toast.error("Invalid email format");
       setLoading(false);
       return;
     }
@@ -63,6 +67,7 @@ const SignUp = () => {
     // Ensure password is at least 6 characters
     if (!formData.password || formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
+      toast.error("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
@@ -78,6 +83,7 @@ const SignUp = () => {
         // Log successful signup
         await securityService.logAuthAttempt(formData.email, true, "signup");
         setSuccess(result.message);
+        toast.success(result.message || "Account created successfully");
         setTimeout(() => {
           navigate("/email-verification", {
             state: {
@@ -93,6 +99,7 @@ const SignUp = () => {
           result.message
         );
         setError(result.message);
+        toast.error(result.message || "Signup failed");
       }
     } catch (error) {
       await securityService.logAuthAttempt(
@@ -101,6 +108,7 @@ const SignUp = () => {
         error.message
       );
       setError("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
     }
     setLoading(false);
   };
@@ -115,13 +123,16 @@ const SignUp = () => {
 
       if (result.success) {
         setSuccess(result.message);
+        toast.success(result.message || "Signed in with Google successfully");
         // Google will handle the redirect through the callback
       } else {
         setError(result.message);
+        toast.error(result.message || "Google sign-in failed");
         setLoading(false);
       }
     } catch (error) {
       setError("An unexpected error occurred with Google sign-in.");
+      toast.error("An unexpected error occurred with Google sign-in.");
       setLoading(false);
     }
   };
@@ -148,8 +159,6 @@ const SignUp = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && <p className="error-message">{error}</p>}
-            {success && <p className="success-message">{success}</p>}
             <InputField
               type="text"
               placeholder="Username"

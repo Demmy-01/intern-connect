@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import "../style/login.css";
 import logo from "../assets/logo_blue.png";
 import authService from "../lib/authService";
+import { toast } from "../components/ui/sonner";
 const currentYear = new Date().getFullYear();
 
 const AdminLogin = () => {
@@ -136,8 +137,6 @@ const AdminLogin = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && <p className="error-message">{error}</p>}
-            {success && <p className="success-message">{success}</p>}
 
             <InputField
               type="email"
