@@ -373,7 +373,7 @@ const PublicOrganizationProfile = () => {
       <style jsx>{`
         .public-profile-page {
           min-height: calc(100vh - 160px);
-          background-color: #f8fafc;
+          background-color: var(--bg-secondary);
           padding: 2rem 0;
           padding-top: 80px;
         }
@@ -395,7 +395,7 @@ const PublicOrganizationProfile = () => {
           gap: 0.5rem;
           background: none;
           border: none;
-          color: #1070e5;
+          color: var(--primary);
           font-size: 1rem;
           cursor: pointer;
           padding: 0.5rem;
@@ -404,7 +404,7 @@ const PublicOrganizationProfile = () => {
         }
 
         .back-btn:hover {
-          background-color: #e0f2fe;
+          background-color: var(--info-bg);
         }
 
         /* Loading and Error States */
@@ -412,16 +412,16 @@ const PublicOrganizationProfile = () => {
         .error-state {
           text-align: center;
           padding: 4rem 2rem;
-          background: white;
+          background: var(--card-bg);
           border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 8px var(--card-shadow);
         }
 
         .spinner {
           width: 40px;
           height: 40px;
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #1070e5;
+          border: 4px solid var(--bg-tertiary);
+          border-top: 4px solid var(--primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
           margin: 0 auto 1rem;
@@ -437,32 +437,32 @@ const PublicOrganizationProfile = () => {
         }
 
         .error-state h2 {
-          color: #dc2626;
+          color: var(--error);
           margin-bottom: 1rem;
         }
 
         .error-state p {
-          color: #64748b;
+          color: var(--text-secondary);
           margin-bottom: 2rem;
         }
 
         /* Main Box */
         .profile-main-box {
-          background: white;
+          background: var(--card-bg);
           border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 8px var(--card-shadow);
           overflow: hidden;
         }
 
         /* Header Section */
         .profile-header-content {
           padding: 2rem;
-          border-bottom: 1px solid #e5e7eb;
+          border-bottom: 1px solid var(--card-border);
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           gap: 2rem;
-          background: linear-gradient(to right, #f8fafc, white);
+          background: linear-gradient(to right, var(--bg-secondary), var(--card-bg));
         }
 
         .profile-company-info {
@@ -486,7 +486,7 @@ const PublicOrganizationProfile = () => {
           height: 80px;
           border-radius: 12px;
           overflow: hidden;
-          background: #e2e8f0;
+          background: var(--bg-tertiary);
           position: relative;
         }
 
@@ -502,8 +502,8 @@ const PublicOrganizationProfile = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #1070e5, #0ea5e9);
-          color: white;
+          background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+          color: var(--text-on-primary);
           font-size: 1.5rem;
           font-weight: 600;
         }
@@ -522,7 +522,7 @@ const PublicOrganizationProfile = () => {
         .profile-company-name {
           font-size: 2rem;
           font-weight: 700;
-          color: #1e293b;
+          color: var(--text-primary);
           margin: 0;
         }
 
@@ -537,21 +537,21 @@ const PublicOrganizationProfile = () => {
         }
 
         .verification-status--verified {
-          background: #dcfce7;
-          color: #166534;
-          border: 1px solid #bbf7d0;
+          background: var(--success-bg);
+          color: var(--success);
+          border: 1px solid var(--success-bg);
         }
 
         .verification-status--pending {
-          background: #fef3c7;
-          color: #92400e;
-          border: 1px solid #fed7aa;
+          background: var(--warning-bg);
+          color: var(--warning);
+          border: 1px solid var(--warning-bg);
         }
 
         .verification-status--rejected {
-          background: #fee2e2;
-          color: #991b1b;
-          border: 1px solid #fecaca;
+          background: var(--error-bg);
+          color: var(--error);
+          border: 1px solid var(--error-bg);
         }
 
         .profile-company-meta {
@@ -565,7 +565,7 @@ const PublicOrganizationProfile = () => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 1rem;
         }
 
@@ -578,8 +578,8 @@ const PublicOrganizationProfile = () => {
         /* Stats Section */
         .profile-stats {
           padding: 1.5rem;
-          background: #f8fafc;
-          border-left: 1px solid #e5e7eb;
+          background: var(--bg-secondary);
+          border-left: 1px solid var(--card-border);
           flex-shrink: 0;
           min-width: 200px;
         }
@@ -598,25 +598,25 @@ const PublicOrganizationProfile = () => {
         .profile-stat-number {
           font-size: 2rem;
           font-weight: 700;
-          color: #1070e5;
+          color: var(--primary);
           margin-bottom: 0.25rem;
         }
 
         .profile-stat-label {
           font-size: 0.875rem;
-          color: #475569;
+          color: var(--text-secondary);
           font-weight: 500;
           margin-bottom: 0.25rem;
         }
 
         .profile-stat-sublabel {
           font-size: 0.75rem;
-          color: #94a3b8;
+          color: var(--text-tertiary);
         }
 
         /* Content Section */
         .profile-content {
-          background: white;
+          background: var(--card-bg);
         }
 
         .profile-about-section {
@@ -634,7 +634,7 @@ const PublicOrganizationProfile = () => {
         .branches-card {
           margin-top: 2rem;
           padding-top: 2rem;
-          border-top: 1px solid #e5e7eb;
+          border-top: 1px solid var(--card-border);
         }
 
         .profile-section-title {
@@ -643,7 +643,7 @@ const PublicOrganizationProfile = () => {
           gap: 0.5rem;
           font-size: 1.25rem;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           margin-bottom: 1.5rem;
         }
 
@@ -662,24 +662,24 @@ const PublicOrganizationProfile = () => {
           align-items: center;
           gap: 0.75rem;
           padding: 0.75rem 1rem;
-          background: #f8fafc;
+          background: var(--bg-secondary);
           border-radius: 8px;
           font-size: 0.95rem;
-          color: #475569;
+          color: var(--text-secondary);
           transition: all 0.2s ease;
-          border: 1px solid #e5e7eb;
+          border: 1px solid var(--card-border);
         }
 
         .branch-item:hover {
-          background: #f1f5f9;
-          border-color: #1070e5;
+          background: var(--bg-tertiary);
+          border-color: var(--primary);
           transform: translateX(4px);
         }
 
         .branch-dot {
           width: 8px;
           height: 8px;
-          background: #1070e5;
+          background: var(--primary);
           border-radius: 50%;
           flex-shrink: 0;
         }
@@ -687,7 +687,7 @@ const PublicOrganizationProfile = () => {
         .profile-about-title {
           font-size: 1.5rem;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           margin-bottom: 1.5rem;
           display: flex;
           align-items: center;
@@ -695,7 +695,7 @@ const PublicOrganizationProfile = () => {
         }
 
         .profile-about-description {
-          color: #475569;
+          color: var(--text-secondary);
           line-height: 1.8;
           font-size: 1rem;
         }
@@ -703,20 +703,20 @@ const PublicOrganizationProfile = () => {
         .profile-about-title {
           font-size: 1.5rem;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           margin-bottom: 1rem;
         }
 
         .profile-section-title {
           font-size: 1.25rem;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           margin-bottom: 1rem;
           margin-top: 2rem;
         }
 
         .profile-about-description {
-          color: #475569;
+          color: var(--text-secondary);
           line-height: 1.6;
           margin-bottom: 1rem;
         }
@@ -731,8 +731,8 @@ const PublicOrganizationProfile = () => {
           display: inline-flex;
           align-items: center;
           padding: 0.5rem 1rem;
-          background: #1070e5;
-          color: white;
+          background: var(--primary);
+          color: var(--text-on-primary);
           text-decoration: none;
           border-radius: 6px;
           font-weight: 500;
@@ -740,13 +740,13 @@ const PublicOrganizationProfile = () => {
         }
 
         .profile-website-link:hover {
-          background: #0056b3;
+          background: var(--primary-dark);
         }
 
         /* Contact Section */
         .profile-contact-section {
           padding: 1.5rem;
-          background: #f8fafc;
+          background: var(--bg-secondary);
           border-radius: 8px;
           margin-top: 2rem;
         }
@@ -762,24 +762,24 @@ const PublicOrganizationProfile = () => {
           display: flex;
           align-items: flex-start;
           padding: 1.25rem;
-          background: white;
+          background: var(--card-bg);
           border-radius: 8px;
-          border: 1px solid #e2e8f0;
+          border: 1px solid var(--card-border);
           transition: all 0.3s ease;
         }
 
         .contact-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          border-color: #1070e5;
+          box-shadow: 0 4px 6px -1px var(--card-shadow);
+          border-color: var(--primary);
         }
 
         .contact-card-icon {
-          background: #f8fafc;
+          background: var(--bg-secondary);
           padding: 0.75rem;
           border-radius: 8px;
           margin-right: 1rem;
-          border: 1px solid #e2e8f0;
+          border: 1px solid var(--card-border);
         }
 
         .contact-icon {
@@ -793,43 +793,43 @@ const PublicOrganizationProfile = () => {
         }
 
         .contact-label {
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 0.875rem;
           font-weight: 500;
           margin-bottom: 0.25rem;
         }
 
         .contact-value {
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 1rem;
           font-weight: 600;
           margin: 0;
         }
 
         .contact-role {
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 0.875rem;
           margin-top: 0.25rem;
         }
 
         .contact-link {
-          color: #1070e5;
+          color: var(--primary);
           text-decoration: none;
           transition: color 0.2s;
         }
 
         .contact-link:hover {
-          color: #0056b3;
+          color: var(--primary-dark);
           text-decoration: underline;
         }
 
         .profile-contact-details p {
           margin: 0.5rem 0;
-          color: #475569;
+          color: var(--text-secondary);
         }
 
         .profile-contact-details a {
-          color: #1070e5;
+          color: var(--primary);
           text-decoration: none;
         }
 
@@ -839,7 +839,7 @@ const PublicOrganizationProfile = () => {
 
         /* Internships Section */
         .internships-section {
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid var(--card-border);
           padding-top: 2rem;
         }
 
@@ -851,8 +851,8 @@ const PublicOrganizationProfile = () => {
         }
 
         .internship-card {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
+          background: var(--bg-secondary);
+          border: 1px solid var(--card-border);
           border-radius: 8px;
           padding: 1.5rem;
           cursor: pointer;
@@ -860,20 +860,20 @@ const PublicOrganizationProfile = () => {
         }
 
         .internship-card:hover {
-          border-color: #1070e5;
-          box-shadow: 0 4px 12px rgba(16, 112, 229, 0.1);
+          border-color: var(--primary);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
           transform: translateY(-2px);
         }
 
         .internship-title {
           font-size: 1.125rem;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           margin-bottom: 0.5rem;
         }
 
         .internship-department {
-          color: #64748b;
+          color: var(--text-secondary);
           margin-bottom: 1rem;
         }
 
@@ -886,11 +886,11 @@ const PublicOrganizationProfile = () => {
         .internship-location,
         .internship-type {
           font-size: 0.875rem;
-          color: #475569;
+          color: var(--text-secondary);
         }
 
         .internship-duration {
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 0.875rem;
           margin-bottom: 0.5rem;
         }
@@ -898,8 +898,8 @@ const PublicOrganizationProfile = () => {
         .internship-compensation {
           display: inline-block;
           padding: 0.25rem 0.75rem;
-          background: #dcfce7;
-          color: #166534;
+          background: var(--success-bg);
+          color: var(--success);
           border-radius: 20px;
           font-size: 0.75rem;
           font-weight: 500;
@@ -934,7 +934,7 @@ const PublicOrganizationProfile = () => {
           .profile-stats {
             width: 100%;
             border-left: none;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid var(--card-border);
             margin-top: 1.5rem;
             padding-top: 1.5rem;
           }

@@ -403,8 +403,8 @@ const InternshipDetails = () => {
         .spinner {
           width: 40px;
           height: 40px;
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #1070e5;
+          border: 4px solid var(--bg-tertiary);
+          border-top: 4px solid var(--primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
           margin: 0 auto 1rem;
@@ -420,8 +420,8 @@ const InternshipDetails = () => {
         }
 
         .application-status {
-          background: #f0f9ff;
-          border: 1px solid #0ea5e9;
+          background: var(--info-bg);
+          border: 1px solid var(--info);
           border-radius: 8px;
           padding: 1rem;
           margin-top: 1rem;
@@ -436,13 +436,13 @@ const InternshipDetails = () => {
         }
 
         .status-badge.applied {
-          background: #dcfce7;
-          color: #166534;
-          border: 1px solid #bbf7d0;
+          background: var(--success-bg);
+          color: var(--success);
+          border: 1px solid var(--success-bg);
         }
 
         .org-info {
-          background: #f8fafc;
+          background: var(--bg-secondary);
           padding: 1.5rem;
           border-radius: 8px;
           margin-top: 1rem;
@@ -455,70 +455,70 @@ const InternshipDetails = () => {
         .org-description {
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid var(--card-border);
         }
 
         .btn.disabled {
-          background: #94a3b8;
+          background: var(--text-tertiary);
           cursor: not-allowed;
         }
 
         .btn.disabled:hover {
-          background: #94a3b8;
+          background: var(--text-tertiary);
         }
 
         .error-state h2 {
-          color: #dc2626;
+          color: var(--error);
           margin-bottom: 1rem;
         }
 
         .error-state p {
-          color: #64748b;
+          color: var(--text-secondary);
           margin-bottom: 2rem;
         }
         .deadline-badge {
-          background: #fef3c7;
-          color: #92400e;
+          background: var(--warning-bg);
+          color: var(--warning);
           padding: 0.25rem 0.75rem;
           border-radius: 20px;
           font-size: 0.875rem;
           font-weight: 500;
-          border: 1px solid #fde68a;
+          border: 1px solid var(--warning-bg);
         }
 
         .deadline-warning {
-          background: #fee2e2;
-          border: 1px solid #fecaca;
-          color: #991b1b;
+          background: var(--error-bg);
+          border: 1px solid var(--error);
+          color: var(--error);
         }
 
         .deadline-expired {
-          background: #f3f4f6;
-          border: 1px solid #d1d5db;
-          color: #6b7280;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--card-border);
+          color: var(--text-secondary);
         }
         .deadline-warning-banner {
-          background: #fef3c7;
-          border: 2px solid #fbbf24;
+          background: var(--warning-bg);
+          border: 2px solid var(--warning);
           border-radius: 8px;
           padding: 1rem;
           margin-top: 1rem;
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          color: #92400e;
+          color: var(--warning);
         }
 
         .deadline-expired-banner {
-          background: #fee2e2;
-          border: 2px solid #ef4444;
+          background: var(--error-bg);
+          border: 2px solid var(--error);
           border-radius: 8px;
           padding: 1rem;
           margin-top: 1rem;
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          color: #991b1b;
+          color: var(--error);
         }
 
         .warning-icon,

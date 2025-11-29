@@ -17,10 +17,10 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'accepted': return '#22c55e';
-      case 'rejected': return '#ef4444';
-      case 'pending': return '#f59e0b';
-      default: return '#6b7280';
+      case 'accepted': return 'var(--success)';
+      case 'rejected': return 'var(--error)';
+      case 'pending': return 'var(--warning)';
+      default: return 'var(--text-secondary)';
     }
   };
 
@@ -53,7 +53,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
           {applications.length === 0 ? (
             <div className="empty-applications">
               <p>You haven't sent any applications yet.</p>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.5rem' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
                 Start exploring internships and apply to your dream positions!
               </p>
             </div>
@@ -157,7 +157,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
 
         .modal-header {
           padding: 1.5rem;
-          border-bottom: 1px solid #e5e7eb;
+          border-bottom: 1px solid var(--card-border);
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -165,7 +165,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
 
         .modal-header h2 {
           margin: 0;
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 1.5rem;
           font-weight: 600;
         }
@@ -175,7 +175,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
           border: none;
           font-size: 2rem;
           cursor: pointer;
-          color: #64748b;
+          color: var(--text-secondary);
           width: 40px;
           height: 40px;
           display: flex;
@@ -186,8 +186,8 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         }
 
         .modal-close:hover {
-          background-color: #f1f5f9;
-          color: #374151;
+          background-color: var(--bg-tertiary);
+          color: var(--text-primary);
         }
 
         .modal-body {
@@ -199,13 +199,13 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         .empty-applications {
           text-align: center;
           padding: 3rem 1.5rem;
-          color: #64748b;
+          color: var(--text-secondary);
         }
 
         .empty-applications p:first-child {
           font-size: 1.1rem;
           margin-bottom: 0.5rem;
-          color: #374151;
+          color: var(--text-primary);
         }
 
         .applications-list {
@@ -217,13 +217,13 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
           justify-content: space-between;
           align-items: center;
           padding: 1.5rem;
-          border-bottom: 1px solid #f1f5f9;
+          border-bottom: 1px solid var(--bg-tertiary);
           cursor: pointer;
           transition: background-color 0.2s;
         }
 
         .application-item:hover {
-          background-color: #f8fafc;
+          background-color: var(--bg-secondary);
         }
 
         .application-item:last-child {
@@ -254,7 +254,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         .logo-placeholder {
           width: 50px;
           height: 50px;
-          background: linear-gradient(135deg, #1070e5, #2980b9);
+          background: linear-gradient(135deg, var(--primary), var(--primary-dark));
           color: white;
           display: flex;
           align-items: center;
@@ -270,7 +270,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
 
         .application-info h3 {
           margin: 0 0 0.5rem 0;
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 1rem;
           font-weight: 600;
           line-height: 1.4;
@@ -278,20 +278,20 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
 
         .company-name {
           margin: 0 0 0.5rem 0;
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 0.875rem;
           font-weight: 500;
         }
 
         .application-details {
           margin: 0 0 0.5rem 0;
-          color: #94a3b8;
+          color: var(--text-tertiary);
           font-size: 0.75rem;
         }
 
         .application-date {
           margin: 0;
-          color: #94a3b8;
+          color: var(--text-tertiary);
           font-size: 0.75rem;
         }
 
@@ -300,7 +300,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         }
 
         .status-badge {
-          color: white;
+          color: var(--text-on-primary);
           padding: 0.5rem 1rem;
           border-radius: 20px;
           font-size: 0.75rem;
@@ -319,22 +319,22 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         }
 
         .btn-secondary {
-          background: #f1f5f9;
-          color: #64748b;
+          background: var(--bg-tertiary);
+          color: var(--text-secondary);
         }
 
         .btn-secondary:hover {
-          background: #e2e8f0;
-          color: #475569;
+          background: var(--card-bg);
+          color: var(--text-primary);
         }
 
         .btn-primary {
-          background: #1070e5;
-          color: white;
+          background: var(--primary);
+          color: var(--text-on-primary);
         }
 
         .btn-primary:hover {
-          background: #0856c1;
+          background: var(--primary-dark);
         }
 
         @media (max-width: 768px) {

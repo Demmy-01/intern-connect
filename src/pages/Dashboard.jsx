@@ -173,12 +173,12 @@ const Dashboard = () => {
         {error && (
           <div
             style={{
-              background: "#fef2f2",
-              color: "#dc2626",
+              background: "var(--error-bg)",
+              color: "var(--error)",
               padding: "1rem",
               borderRadius: "8px",
               margin: "1rem 0",
-              border: "1px solid #fecaca",
+              border: "1px solid var(--error)",
             }}
           >
             {error}
@@ -213,10 +213,10 @@ const Dashboard = () => {
                   style={{
                     textAlign: "center",
                     padding: "2rem",
-                    color: "#64748b",
-                    background: "#f8fafc",
+                    color: "var(--text-secondary)",
+                    background: "var(--bg-secondary)",
                     borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--card-border)",
                   }}
                 >
                   <p>No new recommendations available.</p>
@@ -242,7 +242,7 @@ const Dashboard = () => {
                     style={{
                       textAlign: "center",
                       padding: "1.5rem",
-                      color: "#64748b",
+                      color: "var(--text-secondary)",
                       fontSize: "0.875rem",
                     }}
                   >
