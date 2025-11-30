@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "../components/ui/sonner";
+import { isProfileComplete } from "../util/profileUtils";
+import profileService from "../lib/profileService";
 import { supabase } from "../lib/supabase.js";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
@@ -75,11 +77,22 @@ const MultiStepApplyForm = () => {
       if (!user) return;
 
       // Get user profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      const { data: profileResult } = await profileService.getProfile(user.id);
+      const profile = profileResult;
+      // Check whether profile is complete and prevent application if not complete
+      const { complete, missingFields } = isProfileComplete(profile);
+      if (!complete) {
+        try {
+          toast.error(
+            `Your profile isn't complete. Please add the following: ${missingFields.join(
+              ", "
+            )}`
+          );
+        } catch (e) {}
+        // Redirect to edit-profile page so users can complete their profile
+        navigate("/edit-profile");
+        return;
+      }
 
       // Get student data
       const { data: student } = await supabase
@@ -237,6 +250,22 @@ const MultiStepApplyForm = () => {
         throw new Error("You must be logged in to apply");
       }
 
+      // Check profile completeness one more time before submitting the application
+      const { data: profileResult } = await profileService.getProfile(user.id);
+      const profile = profileResult;
+      const { complete, missingFields } = isProfileComplete(profile);
+      if (!complete) {
+        try {
+          toast.error(
+            `Your profile isn't complete. Please update your profile before applying: ${missingFields.join(
+              ", "
+            )}`
+          );
+        } catch (e) {}
+        navigate("/edit-profile");
+        return;
+      }
+
       // Update user profile (not student-specific data)
       await studentService.createOrUpdateStudentProfile({
         fullName: formData.fullName,
@@ -298,6 +327,20 @@ const MultiStepApplyForm = () => {
 
       try {
         toast.success("Application submitted successfully!");
+        // Dispatch a window event so notification modal can refresh immediately
+        try {
+          window.dispatchEvent(
+            new CustomEvent("internshipApplication:created", {
+              detail: {
+                internshipId,
+                studentId: user?.id,
+                application: data?.[0] || data,
+              },
+            })
+          );
+        } catch (e) {
+          // ignore event dispatch errors
+        }
       } catch (e) {}
       navigate(`/internship-details/${internshipId}`);
     } catch (err) {

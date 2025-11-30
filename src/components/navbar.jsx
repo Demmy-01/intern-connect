@@ -18,7 +18,8 @@ const Navbar = ({ textColor }) => {
     React.useState(false);
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
   const { darkMode, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, getDashboardUrl } = useAuth();
+  const dashboardUrl = getDashboardUrl ? getDashboardUrl() : "/dashboard";
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -60,46 +61,62 @@ const Navbar = ({ textColor }) => {
           <div className="nav-flex">
             {/* Logo */}
             <Link to="/" className="logo-link">
-            <div className="logo-container">
-              <div className="logo-flex">
-                <div className="logo-icon">
-                  <span className="logo-text">
-                    <img
-                      src={darkMode ? logo_blue : logo_blue}
-                      alt="Intern Connect"
-                      height={"25px"}
-                      width={"25px"}
-                    />
-                  </span>
+              <div className="logo-container">
+                <div className="logo-flex">
+                  <div className="logo-icon">
+                    <span className="logo-text">
+                      <img
+                        src={darkMode ? logo_blue : logo_blue}
+                        alt="Intern Connect"
+                        height={"25px"}
+                        width={"25px"}
+                      />
+                    </span>
+                  </div>
+                  <span className="logo-title">INTERN CONNECT</span>
                 </div>
-                <span className="logo-title">INTERN CONNECT</span>
               </div>
-            </div>
             </Link>
 
             {/* Desktop Navigation - Center */}
             <div className="desktop-nav">
-              <Link
-                to="/"
-                className={`nav-link ${isActive("/") ? "active" : ""}`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/about"
-                className={`nav-link ${isActive("/about") ? textColor : ""}`}
-              >
-                About us
-              </Link>
+              {!user && (
+                <>
+                  <Link
+                    to="/"
+                    className={`nav-link ${isActive("/") ? "active" : ""}`}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    to="/about"
+                    className={`nav-link ${
+                      isActive("/about") ? textColor : ""
+                    }`}
+                  >
+                    About us
+                  </Link>
+                </>
+              )}
               {user && (
-                <Link
-                  to="/dashboard"
-                  className={`nav-link ${
-                    isActive("/dashboard") ? "active" : ""
-                  }`}
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    to={dashboardUrl}
+                    className={`nav-link ${
+                      isActive(dashboardUrl) ? "active" : ""
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/internships"
+                    className={`nav-link ${
+                      isActive("/internships") ? "active" : ""
+                    }`}
+                  >
+                    Internships
+                  </Link>
+                </>
               )}
             </div>
 
@@ -169,31 +186,45 @@ const Navbar = ({ textColor }) => {
             <div className="mobile-menu">
               <div className="mobile-menu-content">
                 <div className="mobile-menu-links">
-                  <Link
-                    to="/"
-                    className={`mobile-nav-link ${
-                      isActive("/") ? "active" : ""
-                    }`}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    to="/about"
-                    className={`mobile-nav-link ${
-                      isActive("/about") ? "active" : ""
-                    }`}
-                  >
-                    About us
-                  </Link>
+                  {!user && (
+                    <>
+                      <Link
+                        to="/"
+                        className={`mobile-nav-link ${
+                          isActive("/") ? "active" : ""
+                        }`}
+                      >
+                        Home
+                      </Link>
+                      <Link
+                        to="/about"
+                        className={`mobile-nav-link ${
+                          isActive("/about") ? "active" : ""
+                        }`}
+                      >
+                        About us
+                      </Link>
+                    </>
+                  )}
                   {user && (
-                    <Link
-                      to="/dashboard"
-                      className={`mobile-nav-link ${
-                        isActive("/dashboard") ? "active" : ""
-                      }`}
-                    >
-                      Dashboard
-                    </Link>
+                    <>
+                      <Link
+                        to={dashboardUrl}
+                        className={`mobile-nav-link ${
+                          isActive(dashboardUrl) ? "active" : ""
+                        }`}
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        to="/internships"
+                        className={`mobile-nav-link ${
+                          isActive("/internships") ? "active" : ""
+                        }`}
+                      >
+                        Internships
+                      </Link>
+                    </>
                   )}
                 </div>
 

@@ -5,6 +5,10 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Loader from "../components/Loader.jsx";
 import studentService from "../lib/studentService.js";
+import { supabase } from "../lib/supabase.js";
+import { isProfileComplete } from "../util/profileUtils";
+import profileService from "../lib/profileService";
+import { toast } from "../components/ui/sonner";
 
 const InternshipDetails = () => {
   const { id } = useParams();
@@ -62,16 +66,48 @@ const InternshipDetails = () => {
     return deadline < today;
   };
 
-  const handleApplyNow = () => {
-    if (applicationStatus.hasApplied) {
-      alert("You have already applied for this internship");
-      return;
+  const handleApplyNow = async () => {
+    try {
+      if (applicationStatus.hasApplied) {
+        toast.info("You have already applied for this internship.");
+        return;
+      }
+
+      if (isDeadlinePassed(internshipData.application_deadline)) {
+        toast.error("Application deadline has passed. You cannot apply.");
+        return;
+      }
+
+      // Check profile completeness before applying
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to apply for internships.");
+        navigate("/login");
+        return;
+      }
+
+      const { data: profileResult } = await profileService.getProfile(user.id);
+      const profile = profileResult;
+      const { complete, missingFields } = isProfileComplete(profile);
+      if (!complete) {
+        toast.error(
+          `Please complete your profile before applying. Missing: ${missingFields.join(
+            ", "
+          )}`
+        );
+        navigate("/edit-profile");
+        return;
+      }
+
+      navigate(`/apply/${id}`);
+    } catch (err) {
+      console.error("Error during apply navigation:", err);
+      try {
+        toast.error("Failed to proceed to apply. Please try again.");
+      } catch (e) {}
     }
-    if (isDeadlinePassed(internshipData.application_deadline)) {
-      alert("Application deadline has passed. You cannot apply.");
-      return;
-    }
-    navigate(`/apply/${id}`);
   };
 
   const handleViewProfile = () => {

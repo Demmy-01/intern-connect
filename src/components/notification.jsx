@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   X,
@@ -9,9 +10,12 @@ import {
   Calendar,
   Star,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import ProfileService from "../lib/profileService";
+import studentDashboardService from "../lib/studentDashboardService";
+import studentService from "../lib/studentService";
 import "../style/notification.css";
 
 // Helper function to generate consistent colors for company logos
@@ -61,6 +65,8 @@ const ProfileCompletionNotification = ({ profile }) => {
     ((4 - missingFields.length) / 4) * 100
   );
 
+  // Profile notification doesn't use `dateStr` - left over from move earlier
+
   return (
     <div className="notification-item profile-item">
       <div className="icon-container profile-icon">
@@ -85,6 +91,11 @@ const ProfileCompletionNotification = ({ profile }) => {
             style={{ width: `${completionPercentage}%` }}
           ></div>
         </div>
+        <div className="notification-actions" style={{ marginTop: "0.5rem" }}>
+          <Link to="/edit-profile" className="btn btn-link">
+            Edit Profile
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -108,6 +119,13 @@ const ApplicationStatusNotification = ({ app, type = "approved" }) => {
           title: "Application Update",
           description: `Your application for ${app.internships.position_title} was not successful this time. Keep applying - the right opportunity is waiting!`,
         };
+      case "applied":
+        return {
+          icon: <CheckCircle size={18} color="white" />,
+          iconBg: "#0ea5e9",
+          title: "Application Submitted",
+          description: `Your application for ${app.internships.position_title} at ${app.internships.organizations?.organization_name} has been submitted. Good luck!`,
+        };
       default:
         return {
           icon: <AlertCircle size={18} color="white" />,
@@ -119,6 +137,9 @@ const ApplicationStatusNotification = ({ app, type = "approved" }) => {
   };
 
   const content = getNotificationContent();
+  // Friendly date: prefer applied_at, fallback to updated_at
+  const dateStr =
+    app?.applied_at || app?.updated_at || new Date().toISOString();
 
   return (
     <div className="notification-item">
@@ -133,7 +154,7 @@ const ApplicationStatusNotification = ({ app, type = "approved" }) => {
           <h4 className="notification-title">{content.title}</h4>
           <span className="time-ago">
             <span className="dot"></span>
-            {new Date(app.updated_at).toLocaleDateString()}
+            {new Date(dateStr).toLocaleDateString()}
           </span>
         </div>
         <p className="notification-description">{content.description}</p>
@@ -225,11 +246,128 @@ const NotificationModal = ({ isOpen, closeModal }) => {
   const [loading, setLoading] = React.useState(true);
   const { user } = useAuth();
 
+  const subscriptionRef = useRef(null);
+
   React.useEffect(() => {
     if (user && isOpen) {
       loadNotificationData();
+      // attach realtime subscription
+      attachRealtimeSubscription();
     }
+
+    // cleanup on close or unmount
+    return () => {
+      if (subscriptionRef.current) {
+        studentService.unsubscribe(subscriptionRef.current);
+        subscriptionRef.current = null;
+      }
+    };
   }, [user, isOpen]);
+
+  const attachRealtimeSubscription = async () => {
+    try {
+      const sub = await studentService.subscribeToApplicationUpdates(
+        (payload) => {
+          handleRealtimePayload(payload);
+        }
+      );
+      subscriptionRef.current = sub;
+    } catch (err) {
+      console.error("Error subscribing to application updates:", err);
+    }
+  };
+
+  // Listen for newly created or updated applications (event bus) and refresh notifications
+  React.useEffect(() => {
+    const handleAppEvent = (e) => {
+      try {
+        const studentId = e?.detail?.studentId;
+        if (!user || !studentId) return;
+        if (studentId === user.id) {
+          loadNotificationData();
+        }
+      } catch (err) {
+        console.error("Error handling internship application event:", err);
+      }
+    };
+
+    window.addEventListener("internshipApplication:created", handleAppEvent);
+    window.addEventListener("internshipApplication:updated", handleAppEvent);
+    return () => {
+      window.removeEventListener(
+        "internshipApplication:created",
+        handleAppEvent
+      );
+      window.removeEventListener(
+        "internshipApplication:updated",
+        handleAppEvent
+      );
+    };
+  }, [user]);
+
+  const handleRealtimePayload = (payload) => {
+    try {
+      // Supabase real-time payload can differ; handle multiple shapes
+      const evtType =
+        payload?.eventType ||
+        payload?.type ||
+        payload?.event ||
+        payload?.eventType;
+      // new/record sometimes available under 'new', 'record' or payload.payload.new
+      const record =
+        payload?.new ||
+        payload?.record ||
+        payload?.payload?.new ||
+        payload?.payload?.record ||
+        payload?.payload?.data ||
+        null;
+
+      if (!record) return;
+
+      if (evtType === "INSERT") {
+        setApplications((prev) => [
+          record,
+          ...prev.filter((a) => a.id !== record.id),
+        ]);
+        window.dispatchEvent(
+          new CustomEvent("internshipApplication:created", {
+            detail: {
+              studentId: record.student_id,
+              internshipId: record.internship_id,
+              application: record,
+            },
+          })
+        );
+      } else if (evtType === "UPDATE") {
+        setApplications((prev) =>
+          prev.map((a) => (a.id === record.id ? record : a))
+        );
+        // dispatch update event
+        window.dispatchEvent(
+          new CustomEvent("internshipApplication:updated", {
+            detail: {
+              studentId: record.student_id,
+              internshipId: record.internship_id,
+              application: record,
+            },
+          })
+        );
+      } else if (evtType === "DELETE") {
+        setApplications((prev) => prev.filter((a) => a.id !== record.id));
+        window.dispatchEvent(
+          new CustomEvent("internshipApplication:deleted", {
+            detail: {
+              studentId: record.student_id,
+              internshipId: record.internship_id,
+              application: record,
+            },
+          })
+        );
+      }
+    } catch (err) {
+      console.error("Error handling realtime payload:", err);
+    }
+  };
 
   const loadNotificationData = async () => {
     try {
@@ -249,36 +387,24 @@ const NotificationModal = ({ isOpen, closeModal }) => {
         setProfile(profileResult.data);
       }
 
-      // Fetch applications
-      const { data: applications, error } = await supabase
-        .from("internship_applications")
-        .select(
-          `
-          id,
-          status,
-          applied_at,
-          updated_at,
-          internships:internship_id (
-            id,
-            position_title,
-            department,
-            location,
-            work_type,
-            compensation,
-            organizations (
-              organization_name,
-              organization_type,
-              logo_url,
-              location
-            )
-          )
-        `
-        )
-        .eq("student_id", user.id)
-        .order("updated_at", { ascending: false });
-
-      if (!error) {
-        setApplications(applications || []);
+      // Fetch applications via shared student dashboard service so it's consistent with the dashboard
+      try {
+        const { data: apps, error: appsError } =
+          await studentDashboardService.getStudentApplications();
+        if (appsError) throw new Error(appsError);
+        setApplications(apps || []);
+        // Debug: log fetched applications for dev verification
+        console.debug(
+          "NotificationModal: fetched applications",
+          apps?.length,
+          apps
+        );
+      } catch (appsErr) {
+        console.error(
+          "Error fetching applications via studentDashboardService:",
+          appsErr
+        );
+        setApplications([]);
       }
     } catch (error) {
       console.error("Error loading notification data:", error);
@@ -344,6 +470,22 @@ const NotificationModal = ({ isOpen, closeModal }) => {
               )}
 
               {/* Recent application updates */}
+              {/* Newly submitted applications */}
+              {applications
+                .filter(
+                  (app) =>
+                    app.status === "pending" ||
+                    app.status === "applied" ||
+                    app.status === "submitted"
+                )
+                .slice(0, 2)
+                .map((app) => (
+                  <ApplicationStatusNotification
+                    key={`applied-${app.id}`}
+                    app={app}
+                    type="applied"
+                  />
+                ))}
               {applications
                 .filter(
                   (app) =>

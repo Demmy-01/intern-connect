@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "../style/organization-onboarding.css";
 import organizationProfileService from "../lib/OrganizationProfileService.js";
 import { toast } from "../components/ui/sonner";
-import authService from "../lib/authService.js";
 
 const OrganizationOnboarding = () => {
   const navigate = useNavigate();
@@ -12,6 +11,7 @@ const OrganizationOnboarding = () => {
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(false);
   // Success message will be shown via toast
 
   const [profileData, setProfileData] = useState({
@@ -305,6 +305,7 @@ const OrganizationOnboarding = () => {
         toast.success(
           "Onboarding completed successfully! Your organization is now registered and pending verification."
         );
+        setSuccessMessage(true);
       } catch (e) {}
       navigate("/dashboard-overview");
     } catch (error) {

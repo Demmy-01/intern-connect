@@ -86,6 +86,16 @@ const ApplicationDetails = () => {
                 status === "accepted" ? "accepted" : "rejected"
               } successfully! Email notification has been sent to the applicant.`
             );
+            // Dispatch a window event for updates so NotificationModal and other components can refresh
+            window.dispatchEvent(
+              new CustomEvent("internshipApplication:updated", {
+                detail: {
+                  studentId: applicationData.student_id,
+                  applicationId: applicationId,
+                  status,
+                },
+              })
+            );
           } catch (e) {}
           setApplicationData((prev) => ({ ...prev, status }));
         }

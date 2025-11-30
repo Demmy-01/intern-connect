@@ -5,6 +5,10 @@ import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer.jsx";
 import { useNavigate } from "react-router-dom";
 import studentService from "../lib/studentService.js";
+import { supabase } from "../lib/supabase.js";
+import { isProfileComplete } from "../util/profileUtils";
+import { toast } from "../components/ui/sonner";
+import profileService from "../lib/profileService";
 import "../style/it.css";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { MapPin, Calendar, Clock, Info, X, Check } from "lucide-react";
@@ -362,8 +366,40 @@ const InternshipSearchPage = () => {
     return deadline < today;
   };
 
-  const handleApply = (internshipId) => {
-    navigate(`/apply/${internshipId}`);
+  const handleApply = async (internshipId) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to apply for internships.");
+        navigate("/login");
+        return;
+      }
+
+      const { data: profileResult } = await profileService.getProfile(user.id);
+      const profile = profileResult;
+      const { complete, missingFields } = isProfileComplete(profile);
+      if (!complete) {
+        try {
+          toast.error(
+            `Please complete your profile before applying. Missing: ${missingFields.join(
+              ", "
+            )}`
+          );
+        } catch (e) {}
+        navigate("/edit-profile");
+        return;
+      }
+      navigate(`/apply/${internshipId}`);
+    } catch (err) {
+      console.error("Error during apply navigation:", err);
+      try {
+        toast.error(
+          "Unable to proceed to application. Please try again later."
+        );
+      } catch (e) {}
+    }
   };
 
   const formatInternshipData = (internship) => {
