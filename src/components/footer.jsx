@@ -126,7 +126,7 @@ const Footer = () => {
               <Youtube size={18} />
             </a>
             <a
-              href="#"
+              href="https://x.com/dinternconnect?s=11"
               className="social-link-ft"
               aria-label="Twitter"
               target="_blank"
