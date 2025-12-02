@@ -1,36 +1,35 @@
 @import './typography.css';
 @import '../index.css';
-        .section-1 {
-            position: relative;
-            height: 60vh;
-            min-height: 550px;
-            background-image: url('../assets/Image.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding-top: 25px;
-        }
-        
-        .section-1::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #0066ccad;
-            opacity: 0.9;
-            z-index: 1;
-        }
-        .section-1 Link{
-          text-decoration: none;
-        }
-
-        .content {
+      .section-1 {
+          position: relative;
+          height: 60vh;
+          min-height: 550px;
+          background-image: url('../assets/Image.jpeg');
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          padding-top: 25px;
+      }
+      
+      .section-1::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #0066ccad;
+          opacity: 0.9;
+          z-index: 1;
+      }
+      .section-1 Link{
+        text-decoration: none;
+      }
+      .content {
             position: relative;
             z-index: 2;
             text-align: center;
@@ -179,23 +178,22 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: #2563eb; /* Fallback */
+  color: #2563eb;
   margin: 0 0 32px 0;
   line-height: 1.2;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: -0.02em;
 }
 
-        .mission-description {
-            /* Removed font-size and font-weight to use global typography */
-            line-height: 1.8;
-            color: var(--text-secondary);
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 90%;
-            margin: 0 auto;
-            transition: color 0.3s ease;
-        }
+.mission-description {
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 90%;
+    margin: 0 auto;
+    transition: color 0.3s ease;
+}
 .section-3 {
   background: linear-gradient(135deg, #29448d, #2563eb);
   padding: 100px 20px;
@@ -256,23 +254,19 @@
   padding: 20px 0;
 }
 
-        .card-title {
-            /* Removed font-size and font-weight to use global typography */
-            color: var(--text-primary);
-            margin: 0 0 16px 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            transition: color 0.3s ease;
-        }
-
-        .card-description {
-            /* Removed font-size and font-weight to use global typography */
-            line-height: 1.7;
-            color: var(--text-secondary);
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            transition: color 0.3s ease;
-        }
-
+.card-title {
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: color 0.3s ease;
+}
+.card-description {
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: color 0.3s ease;
+}
 .card-image {
   flex: 1;
   max-width: 500px;
@@ -460,7 +454,6 @@
   z-index: 0;
 }
 
-/* Update existing ::after orb to be more visible */
 .section-3::after {
   background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 70%, transparent 100%);
 }

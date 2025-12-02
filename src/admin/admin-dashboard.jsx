@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Users, Building2, Briefcase, FileText, X, CheckCircle, XCircle, Download, ExternalLink } from "lucide-react";
-import { supabase, supabaseAdmin } from '../lib/supabase';
+import {
+  Users,
+  Building2,
+  Briefcase,
+  FileText,
+  X,
+  CheckCircle,
+  XCircle,
+  Download,
+  ExternalLink,
+  Mail,
+} from "lucide-react";
+import { supabase, supabaseAdmin } from "../lib/supabase";
 
 // Reusable StatCard Component
 const StatCard = ({ title, value, icon: Icon }) => (
@@ -84,18 +95,28 @@ const StudentProfileModal = ({ student, onClose, onDelete }) => {
           {/* Student Header */}
           <div style={styles.orgHeader}>
             {student.avatar_url ? (
-              <img src={student.avatar_url} alt="Avatar" style={styles.orgLogo} />
+              <img
+                src={student.avatar_url}
+                alt="Avatar"
+                style={styles.orgLogo}
+              />
             ) : (
               <div style={styles.orgLogoPlaceholder}>
                 <Users size={40} color="#6b7280" />
               </div>
             )}
             <div>
-              <h2 style={styles.orgName}>{student.display_name || student.username}</h2>
-              <span style={{
-                ...styles.statusBadge,
-                ...(student.is_active ? styles.statusActive : styles.statusInactive)
-              }}>
+              <h2 style={styles.orgName}>
+                {student.display_name || student.username}
+              </h2>
+              <span
+                style={{
+                  ...styles.statusBadge,
+                  ...(student.is_active
+                    ? styles.statusActive
+                    : styles.statusInactive),
+                }}
+              >
                 {student.is_active ? "Active" : "Suspended"}
               </span>
             </div>
@@ -111,7 +132,9 @@ const StudentProfileModal = ({ student, onClose, onDelete }) => {
               </div>
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Display Name</span>
-                <span style={styles.contactValue}>{student.display_name || 'N/A'}</span>
+                <span style={styles.contactValue}>
+                  {student.display_name || "N/A"}
+                </span>
               </div>
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Email</span>
@@ -119,7 +142,9 @@ const StudentProfileModal = ({ student, onClose, onDelete }) => {
               </div>
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Phone</span>
-                <span style={styles.contactValue}>{student.phone || 'N/A'}</span>
+                <span style={styles.contactValue}>
+                  {student.phone || "N/A"}
+                </span>
               </div>
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Account Created</span>
@@ -141,8 +166,8 @@ const StudentProfileModal = ({ student, onClose, onDelete }) => {
           {/* Delete Button */}
           {!showDeleteConfirm ? (
             <div style={styles.actionButtons}>
-              <button 
-                onClick={() => setShowDeleteConfirm(true)} 
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
                 style={styles.deleteButton}
                 disabled={loading}
               >
@@ -162,19 +187,19 @@ const StudentProfileModal = ({ student, onClose, onDelete }) => {
                   rows={4}
                 />
                 <div style={styles.rejectActions}>
-                  <button 
-                    onClick={() => setShowDeleteConfirm(false)} 
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
                     style={styles.cancelButton}
                     disabled={loading}
                   >
                     Cancel
                   </button>
-                  <button 
-                    onClick={handleDelete} 
+                  <button
+                    onClick={handleDelete}
                     style={styles.confirmRejectButton}
                     disabled={loading}
                   >
-                    {loading ? 'Processing...' : 'Confirm Deletion'}
+                    {loading ? "Processing..." : "Confirm Deletion"}
                   </button>
                 </div>
               </div>
@@ -190,12 +215,27 @@ const StudentProfileModal = ({ student, onClose, onDelete }) => {
 const LogoutConfirmModal = ({ onClose, onConfirm }) => {
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
-      <div style={{...styles.modalContent, maxWidth: '400px'}} onClick={(e) => e.stopPropagation()}>
+      <div
+        style={{ ...styles.modalContent, maxWidth: "400px" }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div style={styles.modalBody}>
-          <h2 style={{...styles.orgName, textAlign: 'center', marginBottom: '16px'}}>
+          <h2
+            style={{
+              ...styles.orgName,
+              textAlign: "center",
+              marginBottom: "16px",
+            }}
+          >
             Confirm Logout
           </h2>
-          <p style={{...styles.sectionText, textAlign: 'center', marginBottom: '24px'}}>
+          <p
+            style={{
+              ...styles.sectionText,
+              textAlign: "center",
+              marginBottom: "24px",
+            }}
+          >
             Are you sure you want to log out of your admin account?
           </p>
           <div style={styles.rejectActions}>
@@ -213,7 +253,12 @@ const LogoutConfirmModal = ({ onClose, onConfirm }) => {
 };
 
 // Organization Detail Modal Component
-const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject }) => {
+const OrganizationDetailModal = ({
+  organization,
+  onClose,
+  onApprove,
+  onReject,
+}) => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [documents, setDocuments] = useState([]);
@@ -231,12 +276,12 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
     try {
       // Fetch documents from database
       const { data: docsData, error: docsError } = await supabase
-        .from('organization_documents')
-        .select('*')
-        .eq('organization_id', organization.id);
-      
+        .from("organization_documents")
+        .select("*")
+        .eq("organization_id", organization.id);
+
       if (docsError) {
-        console.error('Error fetching documents:', docsError);
+        console.error("Error fetching documents:", docsError);
       }
 
       // For each document, get the signed URL from storage
@@ -247,38 +292,45 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
               // Extract the file path from document_url
               // If document_url is already a full URL, extract the path
               let filePath = doc.document_url;
-              
+
               // If it's a full URL, extract just the path part
-              if (filePath.includes('organization-documents/')) {
-                const pathMatch = filePath.match(/organization-documents\/(.+)$/);
+              if (filePath.includes("organization-documents/")) {
+                const pathMatch = filePath.match(
+                  /organization-documents\/(.+)$/
+                );
                 if (pathMatch) {
                   filePath = pathMatch[0]; // Keep the full path including folder
                 }
               }
-              
+
               // Get signed URL from storage
-              const { data: urlData, error: urlError } = await supabase
-                .storage
-                .from('organization-documents')
+              const { data: urlData, error: urlError } = await supabase.storage
+                .from("organization-documents")
                 .createSignedUrl(filePath, 3600); // URL valid for 1 hour
 
               if (urlError) {
-                console.error(`Error getting signed URL for ${doc.document_name}:`, urlError);
+                console.error(
+                  `Error getting signed URL for ${doc.document_name}:`,
+                  urlError
+                );
                 return {
                   ...doc,
-                  downloadUrl: doc.document_url // Fallback to original URL
+                  downloadUrl: doc.document_url, // Fallback to original URL
                 };
               }
 
               return {
                 ...doc,
-                downloadUrl: urlData.signedUrl
+                downloadUrl: urlData.signedUrl,
               };
             } catch (err) {
-              console.error(`Error processing document ${doc.document_name}:`, err);
+              console.error(
+                `Error processing document ${doc.document_name}:`,
+                err
+              );
               return {
                 ...doc,
-                downloadUrl: doc.document_url
+                downloadUrl: doc.document_url,
               };
             }
           })
@@ -290,20 +342,20 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
 
       // Fetch contacts
       const { data: contactsData } = await supabase
-        .from('organization_contacts')
-        .select('*')
-        .eq('organization_id', organization.id);
+        .from("organization_contacts")
+        .select("*")
+        .eq("organization_id", organization.id);
       setContacts(contactsData || []);
 
       // Fetch compliance
       const { data: complianceData } = await supabase
-        .from('organization_compliance')
-        .select('*')
-        .eq('organization_id', organization.id)
+        .from("organization_compliance")
+        .select("*")
+        .eq("organization_id", organization.id)
         .single();
       setCompliance(complianceData);
     } catch (error) {
-      console.error('Error fetching organization details:', error);
+      console.error("Error fetching organization details:", error);
     }
   };
 
@@ -344,7 +396,11 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
           {/* Organization Header */}
           <div style={styles.orgHeader}>
             {organization.logo_url ? (
-              <img src={organization.logo_url} alt="Logo" style={styles.orgLogo} />
+              <img
+                src={organization.logo_url}
+                alt="Logo"
+                style={styles.orgLogo}
+              />
             ) : (
               <div style={styles.orgLogoPlaceholder}>
                 <Building2 size={40} color="#6b7280" />
@@ -352,12 +408,16 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
             )}
             <div>
               <h2 style={styles.orgName}>{organization.organization_name}</h2>
-              <span style={{
-                ...styles.statusBadge,
-                ...(organization.verification_status === "verified" ? styles.statusActive :
-                    organization.verification_status === "rejected" ? styles.statusRejected :
-                    styles.statusPending)
-              }}>
+              <span
+                style={{
+                  ...styles.statusBadge,
+                  ...(organization.verification_status === "verified"
+                    ? styles.statusActive
+                    : organization.verification_status === "rejected"
+                    ? styles.statusRejected
+                    : styles.statusPending),
+                }}
+              >
                 {organization.verification_status}
               </span>
             </div>
@@ -381,12 +441,19 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
               </div>
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Phone</span>
-                <span style={styles.contactValue}>{organization.phone || 'N/A'}</span>
+                <span style={styles.contactValue}>
+                  {organization.phone || "N/A"}
+                </span>
               </div>
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Website</span>
                 {organization.website ? (
-                  <a href={organization.website} target="_blank" rel="noopener noreferrer" style={styles.link}>
+                  <a
+                    href={organization.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={styles.link}
+                  >
                     {organization.website} <ExternalLink size={14} />
                   </a>
                 ) : (
@@ -396,24 +463,32 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
               <div style={styles.contactItem}>
                 <span style={styles.contactLabel}>Location</span>
                 <span style={styles.contactValue}>
-                  {organization.location ? 
-                    (typeof organization.location === 'string' ? organization.location : JSON.stringify(organization.location)) 
-                    : 'N/A'}
+                  {organization.location
+                    ? typeof organization.location === "string"
+                      ? organization.location
+                      : JSON.stringify(organization.location)
+                    : "N/A"}
                 </span>
               </div>
             </div>
 
             {contacts.length > 0 && (
-              <div style={{ marginTop: '20px' }}>
+              <div style={{ marginTop: "20px" }}>
                 <h4 style={styles.subsectionTitle}>Additional Contacts</h4>
-                {contacts.map(contact => (
+                {contacts.map((contact) => (
                   <div key={contact.id} style={styles.contactCard}>
                     <div>
                       <strong>{contact.contact_name}</strong>
-                      {contact.contact_role && <span style={styles.metadata}> - {contact.contact_role}</span>}
+                      {contact.contact_role && (
+                        <span style={styles.metadata}>
+                          {" "}
+                          - {contact.contact_role}
+                        </span>
+                      )}
                     </div>
                     <div style={styles.metadata}>
-                      {contact.contact_email} {contact.contact_phone && `• ${contact.contact_phone}`}
+                      {contact.contact_email}{" "}
+                      {contact.contact_phone && `• ${contact.contact_phone}`}
                     </div>
                   </div>
                 ))}
@@ -426,7 +501,7 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
             <h3 style={styles.sectionTitle}>Submitted Documents</h3>
             {documents.length > 0 ? (
               <div style={styles.documentsGrid}>
-                {documents.map(doc => (
+                {documents.map((doc) => (
                   <a
                     key={doc.id}
                     href={doc.downloadUrl}
@@ -434,10 +509,24 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
                     rel="noopener noreferrer"
                     style={styles.documentLink}
                   >
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                      <span style={{fontWeight: '500'}}>{doc.document_name}</span>
-                      <span style={{fontSize: '12px', color: '#6b7280', textTransform: 'capitalize'}}>
-                        {doc.document_type.replace('_', ' ')}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "4px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "500" }}>
+                        {doc.document_name}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "#6b7280",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {doc.document_type.replace("_", " ")}
                       </span>
                     </div>
                     <Download size={16} />
@@ -456,20 +545,44 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
               <div style={styles.complianceGrid}>
                 <div style={styles.complianceItem}>
                   <span>Terms & Conditions</span>
-                  <span style={compliance.terms_accepted ? styles.accepted : styles.notAccepted}>
-                    {compliance.terms_accepted ? '✓ Accepted' : '✗ Not Accepted'}
+                  <span
+                    style={
+                      compliance.terms_accepted
+                        ? styles.accepted
+                        : styles.notAccepted
+                    }
+                  >
+                    {compliance.terms_accepted
+                      ? "✓ Accepted"
+                      : "✗ Not Accepted"}
                   </span>
                 </div>
                 <div style={styles.complianceItem}>
                   <span>Guidelines</span>
-                  <span style={compliance.guidelines_accepted ? styles.accepted : styles.notAccepted}>
-                    {compliance.guidelines_accepted ? '✓ Accepted' : '✗ Not Accepted'}
+                  <span
+                    style={
+                      compliance.guidelines_accepted
+                        ? styles.accepted
+                        : styles.notAccepted
+                    }
+                  >
+                    {compliance.guidelines_accepted
+                      ? "✓ Accepted"
+                      : "✗ Not Accepted"}
                   </span>
                 </div>
                 <div style={styles.complianceItem}>
                   <span>Privacy Policy</span>
-                  <span style={compliance.privacy_policy_accepted ? styles.accepted : styles.notAccepted}>
-                    {compliance.privacy_policy_accepted ? '✓ Accepted' : '✗ Not Accepted'}
+                  <span
+                    style={
+                      compliance.privacy_policy_accepted
+                        ? styles.accepted
+                        : styles.notAccepted
+                    }
+                  >
+                    {compliance.privacy_policy_accepted
+                      ? "✓ Accepted"
+                      : "✗ Not Accepted"}
                   </span>
                 </div>
               </div>
@@ -481,16 +594,16 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
             <div style={styles.actionButtons}>
               {!showRejectForm ? (
                 <>
-                  <button 
-                    onClick={handleApprove} 
+                  <button
+                    onClick={handleApprove}
                     style={styles.approveButton}
                     disabled={loading}
                   >
                     <CheckCircle size={20} />
-                    {loading ? 'Processing...' : 'Accept'}
+                    {loading ? "Processing..." : "Accept"}
                   </button>
-                  <button 
-                    onClick={() => setShowRejectForm(true)} 
+                  <button
+                    onClick={() => setShowRejectForm(true)}
                     style={styles.rejectButton}
                     disabled={loading}
                   >
@@ -509,19 +622,19 @@ const OrganizationDetailModal = ({ organization, onClose, onApprove, onReject })
                     rows={4}
                   />
                   <div style={styles.rejectActions}>
-                    <button 
-                      onClick={() => setShowRejectForm(false)} 
+                    <button
+                      onClick={() => setShowRejectForm(false)}
                       style={styles.cancelButton}
                       disabled={loading}
                     >
                       Cancel
                     </button>
-                    <button 
-                      onClick={handleReject} 
+                    <button
+                      onClick={handleReject}
                       style={styles.confirmRejectButton}
                       disabled={loading}
                     >
-                      {loading ? 'Processing...' : 'Confirm Rejection'}
+                      {loading ? "Processing..." : "Confirm Rejection"}
                     </button>
                   </div>
                 </div>
@@ -538,6 +651,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("users");
   const [users, setUsers] = useState([]);
   const [organizations, setOrganizations] = useState([]);
+  const [contactMessages, setContactMessages] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -546,6 +660,8 @@ const AdminDashboard = () => {
     totalOrganizations: 0,
     activeInternships: 0,
     totalApplications: 0,
+    totalMessages: 0,
+    unreadMessages: 0,
   });
   const [visibleCount, setVisibleCount] = useState(10);
   const [loading, setLoading] = useState(true);
@@ -559,11 +675,18 @@ const AdminDashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [usersResult, orgsResult, internshipsResult, applicationsResult] = await Promise.all([
+      const [
+        usersResult,
+        orgsResult,
+        internshipsResult,
+        applicationsResult,
+        messagesResult,
+      ] = await Promise.all([
         fetchUsers(),
         fetchOrganizations(),
         fetchInternships(),
         fetchApplications(),
+        fetchContactMessages(),
       ]);
 
       if (usersResult.error) throw usersResult.error;
@@ -573,12 +696,21 @@ const AdminDashboard = () => {
 
       setUsers(usersResult.data || []);
       setOrganizations(orgsResult.data || []);
-      
+      setContactMessages(messagesResult.data || []);
+
+      const messagesData = messagesResult.data || [];
+      const unreadCount = messagesData.filter(
+        (m) => m.status === "unread"
+      ).length;
+
       setStats({
         totalUsers: usersResult.data?.length || 0,
         totalOrganizations: orgsResult.data?.length || 0,
-        activeInternships: internshipsResult.data?.filter(i => i.is_active).length || 0,
+        activeInternships:
+          internshipsResult.data?.filter((i) => i.is_active).length || 0,
         totalApplications: applicationsResult.data?.length || 0,
+        totalMessages: messagesData.length,
+        unreadMessages: unreadCount,
       });
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
@@ -591,8 +723,9 @@ const AdminDashboard = () => {
   const fetchUsers = async () => {
     try {
       const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
+        .from("profiles")
+        .select(
+          `
           id,
           username,
           display_name,
@@ -604,9 +737,9 @@ const AdminDashboard = () => {
             id,
             bio
           )
-        `)
-        .eq('user_type', 'student')
-        .order('created_at', { ascending: false });
+        `
+        )
+        .order("created_at", { ascending: false });
 
       if (profilesError) {
         console.error("Error fetching profiles:", profilesError);
@@ -617,23 +750,24 @@ const AdminDashboard = () => {
         return { data: [], error: null };
       }
 
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+      const { data: authData, error: authError } =
+        await supabaseAdmin.auth.admin.listUsers();
 
       if (authError) {
         console.error("Error fetching auth users:", authError);
       }
 
-      const usersWithEmail = profilesData.map(user => {
-        const authUser = authData?.users?.find(au => au.id === user.id);
-        
+      const usersWithEmail = profilesData.map((user) => {
+        const authUser = authData?.users?.find((au) => au.id === user.id);
+
         return {
           ...user,
-          email: authUser?.email || 'N/A',
+          email: authUser?.email || "N/A",
           is_active: authUser ? (authUser.banned_until ? false : true) : true,
-          banned_until: authUser?.banned_until
+          banned_until: authUser?.banned_until,
         };
       });
-      
+
       return { data: usersWithEmail, error: null };
     } catch (error) {
       console.error("Error in fetchUsers:", error);
@@ -644,8 +778,9 @@ const AdminDashboard = () => {
   const fetchOrganizations = async () => {
     try {
       const { data, error } = await supabase
-        .from('organizations')
-        .select(`
+        .from("organizations")
+        .select(
+          `
           id,
           organization_name,
           company_name,
@@ -664,8 +799,9 @@ const AdminDashboard = () => {
             display_name,
             phone
           )
-        `)
-        .order('created_at', { ascending: false });
+        `
+        )
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching organizations:", error);
@@ -676,24 +812,25 @@ const AdminDashboard = () => {
         return { data: [], error: null };
       }
 
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
-      
+      const { data: authData, error: authError } =
+        await supabaseAdmin.auth.admin.listUsers();
+
       if (authError) {
         console.error("Error fetching auth users:", authError);
       }
 
-      const orgsWithEmail = data.map(org => {
-        const authUser = authData?.users?.find(au => au.id === org.id);
-        
+      const orgsWithEmail = data.map((org) => {
+        const authUser = authData?.users?.find((au) => au.id === org.id);
+
         return {
           ...org,
-          email: authUser?.email || 'N/A',
+          email: authUser?.email || "N/A",
           username: org.profiles?.username,
           display_name: org.profiles?.display_name,
-          phone: org.profiles?.phone
+          phone: org.profiles?.phone,
         };
       });
-      
+
       return { data: orgsWithEmail, error: null };
     } catch (error) {
       console.error("Error in fetchOrganizations:", error);
@@ -703,37 +840,54 @@ const AdminDashboard = () => {
 
   const fetchInternships = async () => {
     const { data, error } = await supabase
-      .from('internships')
-      .select('id, is_active');
+      .from("internships")
+      .select("id, is_active");
 
     return { data, error };
   };
 
   const fetchApplications = async () => {
     const { data, error } = await supabase
-      .from('internship_applications')
-      .select('id');
+      .from("internship_applications")
+      .select("id");
 
     return { data, error };
   };
 
+  const fetchContactMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("contact_messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching contact messages:", error);
+        return { data: [], error };
+      }
+
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error("Error in fetchContactMessages:", err);
+      return { data: [], error: err };
+    }
+  };
+
   const handleToggle = async (id, type) => {
     if (type === "users") {
-      const user = users.find(u => u.id === id);
+      const user = users.find((u) => u.id === id);
       const newStatus = !user.is_active;
-      
+
       setUsers(
-        users.map((u) =>
-          u.id === id ? { ...u, is_active: newStatus } : u
-        )
+        users.map((u) => (u.id === id ? { ...u, is_active: newStatus } : u))
       );
 
       try {
         if (newStatus) {
           const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
             id,
-            { 
-              ban_duration: 'none'
+            {
+              ban_duration: "none",
             }
           );
 
@@ -752,8 +906,8 @@ const AdminDashboard = () => {
         } else {
           const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
             id,
-            { 
-              ban_duration: '876000h'
+            {
+              ban_duration: "876000h",
             }
           );
 
@@ -783,9 +937,10 @@ const AdminDashboard = () => {
   };
 
   const handleApprovalToggle = async (id) => {
-    const org = organizations.find(o => o.id === id);
-    const newStatus = org.verification_status === "verified" ? "pending" : "verified";
-    
+    const org = organizations.find((o) => o.id === id);
+    const newStatus =
+      org.verification_status === "verified" ? "pending" : "verified";
+
     setOrganizations(
       organizations.map((o) =>
         o.id === id ? { ...o, verification_status: newStatus } : o
@@ -794,31 +949,40 @@ const AdminDashboard = () => {
 
     try {
       const { data, error } = await supabase
-        .from('organizations')
-        .update({ 
+        .from("organizations")
+        .update({
           verification_status: newStatus,
-          verification_notes: newStatus === "verified" ? "Approved by admin" : null,
-          updated_at: new Date().toISOString()
+          verification_notes:
+            newStatus === "verified" ? "Approved by admin" : null,
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', id)
+        .eq("id", id)
         .select();
 
       if (error) {
         console.error("Error updating verification status:", error);
         setOrganizations(
           organizations.map((o) =>
-            o.id === id ? { ...o, verification_status: org.verification_status } : o
+            o.id === id
+              ? { ...o, verification_status: org.verification_status }
+              : o
           )
         );
         alert("Failed to update verification status: " + error.message);
       } else {
-        alert(`Organization ${newStatus === "verified" ? "approved" : "unapproved"} successfully`);
+        alert(
+          `Organization ${
+            newStatus === "verified" ? "approved" : "unapproved"
+          } successfully`
+        );
       }
     } catch (err) {
       console.error("Error:", err);
       setOrganizations(
         organizations.map((o) =>
-          o.id === id ? { ...o, verification_status: org.verification_status } : o
+          o.id === id
+            ? { ...o, verification_status: org.verification_status }
+            : o
         )
       );
       alert("An error occurred: " + err.message);
@@ -827,10 +991,10 @@ const AdminDashboard = () => {
 
   const handleViewProfile = (id, type) => {
     if (type === "organizations") {
-      const org = organizations.find(o => o.id === id);
+      const org = organizations.find((o) => o.id === id);
       setSelectedOrg(org);
     } else {
-      const student = users.find(u => u.id === id);
+      const student = users.find((u) => u.id === id);
       setSelectedStudent(student);
     }
   };
@@ -841,71 +1005,75 @@ const AdminDashboard = () => {
 
       // Use the service role client to delete in correct order
       // Delete all foreign key references first
-      
+
       // 1. Delete internship applications (references students table)
       const { error: appsError } = await supabase
-        .from('internship_applications')
+        .from("internship_applications")
         .delete()
-        .eq('student_id', id);
-      
+        .eq("student_id", id);
+
       if (appsError) {
         console.error("Error deleting applications:", appsError);
       }
 
       // 2. Delete student skills
       const { error: skillsError } = await supabase
-        .from('student_skills')
+        .from("student_skills")
         .delete()
-        .eq('student_id', id);
-      
+        .eq("student_id", id);
+
       if (skillsError) {
         console.error("Error deleting skills:", skillsError);
       }
 
       // 3. Delete student education
       const { error: eduError } = await supabase
-        .from('student_education')
+        .from("student_education")
         .delete()
-        .eq('student_id', id);
-      
+        .eq("student_id", id);
+
       if (eduError) {
         console.error("Error deleting education:", eduError);
       }
 
       // 4. Delete experiences
       const { error: expError } = await supabase
-        .from('experiences')
+        .from("experiences")
         .delete()
-        .eq('student_id', id);
-      
+        .eq("student_id", id);
+
       if (expError) {
         console.error("Error deleting experiences:", expError);
       }
 
       // 5. Delete from students table (references profiles)
       const { error: studentError } = await supabase
-        .from('students')
+        .from("students")
         .delete()
-        .eq('id', id);
-      
+        .eq("id", id);
+
       if (studentError) {
         console.error("Error deleting from students table:", studentError);
-        throw new Error(`Failed to delete student record: ${studentError.message}`);
+        throw new Error(
+          `Failed to delete student record: ${studentError.message}`
+        );
       }
 
       // 6. Delete from profiles table (references auth.users)
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .delete()
-        .eq('id', id);
-      
+        .eq("id", id);
+
       if (profileError) {
         console.error("Error deleting from profiles table:", profileError);
         throw new Error(`Failed to delete profile: ${profileError.message}`);
       }
 
       // 7. Finally, delete from auth.users using admin client
-      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(
+        id
+      );
 
       if (authError) {
         console.error("Error deleting user from auth:", authError);
@@ -915,17 +1083,17 @@ const AdminDashboard = () => {
       console.log("User deleted successfully");
 
       // Update local state
-      setUsers(users.filter(u => u.id !== id));
-      
+      setUsers(users.filter((u) => u.id !== id));
+
       // Update stats
-      setStats(prev => ({
+      setStats((prev) => ({
         ...prev,
-        totalUsers: prev.totalUsers - 1
+        totalUsers: prev.totalUsers - 1,
       }));
 
       setSelectedStudent(null);
       alert("User deleted successfully!");
-      
+
       // Refresh data
       await fetchDashboardData();
     } catch (err) {
@@ -943,7 +1111,7 @@ const AdminDashboard = () => {
         console.error("Error logging out:", error);
         alert("Failed to logout: " + error.message);
       } else {
-        window.location.href = '/icn-admin-login';
+        window.location.href = "/icn-admin-login";
       }
     } catch (err) {
       console.error("Error:", err);
@@ -954,13 +1122,13 @@ const AdminDashboard = () => {
   const handleApproveOrganization = async (id) => {
     try {
       const { data, error } = await supabase
-        .from('organizations')
-        .update({ 
-          verification_status: 'verified',
-          verification_notes: 'Approved by admin',
-          updated_at: new Date().toISOString()
+        .from("organizations")
+        .update({
+          verification_status: "verified",
+          verification_notes: "Approved by admin",
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', id)
+        .eq("id", id)
         .select();
 
       if (error) {
@@ -972,17 +1140,19 @@ const AdminDashboard = () => {
 
       setOrganizations(
         organizations.map((o) =>
-          o.id === id ? { 
-            ...o, 
-            verification_status: 'verified', 
-            verification_notes: 'Approved by admin' 
-          } : o
+          o.id === id
+            ? {
+                ...o,
+                verification_status: "verified",
+                verification_notes: "Approved by admin",
+              }
+            : o
         )
       );
 
       setSelectedOrg(null);
       alert("Organization approved successfully!");
-      
+
       await fetchDashboardData();
     } catch (err) {
       console.error("Error approving organization:", err);
@@ -993,13 +1163,13 @@ const AdminDashboard = () => {
   const handleRejectOrganization = async (id, reason) => {
     try {
       const { data, error } = await supabase
-        .from('organizations')
-        .update({ 
-          verification_status: 'rejected',
+        .from("organizations")
+        .update({
+          verification_status: "rejected",
           verification_notes: reason,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', id)
+        .eq("id", id)
         .select();
 
       if (error) {
@@ -1011,17 +1181,19 @@ const AdminDashboard = () => {
 
       setOrganizations(
         organizations.map((o) =>
-          o.id === id ? { 
-            ...o, 
-            verification_status: 'rejected', 
-            verification_notes: reason 
-          } : o
+          o.id === id
+            ? {
+                ...o,
+                verification_status: "rejected",
+                verification_notes: reason,
+              }
+            : o
         )
       );
 
       setSelectedOrg(null);
       alert("Organization rejected successfully");
-      
+
       await fetchDashboardData();
     } catch (err) {
       console.error("Error rejecting organization:", err);
@@ -1067,7 +1239,10 @@ const AdminDashboard = () => {
             Manage all platform activities from one place.
           </p>
         </div>
-        <button onClick={() => setShowLogoutModal(true)} style={styles.logoutButton}>
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          style={styles.logoutButton}
+        >
           Logout
         </button>
       </div>
@@ -1110,19 +1285,94 @@ const AdminDashboard = () => {
         >
           Organizations
         </TabButton>
+        <TabButton
+          active={activeTab === "messages"}
+          onClick={() => {
+            setActiveTab("messages");
+            setVisibleCount(10);
+          }}
+        >
+          Messages ({stats.unreadMessages})
+        </TabButton>
       </div>
 
       <div style={styles.manageSection}>
         <div>
           <h2 style={styles.manageTitle}>
-            Manage {activeTab === "users" ? "Users" : "Organizations"}
+            Manage{" "}
+            {activeTab === "users"
+              ? "Users"
+              : activeTab === "organizations"
+              ? "Organizations"
+              : "Contact Messages"}
           </h2>
           <p style={styles.manageSubtitle}>
-            View, suspend, or {activeTab === "users" ? "manage user" : "verify organization"} accounts.
+            {activeTab === "users"
+              ? "View, suspend, or manage user accounts."
+              : activeTab === "organizations"
+              ? "View, suspend, or verify organization accounts."
+              : "View and manage contact messages from users."}
           </p>
         </div>
 
-        {currentData.length === 0 ? (
+        {activeTab === "messages" ? (
+          // Messages View
+          contactMessages.length === 0 ? (
+            <div style={styles.emptyState}>
+              <p style={styles.emptyText}>No contact messages found.</p>
+            </div>
+          ) : (
+            <>
+              <div style={styles.messagesContainer}>
+                {contactMessages.slice(0, visibleCount).map((msg) => (
+                  <div key={msg.id} style={styles.messageCard}>
+                    <div style={styles.messageHeader}>
+                      <div>
+                        <h3 style={styles.messageName}>{msg.full_name}</h3>
+                        <p style={styles.messageEmail}>{msg.email}</p>
+                        {msg.phone_number && (
+                          <p style={styles.messagePhone}>{msg.phone_number}</p>
+                        )}
+                      </div>
+                      <div style={styles.messageMetadata}>
+                        <span
+                          style={{
+                            ...styles.statusBadge,
+                            ...(msg.status === "unread"
+                              ? styles.statusUnread
+                              : msg.status === "read"
+                              ? styles.statusRead
+                              : styles.statusReplied),
+                          }}
+                        >
+                          {msg.status.charAt(0).toUpperCase() +
+                            msg.status.slice(1)}
+                        </span>
+                        <span style={styles.messageDate}>
+                          {new Date(msg.created_at).toLocaleDateString()}{" "}
+                          {new Date(msg.created_at).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={styles.messageBody}>
+                      <p>{msg.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {visibleCount < contactMessages.length && (
+                <div style={styles.seeMoreContainer}>
+                  <button
+                    onClick={() => setVisibleCount(visibleCount + 10)}
+                    style={styles.seeMoreButton}
+                  >
+                    Load More Messages
+                  </button>
+                </div>
+              )}
+            </>
+          )
+        ) : currentData.length === 0 ? (
           <div style={styles.emptyState}>
             <p style={styles.emptyText}>
               No {activeTab === "users" ? "users" : "organizations"} found.
@@ -1147,10 +1397,14 @@ const AdminDashboard = () => {
                   <div style={styles.tableCell}>
                     <div style={styles.nameCell}>
                       <span style={styles.displayName}>
-                        {item.display_name || item.organization_name || item.username}
+                        {item.display_name ||
+                          item.organization_name ||
+                          item.username}
                       </span>
                       {activeTab === "organizations" && item.company_size && (
-                        <span style={styles.metadata}>{item.company_size} employees</span>
+                        <span style={styles.metadata}>
+                          {item.company_size} employees
+                        </span>
                       )}
                       {activeTab === "organizations" && item.industry && (
                         <span style={styles.metadata}>{item.industry}</span>
@@ -1239,7 +1493,8 @@ const AdminDashboard = () => {
             {hasMore && (
               <div style={styles.seeMoreContainer}>
                 <button onClick={handleSeeMore} style={styles.seeMoreButton}>
-                  See More ({Math.min(5, currentData.length - visibleCount)} more)
+                  See More ({Math.min(5, currentData.length - visibleCount)}{" "}
+                  more)
                 </button>
               </div>
             )}
@@ -1279,7 +1534,8 @@ const styles = {
     minHeight: "100vh",
     backgroundColor: "#f9fafb",
     padding: "40px 20px",
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   },
   loadingContainer: {
     display: "flex",
@@ -1804,6 +2060,83 @@ const styles = {
     justifyContent: "center",
     gap: "8px",
     transition: "background-color 0.2s",
+  },
+  // Messages styles
+  messagesContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+  messageCard: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+    padding: "20px",
+    borderLeft: "4px solid #3b82f6",
+  },
+  messageHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: "12px",
+  },
+  messageName: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#111827",
+    margin: "0 0 4px 0",
+  },
+  messageEmail: {
+    fontSize: "14px",
+    color: "#6b7280",
+    margin: "0",
+  },
+  messagePhone: {
+    fontSize: "14px",
+    color: "#6b7280",
+    margin: "4px 0 0 0",
+  },
+  messageMetadata: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: "8px",
+  },
+  messageDate: {
+    fontSize: "12px",
+    color: "#9ca3af",
+  },
+  messageBody: {
+    backgroundColor: "#f9fafb",
+    padding: "12px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    lineHeight: "1.6",
+    color: "#374151",
+  },
+  statusUnread: {
+    backgroundColor: "#3b82f6",
+    color: "white",
+    padding: "4px 12px",
+    borderRadius: "12px",
+    fontSize: "12px",
+    fontWeight: "500",
+  },
+  statusRead: {
+    backgroundColor: "#6b7280",
+    color: "white",
+    padding: "4px 12px",
+    borderRadius: "12px",
+    fontSize: "12px",
+    fontWeight: "500",
+  },
+  statusReplied: {
+    backgroundColor: "#10b981",
+    color: "white",
+    padding: "4px 12px",
+    borderRadius: "12px",
+    fontSize: "12px",
+    fontWeight: "500",
   },
 };
 
