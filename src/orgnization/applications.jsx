@@ -9,6 +9,7 @@ import organizationService from "../lib/organizationService.js";
 import { toast } from "../components/ui/sonner";
 import ManualScreeningPanel from "../components/ManualScreeningPanel.jsx";
 import Loader from "../components/Loader.jsx";
+import { supabase } from "../lib/supabase";
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
@@ -18,6 +19,7 @@ const Applications = () => {
   const [screeningFilter, setScreeningFilter] = useState("all");
   const [positionFilter, setPositionFilter] = useState("all");
   const [screeningStats, setScreeningStats] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     loadApplications();
@@ -158,6 +160,76 @@ const Applications = () => {
 
   const stats = getStats();
 
+  const toggleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedIds(filteredApplications.map((a) => a.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) return prev.filter((p) => p !== id);
+      return [...prev, id];
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (!selectedIds || selectedIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Delete ${selectedIds.length} selected application(s)? This action cannot be undone.`
+      )
+    )
+      return;
+    try {
+      // IDs are UUIDs (strings), pass them as-is to Supabase
+      const ids = selectedIds;
+
+      // Request the deleted rows back to verify deletion
+      const { data, error } = await supabase
+        .from("internship_applications")
+        .delete()
+        .in("id", ids)
+        .select("id");
+
+      if (error) throw error;
+
+      const deletedCount = Array.isArray(data) ? data.length : 0;
+      if (deletedCount === 0) {
+        toast.error(
+          "No applications were deleted. Check permissions or selected items."
+        );
+        return;
+      }
+
+      // Remove deleted items from local state for immediate UI update
+      setApplications((prev) =>
+        prev.filter((a) => !selectedIds.includes(a.id))
+      );
+      toast.success(`${deletedCount} application(s) deleted`);
+      setSelectedIds([]);
+      // refresh list in background to ensure consistency
+      loadApplications();
+    } catch (err) {
+      console.error("Bulk delete failed:", err);
+      const msg =
+        err?.message || err?.details || err?.error || JSON.stringify(err);
+      // If this is likely an RLS/permission issue, help the developer diagnose
+      if (
+        err?.status === 401 ||
+        err?.status === 403 ||
+        (err?.message &&
+          /permission|forbidden|not authorized/i.test(err.message))
+      ) {
+        toast.error(`Delete failed: ${msg} (check RLS / DB permissions)`);
+      } else {
+        toast.error(`Failed to delete selected applications: ${msg}`);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -255,6 +327,30 @@ const Applications = () => {
         </button>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div
+          className="bulk-actions"
+          style={{
+            margin: "12px 0",
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>{selectedIds.length} selected</div>
+          <button className="filter-btn" onClick={() => setSelectedIds([])}>
+            Clear
+          </button>
+          <button
+            className="filter-btn"
+            style={{ background: "#ef4444", color: "white", border: "none" }}
+            onClick={handleBulkDelete}
+          >
+            Delete Selected
+          </button>
+        </div>
+      )}
+
       {/* AI Screening Filters */}
       <div className="screening-filters">
         <label className="filter-label">AI Screening Status:</label>
@@ -316,6 +412,16 @@ const Applications = () => {
           <table className="applications-table">
             <thead>
               <tr>
+                <th style={{ width: 40 }}>
+                  <input
+                    type="checkbox"
+                    onChange={(e) => toggleSelectAll(e.target.checked)}
+                    checked={
+                      selectedIds.length === filteredApplications.length &&
+                      filteredApplications.length > 0
+                    }
+                  />
+                </th>
                 <th>Applicant</th>
                 <th>Position</th>
                 <th>AI Score</th>
@@ -335,6 +441,13 @@ const Applications = () => {
                       : ""
                   }`}
                 >
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(application.id)}
+                      onChange={() => toggleSelect(application.id)}
+                    />
+                  </td>
                   <td className="applicant-cell">
                     <div className="applicant-info">
                       <div className="applicant-avatar">

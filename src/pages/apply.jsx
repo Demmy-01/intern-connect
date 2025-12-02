@@ -632,10 +632,14 @@ const MultiStepApplyForm = () => {
             </option>
             <option value="2 months">2 months</option>
             <option value="3 months">3 months</option>
-            <option value="3 months">4 months</option>
-            <option value="3 months">4 months</option>
+            <option value="4 months">4 months</option>
+            <option value="5 months">5 months</option>
             <option value="6 months">6 months</option>
+            <option value="7 months">7 months</option>
+            <option value="8 months">8 months</option>
             <option value="9 months">9 months</option>
+            <option value="10 months">10 months</option>
+            <option value="11 months">11 months</option>
             <option value="12 months">12 months</option>
           </select>
         </div>

@@ -10,8 +10,10 @@ import {
   Download,
   ExternalLink,
   Mail,
+  Trash2,
 } from "lucide-react";
 import { supabase, supabaseAdmin } from "../lib/supabase";
+import internshipService from "../lib/internshipService.js";
 
 // Reusable StatCard Component
 const StatCard = ({ title, value, icon: Icon }) => (
@@ -652,6 +654,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
+  const [internshipsList, setInternshipsList] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -696,6 +699,7 @@ const AdminDashboard = () => {
 
       setUsers(usersResult.data || []);
       setOrganizations(orgsResult.data || []);
+      setInternshipsList(internshipsResult.data || []);
       setContactMessages(messagesResult.data || []);
 
       const messagesData = messagesResult.data || [];
@@ -839,11 +843,42 @@ const AdminDashboard = () => {
   };
 
   const fetchInternships = async () => {
-    const { data, error } = await supabase
-      .from("internships")
-      .select("id, is_active");
+    try {
+      const { data, error } = await supabase
+        .from("internships")
+        .select(
+          `id, position_title, organization_id, is_active, created_at, organizations!inner(organization_name)`
+        )
+        .order("created_at", { ascending: false });
 
-    return { data, error };
+      if (error) {
+        console.error("Error fetching internships:", error);
+        return { data: [], error };
+      }
+
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error("Error in fetchInternships:", err);
+      return { data: [], error: err };
+    }
+  };
+
+  const handleDeleteInternship = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this internship?"))
+      return;
+    try {
+      const { error } = await internshipService.deleteInternship(id);
+      if (error) throw new Error(error);
+      setInternshipsList((prev) => prev.filter((i) => i.id !== id));
+      setStats((s) => ({
+        ...s,
+        activeInternships: Math.max(0, s.activeInternships - 1),
+      }));
+      alert("Internship deleted successfully");
+    } catch (err) {
+      console.error("Failed to delete internship:", err);
+      alert("Failed to delete internship: " + (err.message || err));
+    }
   };
 
   const fetchApplications = async () => {
@@ -1119,6 +1154,33 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteMessage = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this message?"))
+      return;
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setContactMessages((prev) => prev.filter((m) => m.id !== id));
+      setStats((prev) => ({
+        ...prev,
+        totalMessages: Math.max(0, prev.totalMessages - 1),
+        unreadMessages:
+          contactMessages.find((m) => m.id === id)?.status === "unread"
+            ? Math.max(0, prev.unreadMessages - 1)
+            : prev.unreadMessages,
+      }));
+      alert("Message deleted successfully");
+    } catch (err) {
+      console.error("Failed to delete message:", err);
+      alert("Failed to delete message: " + (err.message || err));
+    }
+  };
+
   const handleApproveOrganization = async (id) => {
     try {
       const { data, error } = await supabase
@@ -1294,6 +1356,15 @@ const AdminDashboard = () => {
         >
           Messages ({stats.unreadMessages})
         </TabButton>
+        <TabButton
+          active={activeTab === "internships"}
+          onClick={() => {
+            setActiveTab("internships");
+            setVisibleCount(10);
+          }}
+        >
+          Internships
+        </TabButton>
       </div>
 
       <div style={styles.manageSection}>
@@ -1335,19 +1406,28 @@ const AdminDashboard = () => {
                         )}
                       </div>
                       <div style={styles.messageMetadata}>
-                        <span
-                          style={{
-                            ...styles.statusBadge,
-                            ...(msg.status === "unread"
-                              ? styles.statusUnread
-                              : msg.status === "read"
-                              ? styles.statusRead
-                              : styles.statusReplied),
-                          }}
-                        >
-                          {msg.status.charAt(0).toUpperCase() +
-                            msg.status.slice(1)}
-                        </span>
+                        <div style={styles.messageActions}>
+                          <span
+                            style={{
+                              ...styles.statusBadge,
+                              ...(msg.status === "unread"
+                                ? styles.statusUnread
+                                : msg.status === "read"
+                                ? styles.statusRead
+                                : styles.statusReplied),
+                            }}
+                          >
+                            {msg.status.charAt(0).toUpperCase() +
+                              msg.status.slice(1)}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            style={styles.deleteMessageButton}
+                            title="Delete message"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                         <span style={styles.messageDate}>
                           {new Date(msg.created_at).toLocaleDateString()}{" "}
                           {new Date(msg.created_at).toLocaleTimeString()}
@@ -1367,6 +1447,76 @@ const AdminDashboard = () => {
                     style={styles.seeMoreButton}
                   >
                     Load More Messages
+                  </button>
+                </div>
+              )}
+            </>
+          )
+        ) : activeTab === "internships" ? (
+          // Internships admin view
+          internshipsList.length === 0 ? (
+            <div style={styles.emptyState}>
+              <p style={styles.emptyText}>No internships found.</p>
+            </div>
+          ) : (
+            <>
+              <div style={styles.tableContainer}>
+                <div style={styles.tableHeader}>
+                  <div style={styles.tableHeaderCell}>Position</div>
+                  <div style={styles.tableHeaderCell}>Organization</div>
+                  <div style={styles.tableHeaderCell}>Status</div>
+                  <div style={styles.tableHeaderCell}>Actions</div>
+                </div>
+
+                {internshipsList.slice(0, visibleCount).map((item) => (
+                  <div key={item.id} style={styles.tableRow}>
+                    <div style={styles.tableCell}>{item.position_title}</div>
+                    <div style={styles.tableCell}>
+                      {item.organizations?.organization_name || "N/A"}
+                    </div>
+                    <div style={styles.tableCell}>
+                      <span
+                        style={{
+                          ...styles.statusBadge,
+                          ...(item.is_active
+                            ? styles.statusActive
+                            : styles.statusInactive),
+                        }}
+                      >
+                        {item.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <div style={styles.tableCellActions}>
+                      <button
+                        onClick={() =>
+                          window.location.assign(`/edit-internship/${item.id}`)
+                        }
+                        style={styles.viewButton}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteInternship(item.id)}
+                        style={{
+                          ...styles.viewButton,
+                          backgroundColor: "#ef4444",
+                          color: "white",
+                          border: "none",
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {visibleCount < internshipsList.length && (
+                <div style={styles.seeMoreContainer}>
+                  <button
+                    onClick={() => setVisibleCount(visibleCount + 10)}
+                    style={styles.seeMoreButton}
+                  >
+                    Load More Internships
                   </button>
                 </div>
               )}
@@ -2101,6 +2251,23 @@ const styles = {
     flexDirection: "column",
     alignItems: "flex-end",
     gap: "8px",
+  },
+  messageActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  deleteMessageButton: {
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    color: "#ef4444",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.2s",
   },
   messageDate: {
     fontSize: "12px",

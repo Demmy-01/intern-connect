@@ -214,6 +214,7 @@ const PostedInternship = () => {
                   isActive={internship.is_active}
                   onToggleStatus={handleToggleStatus}
                   onDelete={handleDelete}
+                  onEdit={handleEdit}
                 />
               ))
             )}

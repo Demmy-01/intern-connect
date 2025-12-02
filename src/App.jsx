@@ -22,6 +22,7 @@ import Profile from "./pages/profile";
 import EditProfile from "./pages/edit-profile.jsx";
 import ApplicationDetails from "./orgnization/application-review.jsx";
 import PostedInternship from "./orgnization/posted-internship.jsx";
+import EditInternship from "./orgnization/edit-internship.jsx";
 import OrgnizationProfiles from "./orgnization/organization-profile.jsx";
 import SentApplicationModal from "./components/sent-application.jsx";
 import InternshipSearchPage from "./pages/internships.jsx";
@@ -164,6 +165,14 @@ function App() {
             element={
               <OrganizationProtectedRoute>
                 <PostedInternship />
+              </OrganizationProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-internship/:id"
+            element={
+              <OrganizationProtectedRoute>
+                <EditInternship />
               </OrganizationProtectedRoute>
             }
           />
