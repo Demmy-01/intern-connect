@@ -295,18 +295,8 @@ class ProfileService {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // Update profile with image URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          avatar_url: publicUrl
-        })
-        .eq('id', userId);
-
-      if (updateError) {
-        console.error('ProfileService: Profile image update error:', updateError);
-        throw updateError;
-      }
+      // Don't update profile here - let the caller handle it
+      // This avoids double updates
 
       return {
         success: true,

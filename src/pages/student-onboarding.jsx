@@ -109,7 +109,11 @@ const OnboardingPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, profilePicture: URL.createObjectURL(file) });
+      setFormData({ 
+        ...formData, 
+        profilePicture: URL.createObjectURL(file),
+        profilePictureFile: file  // Store the actual file
+      });
     }
   };
 
@@ -149,6 +153,24 @@ const OnboardingPage = () => {
 
     setSaving(true);
     try {
+      let imageUrl = null;
+
+      // Upload profile image to storage first if provided
+      if (formData.profilePictureFile) {
+        console.log("Uploading profile image...");
+        const uploadResult = await profileService.uploadProfileImage(
+          currentUser.id,
+          formData.profilePictureFile
+        );
+
+        if (!uploadResult.success) {
+          throw new Error('Failed to upload profile image: ' + uploadResult.message);
+        }
+
+        imageUrl = uploadResult.imageUrl;
+        console.log("Image uploaded successfully:", imageUrl);
+      }
+
       // Transform experiences to match profileService format
       const transformedExperiences = formData.experiences.map((exp) => ({
         title: exp.jobTitle,
@@ -156,6 +178,14 @@ const OnboardingPage = () => {
         description: exp.description,
         startDate: exp.startDate,
         endDate: exp.endDate,
+      }));
+
+      // Transform education to match profileService format
+      const transformedEducation = formData.educations.map((edu) => ({
+        institution: edu.institution,
+        degree: edu.degree,
+        duration: edu.startDate && edu.endDate ? `${edu.startDate} - ${edu.endDate}` : '',
+        coursework: edu.coursework,
       }));
 
       const onboardingData = {
@@ -168,9 +198,11 @@ const OnboardingPage = () => {
           .map((s) => s.trim())
           .filter((s) => s),
         experiences: transformedExperiences,
-        education: formData.educations,
-        profileImage: formData.profilePicture,
+        education: transformedEducation,
+        profileImage: imageUrl,  // Use the uploaded URL or null
       };
+
+      console.log("Saving profile data:", onboardingData);
 
       // Save to profile
       const result = await profileService.updateProfile(
@@ -182,16 +214,22 @@ const OnboardingPage = () => {
         throw new Error(result.message);
       }
 
+      console.log("Profile updated successfully");
+
       // Mark onboarding as completed
       await supabase
         .from("profiles")
         .update({ has_completed_onboarding: true })
         .eq("id", currentUser.id);
 
+      console.log("Onboarding marked as complete");
+
       toast.success("Profile setup complete!");
       return true;
     } catch (err) {
       console.error("Error saving onboarding data:", err);
+      console.error("Error message:", err.message);
+      console.error("Full error:", err);
       toast.error("Failed to save profile data. Please try again.");
       return false;
     } finally {
