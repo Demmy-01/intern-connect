@@ -81,26 +81,35 @@ const EditProfile = () => {
 
   const validateForm = () => {
     const errors = {};
-    
+
     // Check required fields (experience is optional)
     if (!profileData.name?.trim()) errors.name = "Full name is required";
     if (!profileData.username?.trim()) errors.username = "Username is required";
     if (!profileData.phone?.trim()) errors.phone = "Phone number is required";
     if (!profileData.bio?.trim()) errors.bio = "Bio is required";
-    
+
     // Check education fields
     profileData.education.forEach((edu, idx) => {
-      if (edu.institution?.trim() || edu.degree?.trim() || edu.duration?.trim() || edu.coursework?.trim()) {
+      if (
+        edu.institution?.trim() ||
+        edu.degree?.trim() ||
+        edu.duration?.trim() ||
+        edu.coursework?.trim()
+      ) {
         // If any education field is filled, require all
-        if (!edu.institution?.trim()) errors[`education_${idx}_institution`] = "Institution is required";
-        if (!edu.degree?.trim()) errors[`education_${idx}_degree`] = "Degree is required";
-        if (!edu.duration?.trim()) errors[`education_${idx}_duration`] = "Duration is required";
+        if (!edu.institution?.trim())
+          errors[`education_${idx}_institution`] = "Institution is required";
+        if (!edu.degree?.trim())
+          errors[`education_${idx}_degree`] = "Degree is required";
+        if (!edu.duration?.trim())
+          errors[`education_${idx}_duration`] = "Duration is required";
       }
     });
-    
+
     // Check skills
-    if (profileData.skills.length === 0) errors.skills = "Add at least one skill";
-    
+    if (profileData.skills.length === 0)
+      errors.skills = "Add at least one skill";
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -176,13 +185,13 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form before saving
     if (!validateForm()) {
       toast.error("Please fill in all required fields");
       return;
     }
-    
+
     setSaving(true);
     setError(null);
 
@@ -312,10 +321,14 @@ const EditProfile = () => {
                     placeholder="Enter your full name"
                     required
                     disabled={saving}
-                    className={validationErrors.name ? "edit-prof-input-error" : ""}
+                    className={
+                      validationErrors.name ? "edit-prof-input-error" : ""
+                    }
                   />
                   {validationErrors.name && (
-                    <span className="edit-prof-error-text">{validationErrors.name}</span>
+                    <span className="edit-prof-error-text">
+                      {validationErrors.name}
+                    </span>
                   )}
                 </div>
 
@@ -331,10 +344,14 @@ const EditProfile = () => {
                     placeholder="Enter your username"
                     required
                     disabled={saving}
-                    className={validationErrors.username ? "edit-prof-input-error" : ""}
+                    className={
+                      validationErrors.username ? "edit-prof-input-error" : ""
+                    }
                   />
                   {validationErrors.username && (
-                    <span className="edit-prof-error-text">{validationErrors.username}</span>
+                    <span className="edit-prof-error-text">
+                      {validationErrors.username}
+                    </span>
                   )}
                 </div>
 
@@ -357,10 +374,14 @@ const EditProfile = () => {
                     onChange={(e) => handleInputChange("phone", e.target.value)}
                     placeholder="Enter your phone number"
                     disabled={saving}
-                    className={validationErrors.phone ? "edit-prof-input-error" : ""}
+                    className={
+                      validationErrors.phone ? "edit-prof-input-error" : ""
+                    }
                   />
                   {validationErrors.phone && (
-                    <span className="edit-prof-error-text">{validationErrors.phone}</span>
+                    <span className="edit-prof-error-text">
+                      {validationErrors.phone}
+                    </span>
                   )}
                 </div>
               </div>
@@ -374,10 +395,14 @@ const EditProfile = () => {
                   placeholder="Tell us about yourself..."
                   rows="4"
                   disabled={saving}
-                  className={validationErrors.bio ? "edit-prof-input-error" : ""}
+                  className={
+                    validationErrors.bio ? "edit-prof-input-error" : ""
+                  }
                 />
                 {validationErrors.bio && (
-                  <span className="edit-prof-error-text">{validationErrors.bio}</span>
+                  <span className="edit-prof-error-text">
+                    {validationErrors.bio}
+                  </span>
                 )}
               </div>
             </div>
@@ -391,7 +416,10 @@ const EditProfile = () => {
                 <h2>Skills</h2>
               </div>
               {validationErrors.skills && (
-                <div className="edit-prof-error-text" style={{ marginBottom: "16px" }}>
+                <div
+                  className="edit-prof-error-text"
+                  style={{ marginBottom: "16px" }}
+                >
                   {validationErrors.skills}
                 </div>
               )}

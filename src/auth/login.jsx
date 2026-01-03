@@ -83,16 +83,18 @@ const Login = () => {
         // Log successful login
         await securityService.logAuthAttempt(formData.email, true);
         setSuccess(result.message);
-        
+
         // Check if user has completed onboarding
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           const { data: profile } = await supabase
-            .from('profiles')
-            .select('has_completed_onboarding')
-            .eq('id', user.id)
+            .from("profiles")
+            .select("has_completed_onboarding")
+            .eq("id", user.id)
             .single();
-          
+
           // If onboarding not completed, redirect to onboarding page
           if (!profile?.has_completed_onboarding) {
             try {
@@ -104,7 +106,7 @@ const Login = () => {
             return;
           }
         }
-        
+
         // show success toast
         try {
           toast.success(result.message || "Logged in successfully");
