@@ -32,6 +32,7 @@ import { Toaster } from "./components/ui/sonner";
 import EmailVerification from "./auth/EmailVerification";
 import ForgotPassword from "./auth/ForgotPassword";
 import AuthCallback from "./pages/AuthCallback";
+import CVGenerator from "./pages/cv-generator.jsx";
 import OrganizationLogin from "./auth/organization-login.jsx";
 import OrganizationSignup from "./auth/organization-signup.jsx";
 import ResetPassword from "./auth/ResetPassword.jsx";
@@ -41,6 +42,7 @@ import InternshipDetails from "./pages/internship-details.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import PublicOrganizationProfile from "./pages/organizations-profile.jsx";
 import Terms from "./pages/terms.jsx";
+import OnboardingPage from "./pages/student-onboarding.jsx";
 import AdminLogin from "./auth/admin-login.jsx";
 import AdminDashboard from "./admin/admin-dashboard.jsx";
 
@@ -64,6 +66,16 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/welcome" element={<OnboardingPage />} />
+          <Route
+            path="/student-onboarding"
+            element={
+              <StudentProtectedRoute>
+                <OnboardingPage />
+              </StudentProtectedRoute>
+            }
+          />
+          <Route path="/cv-generator" element={<CVGenerator />} />
           <Route
             path="/internship-opportunities"
             element={<InternshipOpportunities />}

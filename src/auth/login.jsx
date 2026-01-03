@@ -7,6 +7,7 @@ import "../style/login.css";
 import logo from "../assets/logo_blue.png";
 import authService from "../lib/authService";
 import securityService from "../lib/securityService";
+import { supabase } from "../lib/supabase";
 import { toast } from "../components/ui/sonner";
 const currentYear = new Date().getFullYear();
 
@@ -82,6 +83,28 @@ const Login = () => {
         // Log successful login
         await securityService.logAuthAttempt(formData.email, true);
         setSuccess(result.message);
+        
+        // Check if user has completed onboarding
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('has_completed_onboarding')
+            .eq('id', user.id)
+            .single();
+          
+          // If onboarding not completed, redirect to onboarding page
+          if (!profile?.has_completed_onboarding) {
+            try {
+              toast.success(result.message || "Logged in successfully");
+            } catch (e) {}
+            setTimeout(() => {
+              navigate("/student-onboarding");
+            }, 1500);
+            return;
+          }
+        }
+        
         // show success toast
         try {
           toast.success(result.message || "Logged in successfully");

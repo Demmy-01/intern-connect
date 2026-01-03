@@ -148,7 +148,7 @@ const AuthCallback = () => {
                 <p>{message}</p>
               </>
             )}
-
+   
             {status === "success" && (
               <>
                 <div style={{ fontSize: "48px", marginBottom: "20px" }}>

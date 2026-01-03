@@ -28,9 +28,7 @@ export const isProfileComplete = (profile) => {
   if (!profile.education || profile.education.length === 0)
     missingFields.push("Education");
 
-  // Experience
-  if (!profile.experiences || profile.experiences.length === 0)
-    missingFields.push("Experience");
+  // Experience is optional - not required for profile completion
 
   return {
     complete: missingFields.length === 0,

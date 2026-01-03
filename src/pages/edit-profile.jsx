@@ -9,6 +9,7 @@ import { Button } from "../components/button.jsx";
 import skill from "../assets/skills.png";
 import { supabase } from "../lib/supabase";
 import profileService from "../lib/profileService";
+import { Camera } from "lucide-react";
 
 const EditProfile = () => {
   const [profileData, setProfileData] = useState({
@@ -24,8 +25,10 @@ const EditProfile = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [newSkill, setNewSkill] = useState("");
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     fetchProfile();
@@ -66,6 +69,40 @@ const EditProfile = () => {
 
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    
+    // Check required fields (experience is optional)
+    if (!profileData.name?.trim()) errors.name = "Full name is required";
+    if (!profileData.username?.trim()) errors.username = "Username is required";
+    if (!profileData.phone?.trim()) errors.phone = "Phone number is required";
+    if (!profileData.bio?.trim()) errors.bio = "Bio is required";
+    
+    // Check education fields
+    profileData.education.forEach((edu, idx) => {
+      if (edu.institution?.trim() || edu.degree?.trim() || edu.duration?.trim() || edu.coursework?.trim()) {
+        // If any education field is filled, require all
+        if (!edu.institution?.trim()) errors[`education_${idx}_institution`] = "Institution is required";
+        if (!edu.degree?.trim()) errors[`education_${idx}_degree`] = "Degree is required";
+        if (!edu.duration?.trim()) errors[`education_${idx}_duration`] = "Duration is required";
+      }
+    });
+    
+    // Check skills
+    if (profileData.skills.length === 0) errors.skills = "Add at least one skill";
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const addSkill = () => {
@@ -139,6 +176,13 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before saving
+    if (!validateForm()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
     setSaving(true);
     setError(null);
 
@@ -170,7 +214,7 @@ const EditProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setSaving(true);
+    setImageUploading(true);
     setError(null);
 
     try {
@@ -190,12 +234,14 @@ const EditProfile = () => {
         profileImage: result.imageUrl,
       }));
 
+      toast.success("Profile image updated successfully!");
       console.log("Image uploaded successfully");
     } catch (err) {
       console.error("Image upload error:", err);
       setError(`Image upload error: ${err.message}`);
+      toast.error(`Image upload error: ${err.message}`);
     } finally {
-      setSaving(false);
+      setImageUploading(false);
     }
   };
 
@@ -229,12 +275,18 @@ const EditProfile = () => {
                     }
                     alt="Profile Preview"
                   />
+                  {imageUploading && (
+                    <div className="edit-prof-image-loading">
+                      <div className="edit-prof-spinner"></div>
+                    </div>
+                  )}
                   <div className="edit-prof-image-overlay">
                     <label
                       htmlFor="profile-image-input"
                       className="edit-prof-image-btn"
+                      title="Click to change photo"
                     >
-                      <span>📷</span>
+                      <Camera size={24} />
                       Change Photo
                     </label>
                     <input
@@ -243,7 +295,7 @@ const EditProfile = () => {
                       accept="image/*"
                       onChange={handleImageChange}
                       style={{ display: "none" }}
-                      disabled={saving}
+                      disabled={saving || imageUploading}
                     />
                   </div>
                 </div>
@@ -260,7 +312,11 @@ const EditProfile = () => {
                     placeholder="Enter your full name"
                     required
                     disabled={saving}
+                    className={validationErrors.name ? "edit-prof-input-error" : ""}
                   />
+                  {validationErrors.name && (
+                    <span className="edit-prof-error-text">{validationErrors.name}</span>
+                  )}
                 </div>
 
                 <div className="edit-prof-form-group">
@@ -275,7 +331,11 @@ const EditProfile = () => {
                     placeholder="Enter your username"
                     required
                     disabled={saving}
+                    className={validationErrors.username ? "edit-prof-input-error" : ""}
                   />
+                  {validationErrors.username && (
+                    <span className="edit-prof-error-text">{validationErrors.username}</span>
+                  )}
                 </div>
 
                 <div className="edit-prof-form-group">
@@ -297,7 +357,11 @@ const EditProfile = () => {
                     onChange={(e) => handleInputChange("phone", e.target.value)}
                     placeholder="Enter your phone number"
                     disabled={saving}
+                    className={validationErrors.phone ? "edit-prof-input-error" : ""}
                   />
+                  {validationErrors.phone && (
+                    <span className="edit-prof-error-text">{validationErrors.phone}</span>
+                  )}
                 </div>
               </div>
 
@@ -310,7 +374,11 @@ const EditProfile = () => {
                   placeholder="Tell us about yourself..."
                   rows="4"
                   disabled={saving}
+                  className={validationErrors.bio ? "edit-prof-input-error" : ""}
                 />
+                {validationErrors.bio && (
+                  <span className="edit-prof-error-text">{validationErrors.bio}</span>
+                )}
               </div>
             </div>
 
@@ -322,6 +390,11 @@ const EditProfile = () => {
                 </span>
                 <h2>Skills</h2>
               </div>
+              {validationErrors.skills && (
+                <div className="edit-prof-error-text" style={{ marginBottom: "16px" }}>
+                  {validationErrors.skills}
+                </div>
+              )}
 
               <div className="edit-prof-skills-container">
                 <div className="edit-prof-skills-list">

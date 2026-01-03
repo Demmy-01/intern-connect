@@ -1,7 +1,6 @@
 import "../style/footer.css";
 import logo_blue from "../assets/logo_blue.png";
 import { Link } from "react-router-dom";
-// Use plain anchors in footer to force full page reloads on navigation
 import {
   Phone,
   Mail,
@@ -19,7 +18,6 @@ const Footer = () => {
       <div className="footer-overlay-ft"></div>
       <div className="container-ft">
         <div className="footer-content-ft">
-          {/* Company Info Section */}
           <div className="section-ft">
             <div className="logo-section-ft">
               <div className="logo-ft">
@@ -43,7 +41,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Quick Links Section */}
           <div className="section-ft">
             <h4 className="section-title-ft h4">Quick Links</h4>
             <ul className="link-list-ft">
@@ -157,4 +154,3 @@ const Footer = () => {
 };
 
 export default Footer;
-2;

@@ -127,7 +127,7 @@ const OrganizationSignup = () => {
                 name="organizationName"
                 type="text"
                 required
-                className="org-input-field"
+                className="org-input-field"x
                 placeholder="Organization Name *"
                 value={formData.organizationName}
                 onChange={handleInputChange}
