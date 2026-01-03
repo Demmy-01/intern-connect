@@ -18,6 +18,55 @@ class AuthService {
       const finalUsername = username && username.trim() ? username : email.split('@')[0];
       const finalDisplayName = finalUsername;
 
+      // Check if username already exists
+      try {
+        const { data: existingUser, error: usernameCheckError } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', finalUsername)
+          .maybeSingle();
+
+        if (usernameCheckError && usernameCheckError.code !== 'PGRST116') {
+          console.error('Error checking username:', usernameCheckError);
+        }
+
+        if (existingUser) {
+          return {
+            success: false,
+            message: "This username is already taken. Please choose a different username."
+          };
+        }
+      } catch (usernameError) {
+        console.error('Error during username check:', usernameError);
+        // Continue with signup even if username check fails
+      }
+
+      // Check if email already exists
+      try {
+        const { data: existingEmail, error: emailCheckError } = await supabase.auth.admin.listUsers();
+        
+        // Alternative: check using a direct query since admin API might not be available
+        const { data: existingProfile, error: emailProfileCheckError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (emailProfileCheckError && emailProfileCheckError.code !== 'PGRST116') {
+          console.error('Error checking email:', emailProfileCheckError);
+        }
+
+        if (existingProfile) {
+          return {
+            success: false,
+            message: "This email is already registered. Please use a different email or try logging in."
+          };
+        }
+      } catch (emailError) {
+        console.error('Error during email check:', emailError);
+        // Continue with signup - Supabase will catch if email already exists
+      }
+
       // Rely on Supabase to return a proper error if the email already exists.
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -141,6 +190,52 @@ class AuthService {
       const finalUsername = organizationName || email.split('@')[0];
       const finalDisplayName = organizationName || email.split('@')[0];
 
+      // Check if username already exists
+      try {
+        const { data: existingUser, error: usernameCheckError } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', finalUsername)
+          .maybeSingle();
+
+        if (usernameCheckError && usernameCheckError.code !== 'PGRST116') {
+          console.error('Error checking username:', usernameCheckError);
+        }
+
+        if (existingUser) {
+          return {
+            success: false,
+            message: "This organization name is already taken. Please choose a different name."
+          };
+        }
+      } catch (usernameError) {
+        console.error('Error during username check:', usernameError);
+        // Continue with signup even if username check fails
+      }
+
+      // Check if email already exists
+      try {
+        const { data: existingProfile, error: emailProfileCheckError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (emailProfileCheckError && emailProfileCheckError.code !== 'PGRST116') {
+          console.error('Error checking email:', emailProfileCheckError);
+        }
+
+        if (existingProfile) {
+          return {
+            success: false,
+            message: "This email is already registered. Please use a different email or try logging in."
+          };
+        }
+      } catch (emailError) {
+        console.error('Error during email check:', emailError);
+        // Continue with signup - Supabase will catch if email already exists
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -157,6 +252,13 @@ class AuthService {
       });
 
       if (error) {
+        // Check if error is about email already existing
+        if (error.message && error.message.toLowerCase().includes('user already registered')) {
+          return {
+            success: false,
+            message: "This email is already registered. Please use a different email or try logging in."
+          };
+        }
         return {
           success: false,
           message: error.message

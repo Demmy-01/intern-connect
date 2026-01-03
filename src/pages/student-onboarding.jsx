@@ -109,10 +109,10 @@ const OnboardingPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ 
-        ...formData, 
+      setFormData({
+        ...formData,
         profilePicture: URL.createObjectURL(file),
-        profilePictureFile: file  // Store the actual file
+        profilePictureFile: file, // Store the actual file
       });
     }
   };
@@ -164,7 +164,9 @@ const OnboardingPage = () => {
         );
 
         if (!uploadResult.success) {
-          throw new Error('Failed to upload profile image: ' + uploadResult.message);
+          throw new Error(
+            "Failed to upload profile image: " + uploadResult.message
+          );
         }
 
         imageUrl = uploadResult.imageUrl;
@@ -184,7 +186,10 @@ const OnboardingPage = () => {
       const transformedEducation = formData.educations.map((edu) => ({
         institution: edu.institution,
         degree: edu.degree,
-        duration: edu.startDate && edu.endDate ? `${edu.startDate} - ${edu.endDate}` : '',
+        duration:
+          edu.startDate && edu.endDate
+            ? `${edu.startDate} - ${edu.endDate}`
+            : "",
         coursework: edu.coursework,
       }));
 
@@ -199,7 +204,7 @@ const OnboardingPage = () => {
           .filter((s) => s),
         experiences: transformedExperiences,
         education: transformedEducation,
-        profileImage: imageUrl,  // Use the uploaded URL or null
+        profileImage: imageUrl, // Use the uploaded URL or null
       };
 
       console.log("Saving profile data:", onboardingData);

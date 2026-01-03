@@ -51,6 +51,7 @@ const AuthCallback = () => {
                     data.session.user.user_metadata.full_name ||
                     data.session.user.user_metadata.name,
                   email: data.session.user.email,
+                  has_completed_onboarding: false
                 });
 
               if (!profileError) {
@@ -69,11 +70,12 @@ const AuthCallback = () => {
 
             setStatus("success");
             setMessage(
-              "Google sign-in successful! Redirecting to dashboard..."
+              "Google sign-in successful! Redirecting to onboarding..."
             );
 
+            // Redirect to onboarding page for new Google users
             setTimeout(() => {
-              navigate("/dashboard");
+              navigate("/student-onboarding");
             }, 2000);
           } else {
             // Regular email verification
