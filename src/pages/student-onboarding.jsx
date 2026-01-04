@@ -14,7 +14,6 @@ const OnboardingPage = () => {
   const [hasExperience, setHasExperience] = useState(true);
   const [formData, setFormData] = useState({
     fullName: "",
-    username: "",
     phone: "",
     bio: "",
     skills: "",
@@ -41,15 +40,14 @@ const OnboardingPage = () => {
 
   const confirmationMessages = {
     1: "What a lovely name!",
-    2: "Great choice!",
-    3: "Perfect! We'll keep in touch!",
-    4: "Tell us more about yourself!",
-    5: "Impressive skills!",
-    6: hasExperience
+    2: "Perfect! We'll keep in touch!",
+    3: "Tell us more about yourself!",
+    4: "Impressive skills!",
+    5: hasExperience
       ? "Wonderful experience!"
       : "That's okay! Everyone starts somewhere!",
-    7: "Excellent educational background!",
-    8: "You look amazing!",
+    6: "Excellent educational background!",
+    7: "You look amazing!",
   };
 
   const handleNext = (stepNum = step) => {
@@ -195,7 +193,6 @@ const OnboardingPage = () => {
 
       const onboardingData = {
         name: formData.fullName,
-        username: formData.username,
         phone: formData.phone,
         bio: formData.bio,
         skills: formData.skills
@@ -601,26 +598,6 @@ const OnboardingPage = () => {
 
       {!showConfirmation && step === 2 && (
         <div className="form-step float-in">
-          <h2>Choose a username</h2>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={formData.username}
-            onChange={(e) => handleInputChange("username", e.target.value)}
-            className="input-field"
-          />
-          <button
-            onClick={() => handleNext()}
-            disabled={!formData.username}
-            className="next-button"
-          >
-            Next
-          </button>
-        </div>
-      )}
-
-      {!showConfirmation && step === 3 && (
-        <div className="form-step float-in">
           <h2>What's your phone number?</h2>
           <input
             type="tel"
@@ -639,7 +616,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showConfirmation && step === 4 && (
+      {!showConfirmation && step === 3 && (
         <div className="form-step float-in">
           <h2>Tell us about yourself</h2>
           <textarea
@@ -659,7 +636,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showConfirmation && step === 5 && (
+      {!showConfirmation && step === 4 && (
         <div className="form-step float-in">
           <h2>What are your skills?</h2>
           <textarea
@@ -679,7 +656,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showConfirmation && step === 6 && (
+      {!showConfirmation && step === 5 && (
         <div className="form-step float-in">
           <h2>Add your experience</h2>
           <div className="two-column">
@@ -785,7 +762,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showConfirmation && step === 7 && (
+      {!showConfirmation && step === 6 && (
         <div className="form-step float-in">
           <h2>Add your education</h2>
           <div className="two-column">
@@ -886,7 +863,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showConfirmation && step === 8 && (
+      {!showConfirmation && step === 7 && (
         <div className="form-step float-in">
           <h2>Upload your profile picture</h2>
           {formData.profilePicture && (
@@ -914,7 +891,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {step === 9 && (
+      {step === 8 && (
         <div className="completion-screen float-in">
           <div className="success-icon">✨</div>
           <h1>Welcome aboard, {formData.fullName}!</h1>
@@ -940,7 +917,7 @@ const OnboardingPage = () => {
       )}
 
       <div className="progress-dots">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((dot) => (
+        {[1, 2, 3, 4, 5, 6, 7].map((dot) => (
           <span key={dot} className={`dot ${step >= dot ? "active" : ""}`} />
         ))}
       </div>
