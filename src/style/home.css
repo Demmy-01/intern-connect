@@ -693,6 +693,209 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
 }
 
+/* Organization Section - Tablet Responsive */
+@media (max-width: 1024px) {
+  .organization-section {
+    padding: 80px 0;
+  }
+
+  .organization-content {
+    gap: 48px;
+  }
+
+  .org-step-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 1.4rem;
+  }
+
+  .org-step-content h3 {
+    font-size: 1rem;
+  }
+
+  .org-step-content p {
+    font-size: 0.9rem;
+  }
+
+  .org-cta-container {
+    padding: 40px;
+  }
+
+  .org-cta-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .org-cta-description {
+    font-size: 0.95rem;
+    margin-bottom: 28px;
+  }
+}
+
+/* Organization Section - Mobile */
+@media (max-width: 768px) {
+  .organization-section {
+    padding: 60px 0;
+  }
+
+  .organization-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .organization-steps {
+    gap: 24px;
+  }
+
+  .org-step {
+    gap: 20px;
+  }
+
+  .org-step-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .org-step-content h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  .org-step-content p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .org-cta-container {
+    padding: 36px 28px;
+    border-radius: 16px;
+  }
+
+  .org-cta-content h3 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+  }
+
+  .org-cta-description {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  .org-signup-btn {
+    padding: 11px 32px !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Organization Section - Small Mobile */
+@media (max-width: 600px) {
+  .organization-section {
+    padding: 50px 0;
+  }
+
+  .organization-content {
+    gap: 32px;
+  }
+
+  .organization-steps {
+    gap: 20px;
+  }
+
+  .org-step {
+    gap: 16px;
+  }
+
+  .org-step-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+
+  .org-step-content h3 {
+    font-size: 0.9rem;
+  }
+
+  .org-step-content p {
+    font-size: 0.8rem;
+  }
+
+  .org-cta-container {
+    padding: 32px 24px;
+  }
+
+  .org-cta-content h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .org-cta-description {
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+
+  .org-signup-btn {
+    padding: 10px 28px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Organization Section - Extra Small Mobile */
+@media (max-width: 480px) {
+  .organization-section {
+    padding: 40px 0;
+  }
+
+  .organization-content {
+    gap: 24px;
+  }
+
+  .organization-steps {
+    gap: 18px;
+  }
+
+  .org-step {
+    gap: 14px;
+  }
+
+  .org-step-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  .org-step-content h3 {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+
+  .org-step-content p {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .org-cta-container {
+    padding: 28px 20px;
+    border-radius: 14px;
+  }
+
+  .org-cta-content h3 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+  }
+
+  .org-cta-description {
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .org-signup-btn {
+    padding: 9px 24px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
 /* Contact Section */
 .contact-section {
   padding: 100px 0;
