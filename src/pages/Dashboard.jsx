@@ -9,6 +9,7 @@ import StatsCard from "../components/StatsCard.jsx";
 import JobCard from "../components/JobCard.jsx";
 import EventItem from "../components/EventItem.jsx";
 import QuickAction from "../components/QuickAction.jsx";
+import FeedbackForm from "../components/FeedbackForm.jsx";
 import SentApplicationModal from "../components/sent-application.jsx";
 import AcceptedInternshipsModal from "../components/AcceptedInternship.jsx";
 import interview from "../assets/interview.png";
@@ -259,6 +260,11 @@ const Dashboard = () => {
                   <QuickAction key={index} {...action} />
                 ))}
               </div>
+            </div>
+
+            <div className="dashboard-section">
+              <h2>Feedback</h2>
+              <FeedbackForm />
             </div>
           </div>
         </div>

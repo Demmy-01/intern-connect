@@ -8,29 +8,38 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'accepted': return 'var(--success)';
-      case 'rejected': return 'var(--error)';
-      case 'pending': return 'var(--warning)';
-      default: return 'var(--text-secondary)';
+      case "accepted":
+        return "var(--success)";
+      case "rejected":
+        return "var(--error)";
+      case "pending":
+        return "var(--warning)";
+      default:
+        return "var(--text-secondary)";
     }
   };
 
   const getStatusText = (status) => {
     switch (status?.toLowerCase()) {
-      case 'accepted': return 'Accepted';
-      case 'rejected': return 'Rejected';
-      case 'pending': return 'Pending';
-      case 'reviewed': return 'Under Review';
-      default: return 'Unknown';
+      case "accepted":
+        return "Accepted";
+      case "rejected":
+        return "Rejected";
+      case "pending":
+        return "Pending";
+      case "reviewed":
+        return "Under Review";
+      default:
+        return "Unknown";
     }
   };
 
@@ -48,41 +57,58 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
             ×
           </button>
         </div>
-        
+
         <div className="modal-body">
           {applications.length === 0 ? (
             <div className="empty-applications">
               <p>You haven't sent any applications yet.</p>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--text-secondary)",
+                  marginTop: "0.5rem",
+                }}
+              >
                 Start exploring internships and apply to your dream positions!
               </p>
             </div>
           ) : (
             <div className="applications-list">
               {applications.map((application) => (
-                <div 
-                  key={application.id} 
+                <div
+                  key={application.id}
                   className="application-item"
-                  onClick={() => handleApplicationClick(application.internships?.id)}
+                  onClick={() =>
+                    handleApplicationClick(application.internships?.id)
+                  }
                 >
                   <div className="application-main">
                     <div className="company-logo">
                       {application.internships?.organizations?.logo_url ? (
-                        <img 
-                          src={application.internships.organizations.logo_url} 
-                          alt={application.internships.organizations.organization_name}
+                        <img
+                          src={application.internships.organizations.logo_url}
+                          alt={
+                            application.internships.organizations
+                              .organization_name
+                          }
                         />
                       ) : (
                         <div className="logo-placeholder">
-                          {application.internships?.organizations?.organization_name?.charAt(0) || 'C'}
+                          {application.internships?.organizations?.organization_name?.charAt(
+                            0
+                          ) || "C"}
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="application-info">
-                      <h3>{application.internships?.position_title || 'Unknown Position'}</h3>
+                      <h3>
+                        {application.internships?.position_title ||
+                          "Unknown Position"}
+                      </h3>
                       <p className="company-name">
-                        {application.internships?.organizations?.organization_name || 'Unknown Company'}
+                        {application.internships?.organizations
+                          ?.organization_name || "Unknown Company"}
                       </p>
                       <p className="application-details">
                         {application.internships?.location && (
@@ -97,11 +123,13 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="application-status">
-                    <span 
+                    <span
                       className="status-badge"
-                      style={{ backgroundColor: getStatusColor(application.status) }}
+                      style={{
+                        backgroundColor: getStatusColor(application.status),
+                      }}
                     >
                       {getStatusText(application.status)}
                     </span>
@@ -111,16 +139,16 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
             </div>
           )}
         </div>
-        
+
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>
             Close
           </button>
-          <button 
+          <button
             className="btn-primary"
             onClick={() => {
               onClose();
-              navigate('/internships');
+              navigate("/internships");
             }}
           >
             Explore More Internships
@@ -144,7 +172,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         }
 
         .modal-content {
-          background: white;
+          background: var(--card-bg);
           border-radius: 12px;
           width: 100%;
           max-width: 600px;
@@ -153,6 +181,7 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
           box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
           display: flex;
           flex-direction: column;
+          border: 1px solid var(--card-border);
         }
 
         .modal-header {
@@ -217,13 +246,13 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
           justify-content: space-between;
           align-items: center;
           padding: 1.5rem;
-          border-bottom: 1px solid var(--bg-tertiary);
+          border-bottom: 1px solid var(--card-border);
           cursor: pointer;
           transition: background-color 0.2s;
         }
 
         .application-item:hover {
-          background-color: var(--bg-secondary);
+          background-color: var(--bg-hover);
         }
 
         .application-item:last-child {
@@ -254,7 +283,11 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         .logo-placeholder {
           width: 50px;
           height: 50px;
-          background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+          background: linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-dark)
+          );
           color: white;
           display: flex;
           align-items: center;
@@ -319,12 +352,13 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
         }
 
         .btn-secondary {
-          background: var(--bg-tertiary);
-          color: var(--text-secondary);
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+          border: 1px solid var(--card-border);
         }
 
         .btn-secondary:hover {
-          background: var(--card-bg);
+          background: var(--bg-hover);
           color: var(--text-primary);
         }
 
@@ -337,10 +371,38 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
           background: var(--primary-dark);
         }
 
+        .modal-footer {
+          padding: 1.5rem;
+          border-top: 1px solid var(--card-border);
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+          background: var(--card-bg);
+        }
+
         @media (max-width: 768px) {
+          .modal-overlay {
+            align-items: flex-end;
+          }
+
           .modal-content {
-            margin: 1rem;
-            max-height: calc(100vh - 2rem);
+            margin: 0;
+            border-radius: 16px 16px 0 0;
+            max-height: calc(100vh - 20px);
+            width: 100%;
+          }
+
+          .modal-header {
+            padding: 1.25rem;
+          }
+
+          .modal-header h2 {
+            font-size: 1.25rem;
+          }
+
+          .modal-body {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
           }
 
           .application-main {
@@ -358,14 +420,20 @@ const SentApplicationModal = ({ isOpen, onClose, applications = [] }) => {
             font-size: 1rem;
           }
 
+          .application-info h3 {
+            font-size: 0.95rem;
+          }
+
           .modal-footer {
-            flex-direction: column-reverse;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem;
           }
 
           .btn-secondary,
           .btn-primary {
             width: 100%;
-            justify-content: center;
+            padding: 0.875rem 1rem;
           }
         }
       `}</style>
