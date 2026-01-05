@@ -1,22 +1,20 @@
-
-
 .side-nav-item {
   display: flex;
   align-items: center;
   padding: 12px 20px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
 }
 
 /* Navigation Styles */
 .sidebar {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   width: 280px;
   min-width: 280px;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--card-border);
   padding: 0;
   position: fixed;
   height: 100vh;
@@ -32,7 +30,7 @@
     transform: translateX(-100%);
     position: fixed;
   }
-  
+
   .sidebar.open {
     transform: translateX(0);
   }
@@ -42,6 +40,7 @@
   .sidebar {
     transform: translateX(-100%);
   }
+
   .sidebar.open {
     transform: translateX(0);
   }
@@ -54,7 +53,7 @@
   left: 1rem;
   z-index: 1001;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   padding: 0.5rem;
   border-radius: 0.375rem;
   cursor: pointer;
@@ -81,6 +80,7 @@
   .sidebar-toggle {
     display: block;
   }
+
   .sidebar-overlay {
     display: block;
   }
@@ -88,13 +88,13 @@
 
 .sidebar-header {
   padding: 24px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .sidebar-header h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .sidebar-nav {
@@ -107,31 +107,37 @@
   padding: 12px 20px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
 }
-.side-nav-link{
-    text-decoration: none !important;
-    color: inherit;
-    width: 100%;
+
+.side-nav-link {
+  text-decoration: none !important;
+  color: inherit;
+  width: 100%;
 }
 
 .side-nav-item:hover {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .side-nav-item.active {
-  background-color: #dbeafe;
-  color: #1e40af;
-  border-right: 3px solid #3b82f6;
+  background-color: var(--info-bg);
+  color: var(--info);
+  border-right: 3px solid var(--info);
 }
 
 .side-nav-item.logout {
   margin-top: auto;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--card-border);
   color: #ef4444;
+  padding-top: 16px;
+}
+
+.side-nav-item.logout .nav-icon {
+  margin-right: 12px;
 }
 
 .side-nav-item.logout:hover {
@@ -148,15 +154,16 @@
   font-size: 16px;
 }
 
-.sidebar-icon{
-    width: 20px;
-    height: 20px;
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
 }
+
 /* Main Content Styles */
 .main-content {
   flex: 1;
   padding: 32px;
-  background-color: #f5f7fa;
+  background-color: var(--bg-secondary);
   transition: all 0.3s ease-in-out;
   min-height: 100vh;
 }
@@ -211,7 +218,7 @@
 .dashboard-header h1 {
   font-size: 28px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 /* Metrics Section */
@@ -222,7 +229,7 @@
 .metrics-section h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 20px;
 }
 
@@ -237,7 +244,7 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   display: flex;
   align-items: center;
 }
@@ -272,14 +279,14 @@
 
 .metric-label {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
 .metric-value {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .status-overview {
@@ -309,11 +316,11 @@
 
 .status-item span {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .status-item strong {
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -321,7 +328,7 @@
 .applications-section h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 20px;
 }
 
@@ -336,7 +343,7 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -345,13 +352,13 @@
 .applicant-info h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .applicant-info p {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .application-status {
@@ -383,16 +390,16 @@
   .sidebar {
     width: 240px;
   }
-  
+
   .main-content {
     margin-left: 240px;
     padding: 20px;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard-header h1 {
     font-size: 24px;
   }
@@ -402,21 +409,21 @@
   .sidebar {
     width: 200px;
   }
-  
+
   .main-content {
     margin-left: 200px;
     padding: 16px;
   }
-  
+
   .metric-card {
     padding: 16px;
   }
-  
+
   .nav-item {
     padding: 10px 16px;
     font-size: 13px;
   }
-  
+
   .sidebar-header h2 {
     font-size: 16px;
   }
@@ -432,7 +439,7 @@
   flex: 1;
   margin-left: 280px;
   padding: 32px;
-  background-color: #f5f7fa;
+  background-color: var(--bg-secondary);
 }
 
 .applications-header {
@@ -442,7 +449,7 @@
 .applications-header h1 {
   font-size: 28px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 /* Applications Table */
@@ -450,7 +457,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   overflow: hidden;
 }
 
@@ -468,10 +475,10 @@
   text-align: left;
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .applications-table tbody tr {
@@ -498,18 +505,18 @@
 
 .applicant-name {
   font-size: 16px;
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .position-cell {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .date-cell {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .status-cell {
@@ -592,12 +599,12 @@
     margin-left: 240px;
     padding: 20px;
   }
-  
+
   .applications-table th,
   .applications-table td {
     padding: 12px 16px;
   }
-  
+
   .applications-header h1 {
     font-size: 24px;
   }
@@ -608,21 +615,21 @@
     margin-left: 200px;
     padding: 16px;
   }
-  
+
   .applications-table {
     font-size: 14px;
   }
-  
+
   .applications-table th,
   .applications-table td {
     padding: 10px 12px;
   }
-  
+
   .decision-buttons {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .accept-btn,
   .reject-btn {
     width: 28px;
@@ -642,7 +649,7 @@
   flex: 1;
   margin-left: 280px;
   padding: 32px;
-  background-color: #f5f7fa;
+  background-color: var(--bg-secondary);
 }
 
 .post-internship-header {
@@ -652,7 +659,7 @@
 .post-internship-header h1 {
   font-size: 28px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 /* Form Styles */
@@ -661,7 +668,7 @@
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   max-width: 800px;
 }
 
@@ -673,7 +680,7 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
@@ -682,11 +689,11 @@
 .form-group textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   font-size: 14px;
-  color: #1f2937;
-  background-color: #ffffff;
+  color: var(--text-primary);
+  background-color: var(--card-bg);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -717,11 +724,11 @@
   margin-bottom: 24px;
 }
 
-.duration-group > label {
+.duration-group>label {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 12px;
 }
 
@@ -739,13 +746,13 @@
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
 .duration-separator {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
   padding-bottom: 12px;
   white-space: nowrap;
@@ -806,20 +813,20 @@
     margin-left: 240px;
     padding: 20px;
   }
-  
+
   .internship-form {
     padding: 24px;
   }
-  
+
   .post-internship-header h1 {
     font-size: 24px;
   }
-  
+
   .duration-inputs {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .duration-separator {
     display: none;
   }
@@ -830,19 +837,19 @@
     margin-left: 200px;
     padding: 16px;
   }
-  
+
   .internship-form {
     padding: 20px;
   }
-  
+
   .form-group {
     margin-bottom: 20px;
   }
-  
+
   .form-actions {
     margin-top: 24px;
   }
-  
+
   .post-btn {
     width: 100%;
     min-width: auto;
@@ -859,7 +866,7 @@
   flex: 1;
   margin-left: 280px;
   padding: 32px;
-  background-color: #f5f7fa;
+  background-color: var(--bg-secondary);
 }
 
 .org-profile-header {
@@ -869,7 +876,7 @@
 .org-profile-header h1 {
   font-size: 28px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 /* Profile Content */
@@ -878,7 +885,7 @@
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   max-width: 800px;
 }
 
@@ -887,7 +894,7 @@
   align-items: center;
   margin-bottom: 40px;
   padding-bottom: 32px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .org-company-logo {
@@ -912,19 +919,19 @@
 .org-company-details h2 {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .org-company-type {
   font-size: 16px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
 .org-company-location {
   font-size: 16px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 /* Form Styles */
@@ -940,7 +947,7 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
@@ -949,11 +956,11 @@
 .org-form-group textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   font-size: 14px;
-  color: #1f2937;
-  background-color: #ffffff;
+  color: var(--text-primary);
+  background-color: var(--card-bg);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -1045,33 +1052,33 @@
     margin-left: 240px;
     padding: 20px;
   }
-  
+
   .org-profile-content {
     padding: 24px;
   }
-  
+
   .org-profile-header h1 {
     font-size: 24px;
   }
-  
+
   .org-profile-info {
     flex-direction: column;
     text-align: center;
     margin-bottom: 32px;
     padding-bottom: 24px;
   }
-  
+
   .org-company-logo {
     margin-right: 0;
     margin-bottom: 20px;
   }
-  
+
   .org-logo-placeholder {
     width: 100px;
     height: 100px;
     font-size: 18px;
   }
-  
+
   .org-company-details h2 {
     font-size: 28px;
   }
@@ -1082,30 +1089,30 @@
     margin-left: 200px;
     padding: 16px;
   }
-  
+
   .org-profile-content {
     padding: 20px;
   }
-  
+
   .org-form-group {
     margin-bottom: 20px;
   }
-  
+
   .org-form-actions {
     margin-top: 24px;
   }
-  
+
   .org-save-btn {
     width: 100%;
     min-width: auto;
   }
-  
+
   .org-logo-placeholder {
     width: 80px;
     height: 80px;
     font-size: 16px;
   }
-  
+
   .org-company-details h2 {
     font-size: 24px;
   }
@@ -1115,842 +1122,845 @@
 
 /* ------------------------ application review---------------------------- */
 .appl-container {
-          display: flex;
-          min-height: 100vh;
-          background-color: #f8f9fa;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-        }
-
-        .appl-left-section {
-          width: 400px;
-          padding: 24px;
-          background-color: #f8f9fa;
-          margin-top: -25px;
-        }
-
-        .appl-profile-card {
-          background: white;
-          border-radius: 12px;
-          padding: 32px 24px;
-          text-align: center;
-          margin-bottom: 24px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.123);
-        }
-
-        .appl-profile-image {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          overflow: hidden;
-          margin: 0 auto 16px;
-        }
-
-        .appl-profile-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .appl-profile-name {
-          font-size: 24px;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0 0 8px 0;
-        }
-
-        .appl-applying-text {
-          color: #6b7280;
-          font-size: 14px;
-          margin: 0 0 16px 0;
-        }
-
-        .appl-position-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-        }
-
-        .appl-position {
-          background: #dbeafe;
-          color: #1d4ed8;
-          padding: 6px 16px;
-          border-radius: 20px;
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .appl-status {
-          background: #fef3c7;
-          color: #92400e;
-          padding: 4px 12px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .appl-buttons {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-        }
-
-        .appl-accept-button {
-          background: #10b981;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .appl-reject-button {
-          background: #ef4444;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .appl-documents {
-          background: white;
-          border-radius: 12px;
-          padding: 24px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.123);
-        }
-
-        .appl-documents-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-
-        .appl-documents h3 {
-          font-size: 16px;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0;
-        }
-
-        .appl-download-text {
-          font-size: 12px;
-          color: #6b7280;
-        }
-
-        .appl-document-file {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px;
-          background: #f9fafb;
-          border-radius: 8px;
-        }
-
-        .appl-file-icon {
-          font-size: 16px;
-        }
-
-        .appl-right-section {
-          flex: 1;
-          padding: 24px 32px;
-          background: white;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.123);
-          border-radius: 10px;
-        }
-
-        .appl-main-title {
-          font-size: 24px;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0 0 32px 0;
-        }
-
-        .appl-section {
-          margin-bottom: 32px;
-          padding-bottom: 32px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-
-        .appl-section:last-child {
-          margin-bottom: 0;
-          padding-bottom: 0;
-          border-bottom: none;
-        }
-
-        .appl-section-title {
-          font-size: 18px;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0 0 24px 0;
-        }
-
-        .appl-details-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .appl-detail-row {
-          display: flex;
-          gap: 40px;
-        }
-
-        .appl-detail-full {
-          width: 100%;
-        }
-
-        .appl-detail-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          flex: 1;
-        }
-
-        .appl-icon {
-          width: 20px;
-          height: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-top: 2px;
-        }
-        .appl-icon-img{
-          width: 70%;
-          height: 70%;
-        }
-        .appl-label {
-          font-size: 14px;
-          color: #6b7280;
-          margin-bottom: 4px;
-        }
-
-        .appl-value {
-          font-size: 14px;
-          color: #1f2937;
-          font-weight: 500;
-        }
-
-        @media (max-width: 768px) {
-          .appl-container {
-            flex-direction: column;
-          }
-
-          .appl-left-section {
-            width: 100%;
-            margin-top: 60px;
-          }
-
-          .appl-right-section {
-            padding: 24px;
-            margin-bottom: 60px;
-          }
-
-          .appl-detail-row {
-            flex-direction: column;
-            gap: 16px;
-          }
-        }
-
-
-
-
-
-
-
-
-        /* ------------------posted internship-------------------- */
-        .post-container {
-          min-height: 100vh;
-          background-color: #f8f9fa;
-          padding: 20px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-        }
-
-        .post-main-card {
-          max-width: 1000px;
-          margin: 0 auto;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          padding: 30px;
-        }
-
-        .post-title {
-          font-size: 28px;
-          font-weight: 600;
-          color: #1a1a1a;
-          margin: 0 0 40px 0;
-        }
-
-        .post-table-header {
-          display: grid;
-          grid-template-columns: 1.5fr 2fr 3fr 1fr;
-          gap: 20px;
-          padding: 0 0 15px 0;
-          border-bottom: 1px solid #e9ecef;
-          margin-bottom: 20px;
-        }
-
-        .post-table-header > div {
-          font-weight: 600;
-          color: #666;
-          font-size: 14px;
-        }
-
-        .post-header-status {
-          text-align: right;
-        }
-
-        .post-internships-list {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-        }
-
-        .post-internship-row {
-          border-bottom: 1px solid #f1f3f4;
-          padding-bottom: 20px;
-        }
-
-        .post-internship-row:last-child {
-          border-bottom: none;
-          padding-bottom: 0;
-        }
-
-        .post-row-content {
-          display: grid;
-          grid-template-columns: 1.5fr 2fr 3fr 1fr;
-          gap: 20px;
-          align-items: center;
-        }
-
-        .post-position {
-          font-weight: 500;
-          color: #1a1a1a;
-          font-size: 15px;
-        }
-
-        .post-department {
-          color: #666;
-          font-size: 15px;
-        }
-
-        .post-description {
-          color: #666;
-          font-size: 15px;
-          line-height: 1.4;
-        }
-
-        .post-status {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 8px;
-        }
-
-        .post-toggle {
-          width: 42px;
-          height: 24px;
-          border-radius: 12px;
-          position: relative;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-
-        .post-toggle-active {
-          background-color: #10b981;
-        }
-
-        .post-toggle-inactive {
-          background-color: #d1d5db;
-        }
-
-        .post-toggle-slider {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background-color: white;
-          position: absolute;
-          top: 2px;
-          transition: transform 0.3s ease;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .post-slider-active {
-          transform: translateX(18px);
-        }
-
-        .post-slider-inactive {
-          transform: translateX(2px);
-        }
-
-        .post-status-text {
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .post-text-active {
-          color: #10b981;
-        }
-
-        .post-text-inactive {
-          color: #6b7280;
-        }
-
-        .post-button-container {
-          margin-top: 40px;
-          text-align: center;
-        }
-
-        .post-new-button {
-          background-color: #4f46e5;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          padding: 12px 24px;
-          font-size: 16px;
-          font-weight: 500;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          transition: background-color 0.2s ease;
-        }
-
-        .post-new-button:hover {
-          background-color: #4338ca;
-        }
-
-        .post-button-icon {
-          font-size: 18px;
-          font-weight: 600;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-          .post-container {
-            padding: 15px;
-          }
-
-          .post-main-card {
-            padding: 20px;
-          }
-
-          .post-title {
-            font-size: 24px;
-            margin-bottom: 30px;
-          }
-
-          .post-table-header {
-            display: none;
-          }
-
-          .post-row-content {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            align-items: flex-start;
-          }
-
-          .post-position {
-            font-size: 16px;
-            font-weight: 600;
-          }
-
-          .post-department {
-            font-size: 14px;
-            color: #888;
-          }
-
-          .post-description {
-            font-size: 14px;
-            line-height: 1.5;
-          }
-
-          .post-status {
-            justify-content: flex-start;
-            width: 100%;
-          }
-
-          .post-internship-row {
-            padding: 15px;
-            border: 1px solid #f1f3f4;
-            border-radius: 8px;
-            margin-bottom: 15px;
-          }
-
-          .post-internship-row:last-child {
-            margin-bottom: 0;
-          }
-
-          .post-internships-list {
-            gap: 0;
-          }
-
-          .post-new-button {
-            width: 100%;
-            justify-content: center;
-            padding: 14px 24px;
-          }
-        }
-
-        /* Tablet Responsive Styles */
-        @media (max-width: 1024px) and (min-width: 769px) {
-          .post-row-content {
-            grid-template-columns: 1.2fr 1.8fr 2.5fr 1fr;
-            gap: 15px;
-          }
-
-          .post-table-header {
-            grid-template-columns: 1.2fr 1.8fr 2.5fr 1fr;
-            gap: 15px;
-          }
-
-          .post-description {
-            font-size: 14px;
-          }
-        }
-
-
-
-        /* ---------------profile edit---------------- */
-        .profile-container {
-          padding: 24px;
-          background-color: #f8f9fa;
-          min-height: 100vh;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-        }
-
-        .profile-main-content {
-          max-width: 1000px;
-          margin: 0 auto;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-          overflow: hidden;
-        }
-
-        .profile-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          padding: 32px;
-          border-bottom: 1px solid #e9ecef;
-        }
-
-        .profile-company-info {
-          display: flex;
-          align-items: flex-start;
-          gap: 20px;
-        }
-
-        .profile-logo {
-          flex-shrink: 0;
-        }
-
-        .profile-logo-icon {
-          width: 64px;
-          height: 64px;
-          background-color: #1a1a1a;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .profile-logo-symbol {
-          color: white;
-          font-size: 18px;
-          font-weight: 600;
-          font-family: 'Courier New', monospace;
-        }
-
-        .profile-company-details {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .profile-company-name {
-          font-size: 32px;
-          font-weight: 700;
-          color: #1a1a1a;
-          margin: 0;
-        }
-
-        .profile-company-meta {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .profile-industry,
-        .profile-location {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #666;
-          font-size: 14px;
-        }
-
-        .profile-meta-icon {
-          font-size: 14px;
-        }
-
-        .profile-header-right {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 20px;
-        }
-
-        .profile-stats {
-          display: flex;
-          gap: 40px;
-          text-align: right;
-        }
-
-        .profile-stat-item {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-        }
-
-        .profile-stat-number {
-          font-size: 28px;
-          font-weight: 700;
-          color: #1a1a1a;
-          line-height: 1;
-        }
-
-        .profile-stat-label {
-          font-size: 14px;
-          color: #1a1a1a;
-          font-weight: 600;
-          margin-top: 4px;
-        }
-
-        .profile-stat-sublabel {
-          font-size: 12px;
-          color: #666;
-          margin-top: 2px;
-        }
-
-        .profile-edit-button {
-          background-color: #4f46e5;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          padding: 12px 20px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          transition: background-color 0.2s ease;
-        }
-
-        .profile-edit-button:hover {
-          background-color: #4338ca;
-        }
-
-        .profile-edit-icon {
-          font-size: 16px;
-        }
-
-        .profile-about-section {
-          padding: 32px;
-        }
-
-        .profile-about-tabs {
-          border-bottom: 1px solid #e9ecef;
-          margin-bottom: 32px;
-        }
-
-        .profile-tab {
-          display: inline-block;
-          padding: 12px 0;
-          font-size: 14px;
-          font-weight: 500;
-          color: #666;
-          border-bottom: 2px solid transparent;
-          margin-right: 32px;
-          cursor: pointer;
-        }
-
-        .profile-tab-active {
-          color: #1a1a1a;
-          border-bottom-color: #4f46e5;
-        }
-
-        .profile-about-content {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .profile-about-title {
-          font-size: 20px;
-          font-weight: 600;
-          color: #1a1a1a;
-          margin: 0;
-        }
-
-        .profile-about-description {
-          color: #666;
-          line-height: 1.6;
-          margin: 0;
-          font-size: 15px;
-        }
-
-        .profile-website-link {
-          color: #4f46e5;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .profile-website-link:hover {
-          text-decoration: underline;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-          .profile-container {
-            padding: 16px;
-          }
-
-          .profile-header {
-            flex-direction: column;
-            gap: 24px;
-            padding: 24px;
-          }
-
-          .profile-company-info {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 16px;
-          }
-
-          .profile-company-details {
-            align-items: center;
-          }
-
-          .profile-company-name {
-            font-size: 24px;
-          }
-
-          .profile-header-right {
-            width: 100%;
-            align-items: center;
-          }
-
-          .profile-stats {
-            gap: 24px;
-          }
-
-          .profile-stat-item {
-            align-items: center;
-            text-align: center;
-          }
-
-          .profile-stat-number {
-            font-size: 24px;
-          }
-
-          .profile-edit-button {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .profile-about-section {
-            padding: 24px;
-          }
-
-          .profile-about-title {
-            font-size: 18px;
-          }
-
-          .profile-about-description {
-            font-size: 14px;
-          }
-        }
-
-        /* Tablet Responsive Styles */
-        @media (max-width: 1024px) and (min-width: 769px) {
-          .profile-header {
-            padding: 28px;
-          }
-
-          .profile-company-name {
-            font-size: 28px;
-          }
-
-          .profile-stats {
-            gap: 32px;
-          }
-
-          .profile-about-section {
-            padding: 28px;
-          }
-        }
-
-        /* Small Mobile Styles */
-        @media (max-width: 480px) {
-          .profile-container {
-            padding: 12px;
-          }
-
-          .profile-header {
-            padding: 20px;
-          }
-
-          .profile-company-name {
-            font-size: 20px;
-          }
-
-          .profile-logo-icon {
-            width: 56px;
-            height: 56px;
-          }
-
-          .profile-logo-symbol {
-            font-size: 16px;
-          }
-
-          .profile-stats {
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-          }
-
-          .profile-about-section {
-            padding: 20px;
-          }
-        }
-          .profile-icons{
-          width: 17px;
-          height: 17px;
-          margin-bottom: -4px;
-        }
-        
-
-
-        /* Additional styles for internship components - add to org.css */
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.appl-left-section {
+  width: 400px;
+  padding: 24px;
+  background-color: #f8f9fa;
+  margin-top: -25px;
+}
+
+.appl-profile-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.123);
+}
+
+.appl-profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 16px;
+}
+
+.appl-profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.appl-profile-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.appl-applying-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.appl-position-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.appl-position {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.appl-status {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.appl-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.appl-accept-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.appl-reject-button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.appl-documents {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.123);
+}
+
+.appl-documents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.appl-documents h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.appl-download-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.appl-document-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.appl-file-icon {
+  font-size: 16px;
+}
+
+.appl-right-section {
+  flex: 1;
+  padding: 24px 32px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.123);
+  border-radius: 10px;
+}
+
+.appl-main-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 32px 0;
+}
+
+.appl-section {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.appl-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.appl-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 24px 0;
+}
+
+.appl-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appl-detail-row {
+  display: flex;
+  gap: 40px;
+}
+
+.appl-detail-full {
+  width: 100%;
+}
+
+.appl-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.appl-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.appl-icon-img {
+  width: 70%;
+  height: 70%;
+}
+
+.appl-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.appl-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .appl-container {
+    flex-direction: column;
+  }
+
+  .appl-left-section {
+    width: 100%;
+    margin-top: 60px;
+  }
+
+  .appl-right-section {
+    padding: 24px;
+    margin-bottom: 60px;
+  }
+
+  .appl-detail-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+
+
+
+
+
+
+
+/* ------------------posted internship-------------------- */
+.post-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.post-main-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.post-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 40px 0;
+}
+
+.post-table-header {
+  display: grid;
+  grid-template-columns: 1.5fr 2fr 3fr 1fr;
+  gap: 20px;
+  padding: 0 0 15px 0;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.post-table-header>div {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.post-header-status {
+  text-align: right;
+}
+
+.post-internships-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-internship-row {
+  border-bottom: 1px solid #f1f3f4;
+  padding-bottom: 20px;
+}
+
+.post-internship-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.post-row-content {
+  display: grid;
+  grid-template-columns: 1.5fr 2fr 3fr 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.post-position {
+  font-weight: 500;
+  color: #1a1a1a;
+  font-size: 15px;
+}
+
+.post-department {
+  color: #666;
+  font-size: 15px;
+}
+
+.post-description {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.post-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.post-toggle {
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.post-toggle-active {
+  background-color: #10b981;
+}
+
+.post-toggle-inactive {
+  background-color: #d1d5db;
+}
+
+.post-toggle-slider {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  position: absolute;
+  top: 2px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.post-slider-active {
+  transform: translateX(18px);
+}
+
+.post-slider-inactive {
+  transform: translateX(2px);
+}
+
+.post-status-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.post-text-active {
+  color: #10b981;
+}
+
+.post-text-inactive {
+  color: var(--text-secondary);
+}
+
+.post-button-container {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.post-new-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.post-new-button:hover {
+  background-color: #4338ca;
+}
+
+.post-button-icon {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .post-container {
+    padding: 15px;
+  }
+
+  .post-main-card {
+    padding: 20px;
+  }
+
+  .post-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  .post-table-header {
+    display: none;
+  }
+
+  .post-row-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .post-position {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .post-department {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .post-description {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .post-status {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .post-internship-row {
+    padding: 15px;
+    border: 1px solid #f1f3f4;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  .post-internship-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .post-internships-list {
+    gap: 0;
+  }
+
+  .post-new-button {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 24px;
+  }
+}
+
+/* Tablet Responsive Styles */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .post-row-content {
+    grid-template-columns: 1.2fr 1.8fr 2.5fr 1fr;
+    gap: 15px;
+  }
+
+  .post-table-header {
+    grid-template-columns: 1.2fr 1.8fr 2.5fr 1fr;
+    gap: 15px;
+  }
+
+  .post-description {
+    font-size: 14px;
+  }
+}
+
+
+
+/* ---------------profile edit---------------- */
+.profile-container {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-main-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 32px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.profile-company-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.profile-logo {
+  flex-shrink: 0;
+}
+
+.profile-logo-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #1a1a1a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-logo-symbol {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.profile-company-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-company-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.profile-company-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-industry,
+.profile-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.profile-meta-icon {
+  font-size: 14px;
+}
+
+.profile-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 40px;
+  text-align: right;
+}
+
+.profile-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.profile-stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.profile-stat-label {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.profile-stat-sublabel {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.profile-edit-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.profile-edit-button:hover {
+  background-color: #4338ca;
+}
+
+.profile-edit-icon {
+  font-size: 16px;
+}
+
+.profile-about-section {
+  padding: 32px;
+}
+
+.profile-about-tabs {
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 32px;
+}
+
+.profile-tab {
+  display: inline-block;
+  padding: 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  margin-right: 32px;
+  cursor: pointer;
+}
+
+.profile-tab-active {
+  color: #1a1a1a;
+  border-bottom-color: #4f46e5;
+}
+
+.profile-about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-about-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.profile-about-description {
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 15px;
+}
+
+.profile-website-link {
+  color: #4f46e5;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-website-link:hover {
+  text-decoration: underline;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 16px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .profile-company-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .profile-company-details {
+    align-items: center;
+  }
+
+  .profile-company-name {
+    font-size: 24px;
+  }
+
+  .profile-header-right {
+    width: 100%;
+    align-items: center;
+  }
+
+  .profile-stats {
+    gap: 24px;
+  }
+
+  .profile-stat-item {
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-stat-number {
+    font-size: 24px;
+  }
+
+  .profile-edit-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-about-section {
+    padding: 24px;
+  }
+
+  .profile-about-title {
+    font-size: 18px;
+  }
+
+  .profile-about-description {
+    font-size: 14px;
+  }
+}
+
+/* Tablet Responsive Styles */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .profile-header {
+    padding: 28px;
+  }
+
+  .profile-company-name {
+    font-size: 28px;
+  }
+
+  .profile-stats {
+    gap: 32px;
+  }
+
+  .profile-about-section {
+    padding: 28px;
+  }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 12px;
+  }
+
+  .profile-header {
+    padding: 20px;
+  }
+
+  .profile-company-name {
+    font-size: 20px;
+  }
+
+  .profile-logo-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .profile-logo-symbol {
+    font-size: 16px;
+  }
+
+  .profile-stats {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .profile-about-section {
+    padding: 20px;
+  }
+}
+
+.profile-icons {
+  width: 17px;
+  height: 17px;
+  margin-bottom: -4px;
+}
+
+
+
+/* Additional styles for internship components - add to org.css */
 
 /* Loading Spinner */
 .loading-spinner {
@@ -1959,7 +1969,7 @@
   align-items: center;
   justify-content: center;
   padding: 4rem 0;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .spinner {
@@ -1973,8 +1983,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Post Header with Stats */
@@ -1992,10 +2007,10 @@
 
 .stat-item {
   padding: 0.5rem 1rem;
-  background: #f8fafc;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -2018,7 +2033,7 @@
 .row-department,
 .row-description {
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .row-position {
@@ -2158,7 +2173,7 @@
   background-color: #f8fafc;
   border-bottom: 2px solid #e2e8f0;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 0.875rem;
 }
 
@@ -2170,7 +2185,7 @@
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .empty-icon {
@@ -2181,7 +2196,7 @@
 .empty-state h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
@@ -2236,7 +2251,7 @@
 }
 
 .post-internship-header p {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1.125rem;
 }
 
@@ -2253,7 +2268,7 @@
 .form-group label {
   display: block;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
 }
@@ -2263,7 +2278,7 @@
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   font-size: 0.875rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -2288,7 +2303,7 @@
   display: block;
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .duration-inputs {
@@ -2302,7 +2317,7 @@
 }
 
 .duration-separator {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
   padding-top: 1.5rem;
 }
@@ -2313,14 +2328,14 @@
   justify-content: flex-end;
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--card-border);
 }
 
 .cancel-button {
   padding: 0.75rem 1.5rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--card-border);
   background-color: white;
-  color: #374151;
+  color: var(--text-primary);
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
@@ -2453,39 +2468,40 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+
   .internship-row,
   .post-table-header {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-  
+
   .internship-row {
     padding: 1rem 0.5rem;
   }
-  
+
   .status-container {
     flex-direction: row;
     justify-content: space-between;
   }
-  
+
   .row-actions {
     justify-content: flex-end;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .duration-inputs {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .duration-separator {
     text-align: center;
     padding: 0.5rem 0;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
@@ -2503,7 +2519,7 @@
 
 .filter-btn {
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -2528,13 +2544,13 @@
 }
 
 .stat-item {
-  background: white;
+  background: var(--bg-tertiary);
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .applicant-info {
@@ -2560,7 +2576,7 @@
 .avatar-placeholder {
   width: 40px;
   height: 40px;
-  background: #e5e7eb;
+  background: var(--card-border);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2576,7 +2592,7 @@
   color: #64748b;
   background: white;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
 }
 
 .loading-container,
@@ -2589,7 +2605,7 @@
   text-align: center;
   background: white;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
 }
 
 .spinner {
@@ -2603,8 +2619,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .retry-button {
@@ -2678,41 +2699,41 @@
 
 /* -------------------verification-------------------- */
 .verification-restriction {
-          background: white;
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin-bottom: 2rem;
-          border: 1px solid #e5e7eb;
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-        }
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
 
-        .verification-restriction--warning {
-          border-left: 4px solid #f59e0b;
-          background: #fefce8;
-        }
+.verification-restriction--warning {
+  border-left: 4px solid #f59e0b;
+  background: #fefce8;
+}
 
-        .verification-restriction--error {
-          border-left: 4px solid #ef4444;
-          background: #fef2f2;
-        }
+.verification-restriction--error {
+  border-left: 4px solid #ef4444;
+  background: #fef2f2;
+}
 
-        .restriction-icon {
-          font-size: 1.5rem;
-          flex-shrink: 0;
-        }
+.restriction-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
 
-        .restriction-content h3 {
-          color: #1e293b;
-          font-size: 1.125rem;
-          font-weight: 600;
-          margin: 0 0 0.5rem 0;
-        }
+.restriction-content h3 {
+  color: #1e293b;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
 
-        .restriction-content p {
-          color: #64748b;
-          font-size: 0.875rem;
-          margin: 0;
-          line-height: 1.5;
-        }
+.restriction-content p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.5;
+}

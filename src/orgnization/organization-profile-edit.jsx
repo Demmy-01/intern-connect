@@ -615,18 +615,18 @@ const OrganizationProfileEdit = () => {
         .upload-logo-btn {
           display: inline-block;
           padding: 8px 16px;
-          background-color: #f0f0f0;
-          border: 1px solid #ddd;
+          background-color: var(--bg-tertiary);
+          border: 1px solid var(--card-border);
           border-radius: 4px;
           cursor: pointer;
           font-size: 14px;
-          color: #333;
+          color: var(--text-primary);
           text-align: center;
           transition: background-color 0.2s;
         }
 
         .upload-logo-btn:hover {
-          background-color: #e0e0e0;
+          background-color: var(--bg-hover);
         }
 
         .logo-upload-section {

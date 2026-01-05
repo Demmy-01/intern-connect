@@ -192,10 +192,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapsedChange }) => {
           </Link>
 
           <div className="side-nav-item logout" onClick={handleLogoutClick}>
-            <div className="nav-icon logout-icon">
+            <div className="nav-icon">
               <img src={out} alt="Logout Icon" className="sidebar-icon" />
             </div>
-            <span className="nav-label log">Log Out</span>
+            <span className="nav-label">Log Out</span>
           </div>
         </nav>
       </aside>

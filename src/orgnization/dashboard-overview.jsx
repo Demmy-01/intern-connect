@@ -408,23 +408,41 @@ const OrganizationDashboard = () => {
         }
 
         .dashboard-header h1 {
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 2rem;
           font-weight: 700;
           margin-bottom: 0.5rem;
         }
 
         .dashboard-header p {
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 1.1rem;
         }
 
+        .dashboard-section {
+          background: var(--card-bg) !important;
+          border-radius: 12px;
+          border: 1px solid var(--card-border);
+          overflow: hidden;
+        }
+
+        .stat-card {
+          background: var(--card-bg);
+          border-radius: 12px;
+          padding: 1.5rem;
+          border: 1px solid var(--card-border);
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          transition: all 0.2s;
+        }
+
         .verification-restriction {
-          background: white;
+          background: var(--card-bg);
           border-radius: 12px;
           padding: 1.5rem;
           margin-bottom: 2rem;
-          border: 1px solid #e5e7eb;
+          border: 1px solid var(--card-border);
           display: flex;
           align-items: flex-start;
           gap: 1rem;
@@ -446,14 +464,14 @@ const OrganizationDashboard = () => {
         }
 
         .restriction-content h3 {
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 1.125rem;
           font-weight: 600;
           margin: 0 0 0.5rem 0;
         }
 
         .restriction-content p {
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 0.875rem;
           margin: 0;
           line-height: 1.5;
@@ -466,16 +484,7 @@ const OrganizationDashboard = () => {
           margin-bottom: 3rem;
         }
 
-        .stat-card {
-          background: white;
-          border-radius: 12px;
-          padding: 1.5rem;
-          border: 1px solid #e5e7eb;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          transition: all 0.2s;
-        }
+
 
         .stat-card:hover {
           transform: translateY(-2px);
@@ -508,20 +517,20 @@ const OrganizationDashboard = () => {
         .stat-number {
           font-size: 2rem;
           font-weight: 700;
-          color: #1e293b;
+          color: var(--text-primary);
           line-height: 1;
         }
 
         .stat-label {
           font-size: 0.875rem;
           font-weight: 500;
-          color: #64748b;
+          color: var(--text-secondary);
           margin-bottom: 0.25rem;
         }
 
         .stat-sublabel {
           font-size: 0.75rem;
-          color: #94a3b8;
+          color: var(--text-tertiary);
         }
 
         .dashboard-grid {
@@ -531,23 +540,19 @@ const OrganizationDashboard = () => {
           margin-bottom: 3rem;
         }
 
-        .dashboard-section {
-          background: white;
-          border-radius: 12px;
-          border: 1px solid #e5e7eb;
-          overflow: hidden;
-        }
+
 
         .section-header {
           padding: 1.5rem;
-          border-bottom: 1px solid #e5e7eb;
+          background: var(--card-bg) !important;
+          border-bottom: 1px solid var(--card-border);
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
 
         .section-header h2 {
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 1.25rem;
           font-weight: 600;
           margin: 0;
@@ -578,11 +583,12 @@ const OrganizationDashboard = () => {
           border-radius: 8px;
           margin-bottom: 0.5rem;
           transition: background-color 0.2s;
+          background: transparent !important;
         }
 
         .application-item:hover,
         .internship-item:hover {
-          background: #f8fafc;
+          background: var(--bg-hover);
         }
 
         .applicant-info {
@@ -607,24 +613,24 @@ const OrganizationDashboard = () => {
         .avatar-placeholder {
           width: 40px;
           height: 40px;
-          background: #e5e7eb;
+          background: var(--card-border);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 600;
-          color: #64748b;
+          color: var(--text-secondary);
         }
 
         .applicant-name {
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 0.875rem;
         }
 
         .application-position {
           font-size: 0.75rem;
-          color: #64748b;
+          color: var(--text-secondary);
         }
 
         .application-meta {
@@ -644,7 +650,7 @@ const OrganizationDashboard = () => {
 
         .application-date {
           font-size: 0.75rem;
-          color: #94a3b8;
+          color: var(--text-tertiary);
         }
 
         .internship-info {
@@ -653,14 +659,14 @@ const OrganizationDashboard = () => {
 
         .internship-title {
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 0.875rem;
           margin-bottom: 0.25rem;
         }
 
         .internship-department {
           font-size: 0.75rem;
-          color: #64748b;
+          color: var(--text-secondary);
           margin-bottom: 0.5rem;
         }
 
@@ -672,8 +678,8 @@ const OrganizationDashboard = () => {
         .internship-type,
         .internship-compensation {
           font-size: 0.75rem;
-          color: #94a3b8;
-          background: #f1f5f9;
+          color: var(--text-tertiary);
+          background: var(--bg-tertiary);
           padding: 0.25rem 0.5rem;
           border-radius: 4px;
         }
@@ -691,14 +697,14 @@ const OrganizationDashboard = () => {
         .stat-item .stat-number {
           font-size: 1.5rem;
           font-weight: 700;
-          color: #1e293b;
+          color: var(--text-primary);
           display: block;
           line-height: 1;
         }
 
         .stat-item .stat-label {
           font-size: 0.75rem;
-          color: #64748b;
+          color: var(--text-secondary);
         }
 
         .pending-badge {
@@ -713,7 +719,7 @@ const OrganizationDashboard = () => {
         .empty-state {
           text-align: center;
           padding: 2rem;
-          color: #64748b;
+          color: var(--text-secondary);
         }
 
         .verification-required {
