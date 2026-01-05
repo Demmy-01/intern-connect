@@ -458,6 +458,87 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Are You an Organization Section */}
+      <section className="organization-section" id="for-organizations">
+        <div className="section-container">
+          <div className="section-header-home fade-in">
+            <h2 className="section-title-1">Are You an Organization?</h2>
+            <p className="section-subtitle">
+              Looking to recruit talented interns? Partner with Intern Connect
+              to find the perfect candidates for your team.
+            </p>
+          </div>
+
+          <div className="organization-content fade-in">
+            <div className="organization-steps">
+              <div className="org-step">
+                <div className="org-step-icon">1</div>
+                <div className="org-step-content">
+                  <h3>Create Your Organization Account</h3>
+                  <p>
+                    Sign up and complete your organization profile with company
+                    details, industry information, and your company's mission.
+                  </p>
+                </div>
+              </div>
+
+              <div className="org-step">
+                <div className="org-step-icon">2</div>
+                <div className="org-step-content">
+                  <h3>Complete Onboarding</h3>
+                  <p>
+                    Navigate to your profile page and complete the onboarding
+                    process to verify your organization details and set up your
+                    recruitment preferences.
+                  </p>
+                </div>
+              </div>
+
+              <div className="org-step">
+                <div className="org-step-icon">3</div>
+                <div className="org-step-content">
+                  <h3>Wait for Approval</h3>
+                  <p>
+                    Our team will review your organization profile to ensure
+                    authenticity and quality. This typically takes 1-2 business
+                    days.
+                  </p>
+                </div>
+              </div>
+
+              <div className="org-step">
+                <div className="org-step-icon">4</div>
+                <div className="org-step-content">
+                  <h3>Start Posting Internships</h3>
+                  <p>
+                    Once approved, you can begin posting internship
+                    opportunities, manage applications, and connect with
+                    talented candidates ready to grow.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="org-cta-container fade-in">
+              <div className="org-cta-content">
+                <h3 className="org-cta-title">
+                  Ready to Find Your Next Intern?
+                </h3>
+                <p className="org-cta-description">
+                  Join hundreds of organizations already recruiting on
+                  InternConnect. Start your recruitment journey today.
+                </p>
+                <Button
+                  label="Sign Up as Organization"
+                  onClick={() => navigate("/organization-signup")}
+                  className="org-signup-btn"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Us Section */}
       <section className="contact-section" id="contact">
         <div className="section-container">

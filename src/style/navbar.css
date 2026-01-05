@@ -453,6 +453,23 @@ body {
   gap: 8px;
 }
 
+.nav-button-link,
+.mobile-button-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.nav-button-link:hover,
+.mobile-button-link:hover {
+  opacity: 0.8;
+}
+
 .mobile-login-button {
   background-color: #2563eb;
   color: white;

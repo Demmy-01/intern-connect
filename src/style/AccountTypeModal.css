@@ -1,0 +1,378 @@
+.account-type-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeInBackdrop 0.3s ease-out;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.account-type-modal {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.2);
+  animation: slideInUp 0.3s ease-out;
+  margin: auto;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.account-type-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.account-type-close-btn:hover {
+  background: var(--bg-secondary);
+}
+
+.account-type-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.account-type-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 40px;
+  line-height: 1.5;
+}
+
+.account-type-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.account-option {
+  background: var(--bg-secondary);
+  border: 2px solid var(--card-border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.account-option::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(41, 128, 185, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.account-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -8px rgba(59, 130, 246, 0.2);
+}
+
+.account-option:hover::before {
+  opacity: 1;
+}
+
+.option-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.student-icon {
+  background: linear-gradient(135deg, #3b82f6, #2980b9);
+}
+
+.organization-icon {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.account-option:hover .option-icon {
+  transform: scale(1.1);
+}
+
+.option-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  z-index: 1;
+}
+
+.option-description {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  z-index: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .account-type-modal {
+    padding: 32px 24px;
+    width: 95%;
+    border-radius: 16px;
+  }
+
+  .account-type-title {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+
+  .account-type-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+  }
+
+  .account-option {
+    padding: 28px 20px;
+    gap: 14px;
+  }
+
+  .option-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .option-title {
+    font-size: 1.1rem;
+  }
+
+  .option-description {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .account-type-modal-backdrop {
+    padding: 12px;
+  }
+
+  .account-type-modal {
+    padding: 28px 20px;
+    width: 100%;
+    max-width: none;
+    border-radius: 16px;
+  }
+
+  .account-type-close-btn {
+    top: 12px;
+    right: 12px;
+    padding: 6px;
+  }
+
+  .account-type-title {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+  }
+
+  .account-type-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+  }
+
+  .account-type-options {
+    gap: 16px;
+  }
+
+  .account-option {
+    padding: 24px 18px;
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .option-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+  }
+
+  .option-title {
+    font-size: 1rem;
+  }
+
+  .option-description {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 480px) {
+  .account-type-modal-backdrop {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .account-type-modal {
+    padding: 24px 18px;
+    width: 100%;
+    max-width: none;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+    animation: slideInUpMobile 0.3s ease-out;
+  }
+
+  @keyframes slideInUpMobile {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .account-type-close-btn {
+    top: 12px;
+    right: 12px;
+    padding: 6px;
+  }
+
+  .account-type-close-btn:active {
+    background: var(--bg-secondary);
+  }
+
+  .account-type-title {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+
+  .account-type-subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 24px;
+  }
+
+  .account-type-options {
+    gap: 14px;
+  }
+
+  .account-option {
+    padding: 20px 16px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .account-option:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  .option-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 9px;
+  }
+
+  .option-title {
+    font-size: 0.95rem;
+  }
+
+  .option-description {
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 360px) {
+  .account-type-modal {
+    padding: 20px 16px;
+  }
+
+  .account-type-title {
+    font-size: 1.15rem;
+  }
+
+  .account-type-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 20px;
+  }
+
+  .account-option {
+    padding: 18px 14px;
+    gap: 9px;
+  }
+
+  .option-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .option-title {
+    font-size: 0.9rem;
+  }
+
+  .option-description {
+    font-size: 0.65rem;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .account-option {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .account-type-close-btn:hover {
+  background: var(--bg-tertiary);
+}

@@ -6,6 +6,7 @@ import logo_blue from "../assets/logo_blue.png";
 import { Button } from "./button.jsx";
 import { Buttons } from "./button-1.jsx";
 import NotificationModal from "./notification.jsx";
+import AccountTypeModal from "./AccountTypeModal";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import LogoutModal from "./LogoutModal";
@@ -17,6 +18,8 @@ const Navbar = ({ textColor }) => {
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] =
     React.useState(false);
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+  const [showLoginModal, setShowLoginModal] = React.useState(false);
+  const [showSignupModal, setShowSignupModal] = React.useState(false);
   const { darkMode, toggleTheme } = useTheme();
   const { user, logout, getDashboardUrl } = useAuth();
   const dashboardUrl = getDashboardUrl ? getDashboardUrl() : "/dashboard";
@@ -159,12 +162,18 @@ const Navbar = ({ textColor }) => {
                 </>
               ) : (
                 <>
-                  <Link to="/login">
+                  <button
+                    onClick={() => setShowLoginModal(true)}
+                    className="nav-button-link"
+                  >
                     <Button label="Login" />
-                  </Link>
-                  <Link to="/signup">
+                  </button>
+                  <button
+                    onClick={() => setShowSignupModal(true)}
+                    className="nav-button-link"
+                  >
                     <Buttons label="Sign up" />
-                  </Link>
+                  </button>
                 </>
               )}
             </div>
@@ -269,12 +278,24 @@ const Navbar = ({ textColor }) => {
 
                   {!user && (
                     <div className="mobile-buttons">
-                      <Link to="/login">
+                      <button
+                        onClick={() => {
+                          setShowLoginModal(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className="mobile-button-link"
+                      >
                         <Button label="Login" />
-                      </Link>
-                      <Link to="/signup">
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowSignupModal(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className="mobile-button-link"
+                      >
                         <Button label="Sign up" />
-                      </Link>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -291,6 +312,16 @@ const Navbar = ({ textColor }) => {
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogout}
+      />
+      <AccountTypeModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        type="login"
+      />
+      <AccountTypeModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        type="signup"
       />
     </>
   );
