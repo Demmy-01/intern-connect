@@ -1,7 +1,7 @@
 .custom-button-1{
-          background-color: white;
-          color: #2563eb;
-          border: 1px solid #2563eb;
+          background-color: var(--bg-secondary);
+          color: var(--primary);
+          border: 1px solid var(--primary);
           padding: 8px 16px;
           border-radius: 6px;
           font-size: 14px;
@@ -10,7 +10,12 @@
           transition: background-color 0.2s, transform 0.2s;
         }
 
+        [data-theme="dark"] .custom-button-1 {
+          color: #ffffff;
+        }
+
         .custom-button-1:hover{
-          background-color: #eff6ff;
+          background-color: var(--primary);
+          color: var(--text-on-primary);
           transform: scale(1.05);
         }
