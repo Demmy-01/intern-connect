@@ -172,17 +172,18 @@ const OnboardingPage = () => {
       }
 
       // Transform experiences to match profileService format
-      console.log('Transforming experiences:', formData.experiences);
+      console.log("Transforming experiences:", formData.experiences);
       const transformedExperiences = formData.experiences.map((exp) => {
         const experience = {
           title: exp.jobTitle,
           company: exp.company,
           description: exp.description,
-          duration: exp.startDate && exp.endDate 
-            ? `${exp.startDate} - ${exp.endDate}` 
-            : '',
+          duration:
+            exp.startDate && exp.endDate
+              ? `${exp.startDate} - ${exp.endDate}`
+              : "",
         };
-        console.log('Transformed experience:', experience);
+        console.log("Transformed experience:", experience);
         return experience;
       });
 
@@ -214,28 +215,34 @@ const OnboardingPage = () => {
 
       // Validate required fields before saving
       if (!onboardingData.name || !onboardingData.name.trim()) {
-        throw new Error('Full name is required');
+        throw new Error("Full name is required");
       }
       if (!onboardingData.phone || !onboardingData.phone.trim()) {
-        throw new Error('Phone number is required');
+        throw new Error("Phone number is required");
       }
       if (!onboardingData.bio || !onboardingData.bio.trim()) {
-        throw new Error('Bio is required');
+        throw new Error("Bio is required");
       }
       if (!onboardingData.skills || onboardingData.skills.length === 0) {
-        throw new Error('At least one skill is required');
+        throw new Error("At least one skill is required");
       }
       if (!onboardingData.education || onboardingData.education.length === 0) {
-        throw new Error('Education information is required');
+        throw new Error("Education information is required");
       }
 
       // Validate experience if present
       if (onboardingData.experiences && onboardingData.experiences.length > 0) {
         const invalidExperiences = onboardingData.experiences.filter(
-          exp => !exp.title || !exp.title.trim() || !exp.company || !exp.company.trim()
+          (exp) =>
+            !exp.title ||
+            !exp.title.trim() ||
+            !exp.company ||
+            !exp.company.trim()
         );
         if (invalidExperiences.length > 0) {
-          throw new Error('All experiences must have both a job title and company name');
+          throw new Error(
+            "All experiences must have both a job title and company name"
+          );
         }
       }
 
@@ -248,8 +255,8 @@ const OnboardingPage = () => {
       );
 
       if (!result.success) {
-        console.error('ProfileService returned error:', result.message);
-        throw new Error(result.message || 'Failed to save profile data');
+        console.error("ProfileService returned error:", result.message);
+        throw new Error(result.message || "Failed to save profile data");
       }
 
       console.log("Profile updated successfully");
@@ -268,18 +275,19 @@ const OnboardingPage = () => {
       console.error("Error saving onboarding data:", err);
       console.error("Error message:", err.message);
       console.error("Full error:", err);
-      
+
       // Provide specific error messages
       let errorMessage = "Failed to save profile data.";
-      
+
       if (err.message) {
         errorMessage = err.message;
-      } else if (err.code === 'PGRST116') {
-        errorMessage = "Failed to save profile. Please check all required fields are filled.";
-      } else if (err.code === 'permission_denied') {
+      } else if (err.code === "PGRST116") {
+        errorMessage =
+          "Failed to save profile. Please check all required fields are filled.";
+      } else if (err.code === "permission_denied") {
         errorMessage = "You don't have permission to update this profile.";
       }
-      
+
       console.error("Showing error to user:", errorMessage);
       toast.error(errorMessage);
       return false;
