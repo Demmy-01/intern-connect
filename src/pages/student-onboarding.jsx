@@ -10,7 +10,7 @@ const OnboardingPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(0);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
   const [hasExperience, setHasExperience] = useState(true);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -38,24 +38,19 @@ const OnboardingPage = () => {
     coursework: "",
   });
 
-  const confirmationMessages = {
-    1: "What a lovely name!",
-    2: "Perfect! We'll keep in touch!",
-    3: "Tell us more about yourself!",
-    4: "Impressive skills!",
-    5: hasExperience
-      ? "Wonderful experience!"
-      : "That's okay! Everyone starts somewhere!",
-    6: "Excellent educational background!",
-    7: "You look amazing!",
+  const handleNext = (stepNum = step) => {
+    setShowValidation(true);
+    setTimeout(() => {
+      setShowValidation(false);
+      setStep(stepNum + 1);
+    }, 1500);
   };
 
-  const handleNext = (stepNum = step) => {
-    setShowConfirmation(true);
-    setTimeout(() => {
-      setShowConfirmation(false);
-      setStep(stepNum + 1);
-    }, 2000);
+  const handleBack = () => {
+    setShowValidation(false);
+    if (step > 1) {
+      setStep(step - 1);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -82,7 +77,11 @@ const OnboardingPage = () => {
       endDate: "",
       description: "",
     });
-    handleNext();
+    setShowValidation(true);
+    setTimeout(() => {
+      setShowValidation(false);
+      setStep(step + 1);
+    }, 1500);
   };
 
   const handleAddEducation = () => {
@@ -97,11 +96,19 @@ const OnboardingPage = () => {
       endDate: "",
       coursework: "",
     });
-    handleNext();
+    setShowValidation(true);
+    setTimeout(() => {
+      setShowValidation(false);
+      setStep(step + 1);
+    }, 1500);
   };
 
   const handleNoExperience = () => {
-    handleNext();
+    setShowValidation(true);
+    setTimeout(() => {
+      setShowValidation(false);
+      setStep(step + 1);
+    }, 1500);
   };
 
   const handleFileChange = (e) => {
@@ -451,7 +458,7 @@ const OnboardingPage = () => {
       justify-content: center;
     }
 
-    .next-button, .start-button, .no-exp-button {
+    .next-button, .start-button, .no-exp-button, .back-button {
       background-color: blue;
       color: white;
           padding: 8px 17px;
@@ -462,11 +469,15 @@ const OnboardingPage = () => {
           font-size: 15px;
     }
 
+    .back-button {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    }
+
     .no-exp-button {
       background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
     }
 
-    .next-button:hover:not(:disabled), .start-button:hover, .no-exp-button:hover {
+    .next-button:hover:not(:disabled), .start-button:hover, .no-exp-button:hover, .back-button:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
     }
@@ -477,18 +488,41 @@ const OnboardingPage = () => {
   opacity: 0.6;
     }
 
-    .confirmation-message {
+    .validation-message {
       background: white;
       padding: 40px 50px;
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       text-align: center;
+      max-width: 300px;
     }
 
-    .confirmation-message p {
-      font-size: 32px;
-      color: #667eea;
+    .checkmark {
+      font-size: 80px;
+      color: #22c55e;
+      font-weight: bold;
+      margin-bottom: 15px;
+      animation: checkMarkPulse 1.5s ease-in-out;
+    }
+
+    .validation-message p {
+      font-size: 20px;
+      color: #22c55e;
       font-weight: 600;
+    }
+
+    @keyframes checkMarkPulse {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
     .file-input {
@@ -627,13 +661,14 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {showConfirmation && (
-        <div className="confirmation-message float-in">
-          <p>{confirmationMessages[step]}</p>
+      {showValidation && (
+        <div className="validation-message float-in">
+          <div className="checkmark">✓</div>
+          <p>Valid! Proceeding...</p>
         </div>
       )}
 
-      {!showConfirmation && step === 1 && (
+      {!showValidation && step === 1 && (
         <div className="form-step float-in">
           <h2>What's your full name?</h2>
           <input
@@ -643,17 +678,19 @@ const OnboardingPage = () => {
             onChange={(e) => handleInputChange("fullName", e.target.value)}
             className="input-field"
           />
-          <button
-            onClick={() => handleNext()}
-            disabled={!formData.fullName}
-            className="next-button"
-          >
-            Next
-          </button>
+          <div className="button-group">
+            <button
+              onClick={() => handleNext()}
+              disabled={!formData.fullName}
+              className="next-button"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
-      {!showConfirmation && step === 2 && (
+      {!showValidation && step === 2 && (
         <div className="form-step float-in">
           <h2>What's your phone number?</h2>
           <input
@@ -663,17 +700,22 @@ const OnboardingPage = () => {
             onChange={(e) => handleInputChange("phone", e.target.value)}
             className="input-field"
           />
-          <button
-            onClick={() => handleNext()}
-            disabled={!formData.phone}
-            className="next-button"
-          >
-            Next
-          </button>
+          <div className="button-group">
+            <button onClick={handleBack} className="back-button">
+              Back
+            </button>
+            <button
+              onClick={() => handleNext()}
+              disabled={!formData.phone}
+              className="next-button"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
-      {!showConfirmation && step === 3 && (
+      {!showValidation && step === 3 && (
         <div className="form-step float-in">
           <h2>Tell us about yourself</h2>
           <textarea
@@ -683,17 +725,22 @@ const OnboardingPage = () => {
             className="textarea-field"
             rows="4"
           />
-          <button
-            onClick={() => handleNext()}
-            disabled={!formData.bio}
-            className="next-button"
-          >
-            Next
-          </button>
+          <div className="button-group">
+            <button onClick={handleBack} className="back-button">
+              Back
+            </button>
+            <button
+              onClick={() => handleNext()}
+              disabled={!formData.bio}
+              className="next-button"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
-      {!showConfirmation && step === 4 && (
+      {!showValidation && step === 4 && (
         <div className="form-step float-in">
           <h2>What are your skills?</h2>
           <textarea
@@ -703,17 +750,22 @@ const OnboardingPage = () => {
             className="textarea-field"
             rows="4"
           />
-          <button
-            onClick={() => handleNext()}
-            disabled={!formData.skills}
-            className="next-button"
-          >
-            Next
-          </button>
+          <div className="button-group">
+            <button onClick={handleBack} className="back-button">
+              Back
+            </button>
+            <button
+              onClick={() => handleNext()}
+              disabled={!formData.skills}
+              className="next-button"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
-      {!showConfirmation && step === 5 && (
+      {!showValidation && step === 5 && (
         <div className="form-step float-in">
           <h2>Add your experience</h2>
           <div className="two-column">
@@ -800,6 +852,9 @@ const OnboardingPage = () => {
             />
           </div>
           <div className="button-group">
+            <button onClick={handleBack} className="back-button">
+              Back
+            </button>
             <button
               onClick={handleAddExperience}
               disabled={
@@ -819,7 +874,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showConfirmation && step === 6 && (
+      {!showValidation && step === 6 && (
         <div className="form-step float-in">
           <h2>Add your education</h2>
           <div className="two-column">
@@ -905,22 +960,27 @@ const OnboardingPage = () => {
               rows="4"
             />
           </div>
-          <button
-            onClick={handleAddEducation}
-            disabled={
-              !currentEducation.institution ||
-              !currentEducation.degree ||
-              !currentEducation.startDate ||
-              !currentEducation.endDate
-            }
-            className="next-button"
-          >
-            Next
-          </button>
+          <div className="button-group">
+            <button onClick={handleBack} className="back-button">
+              Back
+            </button>
+            <button
+              onClick={handleAddEducation}
+              disabled={
+                !currentEducation.institution ||
+                !currentEducation.degree ||
+                !currentEducation.startDate ||
+                !currentEducation.endDate
+              }
+              className="next-button"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
-      {!showConfirmation && step === 7 && (
+      {!showValidation && step === 7 && (
         <div className="form-step float-in">
           <h2>Upload your profile picture</h2>
           {formData.profilePicture && (
@@ -938,13 +998,18 @@ const OnboardingPage = () => {
           <label htmlFor="file-upload" className="file-label">
             Choose Image
           </label>
-          <button
-            onClick={() => handleNext()}
-            disabled={!formData.profilePicture || saving}
-            className="next-button"
-          >
-            {saving ? "Saving..." : "Complete"}
-          </button>
+          <div className="button-group">
+            <button onClick={handleBack} className="back-button">
+              Back
+            </button>
+            <button
+              onClick={() => handleNext()}
+              disabled={!formData.profilePicture || saving}
+              className="next-button"
+            >
+              {saving ? "Saving..." : "Complete"}
+            </button>
+          </div>
         </div>
       )}
 
