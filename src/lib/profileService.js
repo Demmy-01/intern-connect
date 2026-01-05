@@ -227,6 +227,7 @@ class ProfileService {
 
       // Update experiences
       console.log('ProfileService: Updating experiences...');
+      console.log('ProfileService: Experiences data:', profileData.experiences);
       const { error: deleteExperiencesError } = await supabase
         .from('experiences')
         .delete()
@@ -237,18 +238,29 @@ class ProfileService {
       }
 
       if (profileData.experiences && profileData.experiences.length > 0) {
-        const validExperiences = profileData.experiences.filter(exp => 
-          exp.title && exp.title.trim() && exp.company && exp.company.trim()
-        );
+        console.log('ProfileService: Processing', profileData.experiences.length, 'experiences');
+        const validExperiences = profileData.experiences.filter(exp => {
+          const isValid = exp.title && exp.title.trim() && exp.company && exp.company.trim();
+          if (!isValid) {
+            console.warn('ProfileService: Skipping invalid experience:', exp);
+          }
+          return isValid;
+        });
+
+        console.log('ProfileService: Valid experiences count:', validExperiences.length);
 
         if (validExperiences.length > 0) {
-          const experiencesToInsert = validExperiences.map(exp => ({
-            student_id: userId,
-            title: exp.title,
-            company: exp.company,
-            duration: exp.duration,
-            description: exp.description
-          }));
+          const experiencesToInsert = validExperiences.map(exp => {
+            const experienceRecord = {
+              student_id: userId,
+              title: exp.title,
+              company: exp.company,
+              duration: exp.duration || '',
+              description: exp.description || ''
+            };
+            console.log('ProfileService: Inserting experience:', experienceRecord);
+            return experienceRecord;
+          });
 
           const { error: experiencesError } = await supabase
             .from('experiences')
@@ -256,8 +268,12 @@ class ProfileService {
 
           if (experiencesError) {
             console.error('ProfileService: Experiences insert error:', experiencesError);
-            throw experiencesError;
+            console.error('ProfileService: Failed to insert experiences:', experiencesToInsert);
+            throw new Error(`Failed to save experiences: ${experiencesError.message}`);
           }
+          console.log('ProfileService: Experiences saved successfully');
+        } else {
+          console.log('ProfileService: No valid experiences to save');
         }
       }
 
