@@ -12,7 +12,7 @@ import {
   Mail,
   Trash2,
 } from "lucide-react";
-import { supabase, supabaseAdmin } from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import internshipService from "../lib/internshipService.js";
 
 // Reusable StatCard Component
@@ -754,23 +754,14 @@ const AdminDashboard = () => {
         return { data: [], error: null };
       }
 
-      const { data: authData, error: authError } =
-        await supabaseAdmin.auth.admin.listUsers();
-
-      if (authError) {
-        console.error("Error fetching auth users:", authError);
-      }
-
-      const usersWithEmail = profilesData.map((user) => {
-        const authUser = authData?.users?.find((au) => au.id === user.id);
-
-        return {
-          ...user,
-          email: authUser?.email || "N/A",
-          is_active: authUser ? (authUser.banned_until ? false : true) : true,
-          banned_until: authUser?.banned_until,
-        };
-      });
+      // SECURITY: In production, admin operations should go to a backend API
+      // Client cannot access auth.admin APIs securely
+      // For now, we'll use data from profiles table which should have email
+      const usersWithEmail = profilesData.map((user) => ({
+        ...user,
+        email: user.email || "N/A",
+        is_active: true,
+      }));
 
       return { data: usersWithEmail, error: null };
     } catch (error) {

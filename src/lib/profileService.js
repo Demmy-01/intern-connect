@@ -113,6 +113,12 @@ class ProfileService {
 
       console.log('ProfileService: Starting update for user:', userId);
 
+      // SECURITY: Prevent user_type modification - user_type is immutable after creation
+      if (profileData.user_type) {
+        console.error('SECURITY VIOLATION: Attempt to modify user_type detected!');
+        throw new Error('User type cannot be changed after account creation');
+      }
+
       // Validate username if changed
       if (profileData.username) {
         const { data: existingUser, error: usernameError } = await supabase
@@ -131,7 +137,7 @@ class ProfileService {
         }
       }
 
-      // Update profiles table
+      // Update profiles table - NEVER include user_type (immutable field)
       console.log('ProfileService: Updating profiles...');
       const { error: profileError } = await supabase
         .from('profiles')
@@ -140,6 +146,7 @@ class ProfileService {
           username: profileData.username,
           phone: profileData.phone,
           avatar_url: profileData.profileImage || null,
+          // NOTE: user_type is intentionally NOT updated - it is immutable
         })
         .eq('id', userId);
 

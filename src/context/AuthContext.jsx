@@ -34,6 +34,24 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
+        // SECURITY: Session isolation - detect user type mismatch
+        if (userType && userType !== profile.user_type) {
+          console.warn(
+            "SECURITY: Detected user type mismatch! Current:",
+            userType,
+            "New:",
+            profile.user_type
+          );
+          // Log out the previous session - cannot have two different user types active
+          await supabase.auth.signOut();
+          alert(
+            "Security: You cannot have multiple account types logged in simultaneously. Previous session has been cleared. Please log in again."
+          );
+          setUser(null);
+          setUserType(null);
+          return;
+        }
+
         setUserType(profile.user_type);
         console.log("AuthContext: User type set to", profile.user_type);
       } catch (error) {
@@ -71,7 +89,9 @@ export const AuthProvider = ({ children }) => {
           if (!mounted) return;
           setIsLoading(false);
           initDoneRef.current = true; // mark initial fetch done
-          console.log("AuthContext: isLoading set to false after initial fetch.");
+          console.log(
+            "AuthContext: isLoading set to false after initial fetch."
+          );
         }
       })
       .catch((error) => {
