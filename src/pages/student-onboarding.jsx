@@ -4,9 +4,11 @@ import logo from "../assets/logo_blue.png";
 import { supabase } from "../lib/supabase";
 import profileService from "../lib/profileService";
 import { toast } from "../components/ui/sonner";
+import { useAuth } from "../context/AuthContext";
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(0);
@@ -125,13 +127,17 @@ const OnboardingPage = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        // If auth is still loading, wait for it
+        if (authLoading) {
+          return;
+        }
+
+        // Check if user is authenticated via AuthContext
         if (!user) {
           navigate("/login");
           return;
         }
+
         setCurrentUser(user);
 
         // Check if user already completed onboarding
@@ -146,12 +152,15 @@ const OnboardingPage = () => {
         }
       } catch (err) {
         console.error("Error checking user:", err);
-        navigate("/login");
+        // Only navigate to login if we're sure auth is done
+        if (!authLoading) {
+          navigate("/login");
+        }
       }
     };
 
     checkUser();
-  }, [navigate]);
+  }, [navigate, user, authLoading]);
 
   const saveOnboardingData = async () => {
     if (!currentUser) return false;
@@ -647,28 +656,36 @@ const OnboardingPage = () => {
 
   return (
     <div className="onboarding-container">
-      {step === 0 && (
-        <div className="welcome-screen float-in">
-          <div className="logo">
-            <img
-              src={logo}
-              alt="InternConnect Logo"
-              width={"58px"}
-              height={"58px"}
-            />
-          </div>
-          <h1 className="welcome-text">Welcome to InternConnect</h1>
+      {authLoading ? (
+        <div className="form-step" style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "48px", marginBottom: "20px" }}>⏳</div>
+          <h2>Loading...</h2>
+          <p>Verifying your authentication...</p>
         </div>
+      ) : (
+        step === 0 && (
+          <div className="welcome-screen float-in">
+            <div className="logo">
+              <img
+                src={logo}
+                alt="InternConnect Logo"
+                width={"58px"}
+                height={"58px"}
+              />
+            </div>
+            <h1 className="welcome-text">Welcome to InternConnect</h1>
+          </div>
+        )
       )}
 
-      {showValidation && (
+      {!authLoading && showValidation && (
         <div className="validation-message float-in">
           <div className="checkmark">✓</div>
           <p>Valid! Proceeding...</p>
         </div>
       )}
 
-      {!showValidation && step === 1 && (
+      {!authLoading && !showValidation && step === 1 && (
         <div className="form-step float-in">
           <h2>What's your full name?</h2>
           <input
@@ -690,7 +707,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showValidation && step === 2 && (
+      {!authLoading && !showValidation && step === 2 && (
         <div className="form-step float-in">
           <h2>What's your phone number?</h2>
           <input
@@ -715,7 +732,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showValidation && step === 3 && (
+      {!authLoading && !showValidation && step === 3 && (
         <div className="form-step float-in">
           <h2>Tell us about yourself</h2>
           <textarea
@@ -740,7 +757,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showValidation && step === 4 && (
+      {!authLoading && !showValidation && step === 4 && (
         <div className="form-step float-in">
           <h2>What are your skills?</h2>
           <textarea
@@ -765,7 +782,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showValidation && step === 5 && (
+      {!authLoading && !showValidation && step === 5 && (
         <div className="form-step float-in">
           <h2>Add your experience</h2>
           <div className="two-column">
@@ -874,7 +891,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showValidation && step === 6 && (
+      {!authLoading && !showValidation && step === 6 && (
         <div className="form-step float-in">
           <h2>Add your education</h2>
           <div className="two-column">
@@ -980,7 +997,7 @@ const OnboardingPage = () => {
         </div>
       )}
 
-      {!showValidation && step === 7 && (
+      {!authLoading && !showValidation && step === 7 && (
         <div className="form-step float-in">
           <h2>Upload your profile picture</h2>
           {formData.profilePicture && (

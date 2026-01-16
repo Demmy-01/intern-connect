@@ -162,18 +162,16 @@ const Navbar = ({ textColor }) => {
                 </>
               ) : (
                 <>
-                  <button
+                  <Button
+                    label="Login"
                     onClick={() => setShowLoginModal(true)}
                     className="nav-button-link"
-                  >
-                    <Button label="Login" />
-                  </button>
-                  <button
+                  />
+                  <Buttons
+                    label="Sign up"
                     onClick={() => setShowSignupModal(true)}
                     className="nav-button-link"
-                  >
-                    <Buttons label="Sign up" />
-                  </button>
+                  />
                 </>
               )}
             </div>

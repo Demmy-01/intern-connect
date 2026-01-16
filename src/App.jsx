@@ -67,14 +67,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
           <Route path="/welcome" element={<OnboardingPage />} />
-          <Route
-            path="/student-onboarding"
-            element={
-              <StudentProtectedRoute>
-                <OnboardingPage />
-              </StudentProtectedRoute>
-            }
-          />
+          <Route path="/student-onboarding" element={<OnboardingPage />} />
           <Route path="/cv-generator" element={<CVGenerator />} />
           <Route
             path="/internship-opportunities"

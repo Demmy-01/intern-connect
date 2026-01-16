@@ -24,11 +24,24 @@ export const AuthProvider = ({ children }) => {
       try {
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("*")
+          .select("id, user_type, username, display_name, email")
           .eq("id", sessionUser.id)
           .single();
 
         if (error) {
+          // Handle recursive policy error gracefully
+          if (error.message && error.message.includes("infinite recursion")) {
+            console.warn(
+              "AuthContext: RLS policy recursion error - setting default user type"
+            );
+            // Set a default user type based on metadata if available
+            if (sessionUser.user_metadata?.user_type) {
+              setUserType(sessionUser.user_metadata.user_type);
+            } else {
+              setUserType("student"); // Default to student
+            }
+            return;
+          }
           console.error("AuthContext: Error fetching profile:", error);
           setUserType(null);
           return;
