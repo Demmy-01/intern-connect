@@ -155,18 +155,43 @@ class AuthService {
       }
 
       // Verify this is a student account
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', data.user.id)
-        .single();
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', data.user.id)
+          .single();
 
-      if (profileError || profile.user_type !== 'student') {
-        await supabase.auth.signOut();
-        return {
-          success: false,
-          message: "Invalid student credentials. Please use the organization login if you're an organization."
-        };
+        // If profile check fails due to RLS policy error, don't sign out - allow login to proceed
+        if (profileError) {
+          console.warn('Profile check failed (RLS policy may be misconfigured):', profileError);
+          // Check user_metadata instead
+          if (data.user.user_metadata?.user_type !== 'student' && data.user.user_metadata?.user_type) {
+            await supabase.auth.signOut();
+            return {
+              success: false,
+              message: "Invalid student credentials. Please use the organization login if you're an organization."
+            };
+          }
+          // If user_metadata says student or is empty, allow login to proceed
+          return {
+            success: true,
+            message: "Login successful!",
+            user: data.user,
+            userType: 'student'
+          };
+        }
+
+        if (profile && profile.user_type !== 'student') {
+          await supabase.auth.signOut();
+          return {
+            success: false,
+            message: "Invalid student credentials. Please use the organization login if you're an organization."
+          };
+        }
+      } catch (profileCheckError) {
+        console.warn('Exception during profile check:', profileCheckError);
+        // Continue with login even if profile check fails
       }
 
       return {

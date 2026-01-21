@@ -68,13 +68,11 @@ const Dashboard = () => {
         upcomingEvents: eventsResult.data || [],
       });
 
-      if (
-        statsResult.error ||
-        applicationsResult.error ||
-        recommendedResult.error ||
-        eventsResult.error
-      ) {
-        setError("Some data could not be loaded");
+      // Only set error if critical data failed to load
+      if (statsResult.error || applicationsResult.error) {
+        setError("Could not load some application data");
+      } else {
+        setError(null);
       }
     } catch (err) {
       console.error("Dashboard loading error:", err);

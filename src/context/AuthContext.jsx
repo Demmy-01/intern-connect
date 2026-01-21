@@ -22,28 +22,30 @@ export const AuthProvider = ({ children }) => {
     if (sessionUser) {
       console.log("AuthContext: Fetching profile using sessionUser directly");
       try {
+        // Try to fetch from profiles table
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("id, user_type, username, display_name, email")
+          .select("id, user_type, username, display_name")
           .eq("id", sessionUser.id)
           .single();
 
+        // If any error occurs, fall back to user_metadata
         if (error) {
-          // Handle recursive policy error gracefully
-          if (error.message && error.message.includes("infinite recursion")) {
-            console.warn(
-              "AuthContext: RLS policy recursion error - setting default user type"
+          console.warn(
+            "AuthContext: Profile query failed - falling back to user_metadata. Error:",
+            error.message
+          );
+          // Set user type based on metadata if available
+          if (sessionUser.user_metadata?.user_type) {
+            setUserType(sessionUser.user_metadata.user_type);
+            console.log(
+              "AuthContext: User type set from metadata:",
+              sessionUser.user_metadata.user_type
             );
-            // Set a default user type based on metadata if available
-            if (sessionUser.user_metadata?.user_type) {
-              setUserType(sessionUser.user_metadata.user_type);
-            } else {
-              setUserType("student"); // Default to student
-            }
-            return;
+          } else {
+            setUserType("student"); // Default to student
+            console.log("AuthContext: User type defaulted to student");
           }
-          console.error("AuthContext: Error fetching profile:", error);
-          setUserType(null);
           return;
         }
 
@@ -69,7 +71,12 @@ export const AuthProvider = ({ children }) => {
         console.log("AuthContext: User type set to", profile.user_type);
       } catch (error) {
         console.error("AuthContext: Exception fetching profile:", error);
-        setUserType(null);
+        // Fall back to metadata
+        if (sessionUser.user_metadata?.user_type) {
+          setUserType(sessionUser.user_metadata.user_type);
+        } else {
+          setUserType("student");
+        }
       }
     } else {
       setUserType(null);

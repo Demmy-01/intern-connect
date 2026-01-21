@@ -209,7 +209,12 @@ class SecurityService {
       };
       
       // Log to security_logs table (if it exists)
-      await supabase.from('security_logs').insert(logEntry);
+      try {
+        await supabase.from('security_logs').insert(logEntry);
+      } catch (logError) {
+        // Silently fail if security_logs table doesn't exist
+        console.debug('Security log failed (table may not exist):', logError.message);
+      }
     } catch (error) {
       console.error('Failed to log security event:', error);
     }

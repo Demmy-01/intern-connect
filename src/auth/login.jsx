@@ -47,12 +47,14 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Login form submitted");
     setLoading(true);
     setError("");
     setSuccess("");
 
     // Validate email and password
     if (!formData.email || !formData.password) {
+      console.log("Validation error: missing email or password");
       setError("Please fill in all fields");
       setLoading(false);
       return;
@@ -60,6 +62,7 @@ const Login = () => {
 
     // Check email format
     if (!securityService.validateEmail(formData.email)) {
+      console.log("Validation error: invalid email format");
       setError("Invalid email format");
       setLoading(false);
       return;
@@ -68,18 +71,23 @@ const Login = () => {
     // Check rate limiting (max 5 attempts per 15 minutes)
     const rateLimit = securityService.checkLoginAttempt(formData.email);
     if (!rateLimit.allowed) {
+      console.log("Rate limit error:", rateLimit.message);
       setError(rateLimit.message);
       setLoading(false);
       return;
     }
 
     try {
+      console.log("Attempting to sign in with email:", formData.email);
       const result = await authService.signInStudent(
         formData.email,
         formData.password
       );
 
+      console.log("Sign in result:", result);
+
       if (result.success) {
+        console.log("Login successful");
         // Log successful login
         await securityService.logAuthAttempt(formData.email, true);
         setSuccess(result.message);
@@ -89,25 +97,33 @@ const Login = () => {
           data: { user },
         } = await supabase.auth.getUser();
         if (user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("has_completed_onboarding")
-            .eq("id", user.id)
-            .single();
+          try {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id, user_type, has_completed_onboarding")
+              .eq("id", user.id)
+              .single();
 
-          // If onboarding not completed, redirect to onboarding page
-          if (!profile?.has_completed_onboarding) {
-            try {
-              toast.success(result.message || "Logged in successfully");
-            } catch (e) {}
-            setTimeout(() => {
-              navigate("/student-onboarding");
-            }, 1500);
-            return;
+            // If onboarding not completed, redirect to onboarding page
+            if (!profile?.has_completed_onboarding) {
+              console.log("Redirecting to onboarding");
+              try {
+                toast.success(result.message || "Logged in successfully");
+              } catch (e) {}
+              setTimeout(() => {
+                navigate("/student-onboarding");
+              }, 1500);
+              setLoading(false);
+              return;
+            }
+          } catch (profileError) {
+            console.error("Error checking onboarding status:", profileError);
+            // Continue anyway if profile check fails
           }
         }
 
         // show success toast
+        console.log("Redirecting to dashboard");
         try {
           toast.success(result.message || "Logged in successfully");
         } catch (e) {
@@ -117,6 +133,7 @@ const Login = () => {
           navigate("/dashboard");
         }, 1500);
       } else {
+        console.log("Login failed:", result.message);
         // Log failed login
         await securityService.logAuthAttempt(
           formData.email,
@@ -131,6 +148,7 @@ const Login = () => {
         }
       }
     } catch (error) {
+      console.error("Login error:", error);
       await securityService.logAuthAttempt(
         formData.email,
         false,
