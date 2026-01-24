@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import authService from "../lib/authService";
 import { Button } from "../components/button";
+import InputField from "../components/InputField";
 import "../style/organization-login.css";
 import logo from "../assets/logo_blue.png";
 import { toast } from "../components/ui/sonner";
@@ -90,9 +91,11 @@ const OrganizationLogin = () => {
         </p>
 
         <form className="org-login-form" onSubmit={handleSubmit}>
-          <input
+          <InputField
             type="email"
             placeholder="Organization email address"
+            icon="mail"
+            name="email"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -100,12 +103,12 @@ const OrganizationLogin = () => {
               setSuccess("");
             }}
             disabled={isLoading}
-            required
-            className="org-input-field"
           />
-          <input
+          <InputField
             type="password"
             placeholder="Password"
+            icon="lock"
+            name="password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -113,8 +116,6 @@ const OrganizationLogin = () => {
               setSuccess("");
             }}
             disabled={isLoading}
-            required
-            className="org-input-field"
           />
 
           <Button
