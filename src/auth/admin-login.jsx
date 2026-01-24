@@ -1,22 +1,23 @@
 // admin-login.jsx
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import InputField from "../components/InputField";
+import { Lock, ArrowRight } from "lucide-react";
 import "../style/login.css";
 import logo from "../assets/logo_blue.png";
 import authService from "../lib/authService";
 import { toast } from "../components/ui/sonner";
+
 const currentYear = new Date().getFullYear();
 
+// This is the hidden email we will authenticate against
+// You must ensure this user exists in your Supabase Auth
+const ADMIN_EMAIL = "admin@d-internconnect.com";
+
 const AdminLogin = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [accessCode, setAccessCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
+  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,81 +33,45 @@ const AdminLogin = () => {
         console.error("Error checking admin auth:", error);
       }
     };
-
     checkAdminAuth();
-
-    // Check for messages from email verification or other sources
-    const state = location.state;
-    if (state?.message) {
-      setSuccess(state.message);
-      if (state?.email) {
-        setFormData((prev) => ({ ...prev, email: state.email }));
-      }
-      // Clear the state
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state, navigate]);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setError("");
-    setSuccess("");
-  };
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
 
-    if (!formData.email || !formData.password) {
-      setError("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError("Please enter a valid email address");
+    if (!accessCode) {
+      setError("Please enter the access code");
       setLoading(false);
       return;
     }
 
     try {
+      // We use the access code AS the password
       const result = await authService.signInAdmin(
-        formData.email,
-        formData.password
+        ADMIN_EMAIL,
+        accessCode
       );
 
       if (result.success) {
-        setSuccess(result.message);
+        toast.success("Access Granted");
+        sessionStorage.setItem('admin_access_verified', 'true');
         
         // Log successful login
-        console.log("Admin logged in:", {
-          userId: result.user.id,
-          role: result.adminProfile?.role,
-          timestamp: new Date().toISOString()
-        });
+        console.log("Admin logged in via access code");
 
         // Redirect to admin dashboard
         setTimeout(() => {
-          navigate("/admin-dashboard", {
-            state: {
-              adminProfile: result.adminProfile,
-              message: "Welcome back!"
-            }
-          });
-        }, 1500);
+          navigate("/admin-dashboard");
+        }, 1000);
       } else {
-        setError(result.message);
+        // Generic error message for security
+        setError("Invalid Access Code");
       }
     } catch (error) {
       console.error("Admin login error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      setError("Invalid Access Code");
     }
     setLoading(false);
   };
@@ -124,75 +89,97 @@ const AdminLogin = () => {
         <p>Intern Connect</p>
       </div>
       <div className="login-page">
-        <div className="login-container">
-          <div style={{ textAlign: "center", marginBottom: "20px" }}>
-            <h2 className="form-title">Admin Login</h2>
-            <p style={{ 
-              color: "#6b7280", 
-              fontSize: "14px", 
-              marginTop: "8px" 
+        <div className="login-container" style={{ maxWidth: "400px" }}>
+          <div style={{ textAlign: "center", marginBottom: "30px" }}>
+            <div style={{
+              background: "rgba(42, 82, 152, 0.1)",
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px auto"
             }}>
-              Access the administrative dashboard
+              <Lock size={30} color="#2a5298" />
+            </div>
+            <h2 className="form-title" style={{ fontSize: "24px", marginBottom: "10px" }}>
+              Admin Access
+            </h2>
+            <p style={{ color: "#6b7280", fontSize: "14px" }}>
+              Enter your access code to manage the platform
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
+            <div className="input-wrapper" style={{ padding: "8px 16px" }}>
+              <input
+                type="password"
+                placeholder="Enter Access Code"
+                value={accessCode}
+                onChange={(e) => {
+                  setAccessCode(e.target.value);
+                  setError("");
+                }}
+                disabled={loading}
+                required
+                style={{
+                  fontSize: "18px",
+                  textAlign: "center",
+                  letterSpacing: "4px",
+                  fontFamily: "monospace",
+                  width: "100%"
+                }}
+                autoFocus
+              />
+            </div>
 
-            <InputField
-              type="email"
-              placeholder="Admin email address"
-              icon="mail"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
-            <InputField
-              type="password"
-              placeholder="Password"
-              icon="lock"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
-
-            <Link to="/forgot-password" className="forgot-pass-link">
-              Forgot password?
-            </Link>
+            {error && (
+              <div style={{
+                color: "#dc2626",
+                fontSize: "14px",
+                textAlign: "center",
+                background: "#fee2e2",
+                padding: "10px",
+                borderRadius: "8px"
+              }}>
+                {error}
+              </div>
+            )}
 
             <button 
               type="submit" 
               className="login-button" 
               disabled={loading}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px"
+              }}
             >
-              {loading ? "Logging in..." : "Login to Dashboard"}
+              {loading ? "Verifying..." : "Access Dashboard"}
+              {!loading && <ArrowRight size={18} />}
             </button>
           </form>
 
-          <div 
-            className="login-links" 
-            style={{ 
-              textAlign: "center", 
-              marginTop: "20px",
-              paddingTop: "20px",
-              borderTop: "1px solid #e5e7eb"
-            }}
-          >
-            <p className="signup-text" style={{ fontSize: "14px" }}>
-              Back to <Link to="/">Home Page</Link>
-            </p>
+          <div style={{ textAlign: "center", marginTop: "30px" }}>
+            <Link 
+              to="/" 
+              style={{ 
+                color: "#6b7280", 
+                textDecoration: "none", 
+                fontSize: "14px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px"
+              }}
+            >
+              ← Back to Home
+            </Link>
           </div>
         </div>
       </div>
-
-      <center>
-        <p style={{ color: "#6b7280", fontSize: "14px" }}>
-          © {currentYear} Intern Connect - Admin Portal
-        </p>
-      </center>
     </div>
   );
 };

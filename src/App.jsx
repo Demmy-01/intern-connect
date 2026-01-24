@@ -6,6 +6,7 @@ import {
   OrganizationProtectedRoute,
   AdminProtectedRoute,
 } from "./components/ProtectedRoute";
+import { supabase } from "./lib/supabase";
 import securityService from "./lib/securityService";
 import Home from "./pages/home.jsx";
 import { About } from "./pages/about";
@@ -45,11 +46,45 @@ import Terms from "./pages/terms.jsx";
 import OnboardingPage from "./pages/student-onboarding.jsx";
 import AdminLogin from "./auth/admin-login.jsx";
 import AdminDashboard from "./admin/admin-dashboard.jsx";
+import AdminRoute from "./components/AdminRoute.jsx"; // Import AdminRoute
 
 function App() {
+  // VERY AGGRESSIVE CHECK: Run before render
+  // If we see specific Supabase recovery tokens in URL, force redirect immediately
+  if (typeof window !== "undefined" && window.location.hash) {
+    const hash = window.location.hash;
+    // Check for access_token AND type=recovery (or just typical recovery patterns)
+    if (hash.includes("type=recovery") || (hash.includes("access_token") && hash.includes("refresh_token") && document.referrer.includes("supabase"))) {
+      console.log("CRITICAL: Recovery hash detected in App.jsx - redirecting to /reset-password");
+      // Use window.location.assign to be sure
+      window.location.assign("/reset-password" + hash);
+      return null; // Stop rendering App to prevent router conflict
+    }
+  }
+
   useEffect(() => {
     // Setup auto-logout after 30 minutes of inactivity
     securityService.setupInactivityTimeout(30);
+
+    // Listen for password recovery event
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          console.log("Password recovery event detected");
+          window.location.href = "/reset-password";
+        }
+      }
+    );
+
+    // AGGRESSIVE CHECK: Check URL hash for recovery params immediately
+    if (window.location.hash && window.location.hash.includes("type=recovery")) {
+      console.log("Recovery hash detected, forcing redirect");
+      window.location.href = "/reset-password";
+    }
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   return (
@@ -214,9 +249,9 @@ function App() {
           <Route
             path="/admin-dashboard"
             element={
-              <AdminProtectedRoute>
+              <AdminRoute>
                 <AdminDashboard />
-              </AdminProtectedRoute>
+              </AdminRoute>
             }
           />
 

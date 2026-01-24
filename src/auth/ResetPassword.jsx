@@ -1,6 +1,7 @@
 // ResetPassword.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 import InputField from "../components/InputField";
 import "../style/login.css";
 import "../style/forgot-password.css";
@@ -18,15 +19,17 @@ const ResetPassword = () => {
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
-    // Check if we have the required tokens in the URL
-    const accessToken = searchParams.get("access_token");
-    const refreshToken = searchParams.get("refresh_token");
-    const type = searchParams.get("type");
-
-    if (!accessToken || !refreshToken || type !== "recovery") {
-      setError("Invalid reset link. Please request a new password reset.");
-    }
-  }, [searchParams]);
+    // Check if we have an active session (set by properties of the link)
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        // If no session, they might have refreshed or link expired
+        // Try not to error immediately, but warn if submitting fails
+        console.log("No active session found for password reset");
+      }
+    };
+    checkSession();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

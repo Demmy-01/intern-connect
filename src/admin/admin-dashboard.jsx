@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import internshipService from "../lib/internshipService.js";
+import adminActivityService from "../lib/adminActivityService.js";
 
 // Reusable StatCard Component
 const StatCard = ({ title, value, icon: Icon }) => (
@@ -1108,6 +1109,14 @@ const AdminDashboard = () => {
 
       console.log("User deleted successfully");
 
+      // Log activity
+      await adminActivityService.logActivity(
+        'delete_user',
+        'user',
+        id,
+        { reason: reason || 'Admin deletion' }
+      );
+
       // Update local state
       setUsers(users.filter((u) => u.id !== id));
 
@@ -1156,6 +1165,13 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
+      // Log activity
+      await adminActivityService.logActivity(
+        'delete_message',
+        'contact_message',
+        id
+      );
+
       setContactMessages((prev) => prev.filter((m) => m.id !== id));
       setStats((prev) => ({
         ...prev,
@@ -1190,6 +1206,13 @@ const AdminDashboard = () => {
       }
 
       console.log("Approval successful:", data);
+
+      // Log activity
+      await adminActivityService.logActivity(
+        'approve_organization',
+        'organization',
+        id
+      );
 
       setOrganizations(
         organizations.map((o) =>
@@ -1231,6 +1254,14 @@ const AdminDashboard = () => {
       }
 
       console.log("Rejection successful:", data);
+
+      // Log activity
+      await adminActivityService.logActivity(
+        'reject_organization',
+        'organization',
+        id,
+        { reason }
+      );
 
       setOrganizations(
         organizations.map((o) =>
