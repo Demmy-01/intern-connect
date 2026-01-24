@@ -1,9 +1,23 @@
-// supabase.js
 import { createClient } from '@supabase/supabase-js'
+import { validateEnvironment, isDevelopment } from './security-config.js'
+
+try {
+    validateEnvironment();
+} catch (error) {
+    console.error('❌ Supabase Configuration Error:', error.message);
+    throw error;
+}
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-// Regular client for normal operations ONLY
-// SECURITY: Never expose SERVICE_ROLE_KEY in browser - it grants admin access
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+    },
+})
+
+if (isDevelopment) {
+    console.log('✅ Supabase client initialized with publishable key');
+}
