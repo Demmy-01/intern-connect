@@ -773,23 +773,19 @@ const AdminDashboard = () => {
 
   const fetchOrganizations = async () => {
     try {
+      /* 
+         NOTE: We no longer need to fetch auth.users() separately because
+         our correct Admin RLS policies now allow us to see all profiles
+         directly, including emails if they are stored there.
+         
+         However, profiles table usually has the email.
+      */
+      
       const { data, error } = await supabase
         .from("organizations")
         .select(
           `
-          id,
-          organization_name,
-          company_name,
-          company_description,
-          industry,
-          company_size,
-          location,
-          website,
-          logo_url,
-          verification_status,
-          verification_notes,
-          total_recruited_interns,
-          created_at,
+          *,
           profiles!inner (
             username,
             display_name,
@@ -804,30 +800,16 @@ const AdminDashboard = () => {
         return { data: [], error };
       }
 
-      if (!data || data.length === 0) {
-        return { data: [], error: null };
-      }
+      // Map data to flattened structure expected by UI
+      const orgsFormatted = data.map((org) => ({
+        ...org,
+        email: org.email || org.profiles?.email || "N/A", // Prioritize org email, fall back to profile
+        username: org.profiles?.username,
+        display_name: org.profiles?.display_name,
+        phone: org.profiles?.phone || org.phone,
+      }));
 
-      const { data: authData, error: authError } =
-        await supabaseAdmin.auth.admin.listUsers();
-
-      if (authError) {
-        console.error("Error fetching auth users:", authError);
-      }
-
-      const orgsWithEmail = data.map((org) => {
-        const authUser = authData?.users?.find((au) => au.id === org.id);
-
-        return {
-          ...org,
-          email: authUser?.email || "N/A",
-          username: org.profiles?.username,
-          display_name: org.profiles?.display_name,
-          phone: org.profiles?.phone,
-        };
-      });
-
-      return { data: orgsWithEmail, error: null };
+      return { data: orgsFormatted, error: null };
     } catch (error) {
       console.error("Error in fetchOrganizations:", error);
       return { data: [], error };
@@ -911,12 +893,11 @@ const AdminDashboard = () => {
 
       try {
         if (newStatus) {
-          const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
-            id,
-            {
-              ban_duration: "none",
-            }
-          );
+          // Re-activate user (set is_active = true in profiles)
+          const { error } = await supabase
+            .from("profiles")
+            .update({ is_active: true })
+            .eq("id", id);
 
           if (error) {
             console.error("Error activating user:", error);
@@ -931,12 +912,11 @@ const AdminDashboard = () => {
             await fetchDashboardData();
           }
         } else {
-          const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
-            id,
-            {
-              ban_duration: "876000h",
-            }
-          );
+          // Suspend user (set is_active = false in profiles)
+          const { error } = await supabase
+            .from("profiles")
+            .update({ is_active: false })
+            .eq("id", id);
 
           if (error) {
             console.error("Error suspending user:", error);
@@ -1097,15 +1077,18 @@ const AdminDashboard = () => {
         throw new Error(`Failed to delete profile: ${profileError.message}`);
       }
 
-      // 7. Finally, delete from auth.users using admin client
-      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(
-        id
-      );
-
-      if (authError) {
-        console.error("Error deleting user from auth:", authError);
-        throw new Error(`Failed to delete auth user: ${authError.message}`);
-      }
+      /*
+         NOTE: We cannot delete from auth.users on the client side without
+         exposing the service role key (which is dangerous).
+         
+         Instead, we will rely on the "soft delete" or just deleting the profile.
+         If you need hard delete, you must use a Supabase Edge Function.
+         
+         For now, deleting the profile is sufficient to "remove" the user from the app.
+      */
+      
+      // 7. (Replaced) We skip auth.admin.deleteUser
+      console.log("Skipping direct auth.deleteUser (requires edge function). Profile deleted.");
 
       console.log("User deleted successfully");
 
