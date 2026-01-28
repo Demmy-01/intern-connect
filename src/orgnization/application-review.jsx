@@ -32,9 +32,8 @@ const ApplicationDetails = () => {
   const loadApplicationDetails = async () => {
     try {
       setLoading(true);
-      const { data, error } = await organizationService.getApplicationDetails(
-        applicationId
-      );
+      const { data, error } =
+        await organizationService.getApplicationDetails(applicationId);
 
       if (error) {
         setError(error);
@@ -68,7 +67,7 @@ const ApplicationDetails = () => {
         const { data, error } =
           await organizationService.updateApplicationStatus(
             applicationId,
-            status
+            status,
           );
 
         if (error) {
@@ -76,7 +75,7 @@ const ApplicationDetails = () => {
             toast.error(
               `Error ${
                 status === "accepted" ? "accepting" : "rejecting"
-              } application: ${error}`
+              } application: ${error}`,
             );
           } catch (e) {}
         } else {
@@ -84,7 +83,7 @@ const ApplicationDetails = () => {
             toast.success(
               `Application ${
                 status === "accepted" ? "accepted" : "rejected"
-              } successfully! Email notification has been sent to the applicant.`
+              } successfully! Email notification has been sent to the applicant.`,
             );
             // Dispatch a window event for updates so NotificationModal and other components can refresh
             window.dispatchEvent(
@@ -94,7 +93,7 @@ const ApplicationDetails = () => {
                   applicationId: applicationId,
                   status,
                 },
-              })
+              }),
             );
           } catch (e) {}
           setApplicationData((prev) => ({ ...prev, status }));
@@ -297,7 +296,7 @@ const ApplicationDetails = () => {
               <div className="ai-status-indicator">
                 <span
                   className={`ai-status-badge ${getScreeningBadgeClass(
-                    applicationData.screening_status
+                    applicationData.screening_status,
                   )}`}
                 >
                   {getScreeningLabel(applicationData.screening_status)}
@@ -320,7 +319,7 @@ const ApplicationDetails = () => {
                           <span key={idx} className="keyword-tag matched">
                             {keyword}
                           </span>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -338,7 +337,7 @@ const ApplicationDetails = () => {
                           <span key={idx} className="keyword-tag missing">
                             {keyword}
                           </span>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -454,13 +453,13 @@ const ApplicationDetails = () => {
                     onClick={async () => {
                       if (
                         window.confirm(
-                          "Override AI decision and move to manual review?"
+                          "Override AI decision and move to manual review?",
                         )
                       ) {
                         const { error } =
                           await organizationService.overrideAIDecision(
                             applicationId,
-                            "flagged_review"
+                            "flagged_review",
                           );
                         if (!error) {
                           try {
@@ -481,7 +480,7 @@ const ApplicationDetails = () => {
                 <small>
                   Screened on{" "}
                   {new Date(
-                    applicationData.ai_analysis.screenedAt
+                    applicationData.ai_analysis.screenedAt,
                   ).toLocaleString()}
                 </small>
               </div>
@@ -503,7 +502,7 @@ const ApplicationDetails = () => {
                   onClick={() =>
                     downloadDocument(
                       applicationData.document_url,
-                      `${profile?.display_name || "Student"}_CV.pdf`
+                      `${profile?.display_name || "Student"}_CV.pdf`,
                     )
                   }
                 >
@@ -526,7 +525,7 @@ const ApplicationDetails = () => {
                     onClick={() =>
                       downloadDocument(
                         applicationData.document_url,
-                        `${profile?.display_name || "Student"}_CV.pdf`
+                        `${profile?.display_name || "Student"}_CV.pdf`,
                       )
                     }
                   >
@@ -849,9 +848,9 @@ const ApplicationDetails = () => {
         }
 
         .back-button {
-          background: #f8fafc;
-          border: 1px solid #e5e7eb;
-          color: #64748b;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--card-border);
+          color: var(--text-secondary);
           padding: 0.5rem 1rem;
           border-radius: 6px;
           cursor: pointer;
@@ -861,8 +860,8 @@ const ApplicationDetails = () => {
         }
 
         .back-button:hover {
-          background: #e5e7eb;
-          color: #374151;
+          background: var(--bg-hover);
+          color: var(--text-primary);
         }
 
         .default-avatar {
@@ -881,23 +880,23 @@ const ApplicationDetails = () => {
         .no-documents {
           padding: 2rem;
           text-align: center;
-          color: #64748b;
-          background: #f8fafc;
+          color: var(--text-secondary);
+          background: var(--bg-tertiary);
           border-radius: 8px;
-          border: 1px solid #e5e7eb;
+          border: 1px solid var(--card-border);
         }
 
         .appl-cover-letter {
-          background: white;
+          background: var(--card-bg);
           border-radius: 12px;
           padding: 1.5rem;
-          border: 1px solid #e5e7eb;
+          border: 1px solid var(--card-border);
           margin-top: 1rem;
         }
 
         .appl-cover-letter h3 {
           margin-bottom: 1rem;
-          color: #1e293b;
+          color: var(--text-primary);
           font-size: 1.1rem;
           font-weight: 600;
         }
@@ -1035,7 +1034,7 @@ const ApplicationDetails = () => {
           border-radius: 8px;
           font-size: 0.875rem;
           font-weight: 600;
-          background: white;
+          background: var(--card-bg);
         }
 
         .ai-status-badge.shortlisted {
@@ -1204,7 +1203,7 @@ const ApplicationDetails = () => {
         }
 
         .override-btn {
-          background: white;
+          background: var(--card-bg);
           color: #dc2626;
           border: none;
           padding: 0.75rem 1.5rem;
@@ -1216,7 +1215,7 @@ const ApplicationDetails = () => {
         }
 
         .override-btn:hover {
-          background: #fef2f2;
+          background: var(--bg-hover);
           transform: translateY(-1px);
         }
 

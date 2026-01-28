@@ -53,7 +53,7 @@ body, html {
     padding: 24px;
   }
 }
-}
+
 
 .sidebar-toggle {
   display: none;
@@ -61,7 +61,7 @@ body, html {
   top: 1rem;
   left: 1rem;
   z-index: 1001;
-  background: white;
+  background: var(--card-bg);
   border: none;
   padding: 0.75rem;
   border-radius: 0.5rem;
@@ -100,7 +100,7 @@ body, html {
   top: 1rem;
   left: 1rem;
   z-index: 1001;
-  background: white;
+  background: var(--card-bg);
   border: none;
   padding: 0.75rem;
   border-radius: 0.5rem;

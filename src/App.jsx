@@ -54,8 +54,15 @@ function App() {
   if (typeof window !== "undefined" && window.location.hash) {
     const hash = window.location.hash;
     // Check for access_token AND type=recovery (or just typical recovery patterns)
-    if (hash.includes("type=recovery") || (hash.includes("access_token") && hash.includes("refresh_token") && document.referrer.includes("supabase"))) {
-      console.log("CRITICAL: Recovery hash detected in App.jsx - redirecting to /reset-password");
+    if (
+      hash.includes("type=recovery") ||
+      (hash.includes("access_token") &&
+        hash.includes("refresh_token") &&
+        document.referrer.includes("supabase"))
+    ) {
+      console.log(
+        "CRITICAL: Recovery hash detected in App.jsx - redirecting to /reset-password",
+      );
       // Use window.location.assign to be sure
       window.location.assign("/reset-password" + hash);
       return null; // Stop rendering App to prevent router conflict
@@ -63,9 +70,6 @@ function App() {
   }
 
   useEffect(() => {
-    // Setup auto-logout after 30 minutes of inactivity
-    securityService.setupInactivityTimeout(30);
-
     // Listen for password recovery event
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -73,11 +77,14 @@ function App() {
           console.log("Password recovery event detected");
           window.location.href = "/reset-password";
         }
-      }
+      },
     );
 
     // AGGRESSIVE CHECK: Check URL hash for recovery params immediately
-    if (window.location.hash && window.location.hash.includes("type=recovery")) {
+    if (
+      window.location.hash &&
+      window.location.hash.includes("type=recovery")
+    ) {
       console.log("Recovery hash detected, forcing redirect");
       window.location.href = "/reset-password";
     }

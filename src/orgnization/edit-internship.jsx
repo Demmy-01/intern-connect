@@ -67,7 +67,7 @@ const EditInternship = () => {
     try {
       const { data, error } = await internshipService.updateInternship(
         id,
-        form
+        form,
       );
       if (error) throw new Error(error);
       toast.success("Internship updated");
@@ -245,23 +245,23 @@ const EditInternship = () => {
 
         <style>{`
           .edit-internship-wrapper { padding: 28px; display: flex; justify-content: center; }
-          .edit-card { width: 100%; max-width: 980px; background: white; border-radius: 12px; box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08); padding: 24px; }
+          .edit-card { width: 100%; max-width: 980px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08); padding: 24px; }
           .edit-header { display:flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
-          .edit-title { margin: 0; font-size: 20px; color: #0f172a; }
-          .edit-sub { margin: 4px 0 0; color: #475569; }
+          .edit-title { margin: 0; font-size: 20px; color: var(--text-primary); }
+          .edit-sub { margin: 4px 0 0; color: var(--text-secondary); }
           .edit-meta { text-align: right; }
           .meta-position { font-weight: 700; color: #0b5fff; }
-          .meta-org { color:#64748b; font-size: 13px; }
+          .meta-org { color: var(--text-secondary); font-size: 13px; }
           .edit-form { display: grid; gap: 12px; }
           .form-row { display:block; }
           .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-          .form-label { display:block; font-weight:600; color:#0f172a; margin-bottom:6px; }
-          .form-input { width:100%; padding:10px 12px; border:1px solid #e6e9ee; border-radius:8px; background:#fcfcfd; }
-          .form-textarea { width:100%; padding:12px; border:1px solid #e6e9ee; border-radius:8px; background:#fcfcfd; min-height:80px; }
+          .form-label { display:block; font-weight:600; color: var(--text-primary); margin-bottom:6px; }
+          .form-input { width:100%; padding:10px 12px; border:1px solid var(--card-border); border-radius:8px; background: var(--card-bg); color: var(--text-primary); }
+          .form-textarea { width:100%; padding:12px; border:1px solid var(--card-border); border-radius:8px; background: var(--card-bg); color: var(--text-primary); min-height:80px; }
           .form-actions { display:flex; gap:12px; margin-top:6px; }
           .btn-primary { background:#0b5fff; color:white; padding:10px 16px; border-radius:8px; border:none; cursor:pointer; }
           .btn-primary:disabled { opacity:0.6; cursor:not-allowed }
-          .btn-ghost { background:transparent; border:1px solid #e6e9ee; color:#0f172a; padding:10px 16px; border-radius:8px; cursor:pointer }
+          .btn-ghost { background: var(--card-bg); border:1px solid var(--card-border); color: var(--text-primary); padding:10px 16px; border-radius:8px; cursor:pointer }
           @media (max-width:720px) { .two-col { grid-template-columns: 1fr; } .edit-meta { text-align:left; } }
         `}</style>
       </div>

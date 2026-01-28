@@ -130,7 +130,7 @@ const Applications = () => {
 
   const uniquePositions = [
     ...new Set(
-      applications.map((app) => app.internships?.position_title || "Unknown")
+      applications.map((app) => app.internships?.position_title || "Unknown"),
     ),
   ];
 
@@ -179,7 +179,7 @@ const Applications = () => {
     if (!selectedIds || selectedIds.length === 0) return;
     if (
       !window.confirm(
-        `Delete ${selectedIds.length} selected application(s)? This action cannot be undone.`
+        `Delete ${selectedIds.length} selected application(s)? This action cannot be undone.`,
       )
     )
       return;
@@ -199,14 +199,14 @@ const Applications = () => {
       const deletedCount = Array.isArray(data) ? data.length : 0;
       if (deletedCount === 0) {
         toast.error(
-          "No applications were deleted. Check permissions or selected items."
+          "No applications were deleted. Check permissions or selected items.",
         );
         return;
       }
 
       // Remove deleted items from local state for immediate UI update
       setApplications((prev) =>
-        prev.filter((a) => !selectedIds.includes(a.id))
+        prev.filter((a) => !selectedIds.includes(a.id)),
       );
       toast.success(`${deletedCount} application(s) deleted`);
       setSelectedIds([]);
@@ -462,7 +462,7 @@ const Applications = () => {
                         ) : (
                           <div className="avatar-placeholder">
                             {application.students?.profiles?.display_name?.charAt(
-                              0
+                              0,
                             ) || "U"}
                           </div>
                         )}
@@ -494,7 +494,7 @@ const Applications = () => {
                   <td className="screening-cell">
                     <span
                       className={`screening-badge ${getScreeningBadgeClass(
-                        application.screening_status
+                        application.screening_status,
                       )}`}
                     >
                       {getScreeningLabel(application.screening_status)}
@@ -506,7 +506,7 @@ const Applications = () => {
                   <td className="status-cell">
                     <span
                       className={`status-badge ${getStatusBadgeClass(
-                        application.status
+                        application.status,
                       )}`}
                     >
                       {application.status
@@ -538,10 +538,10 @@ const Applications = () => {
         }
 
         .stat-card {
-          background: white;
+          background: var(--card-bg);
           padding: 1.5rem;
           border-radius: 12px;
-          border: 2px solid #e5e7eb;
+          border: 2px solid var(--card-border);
           text-align: center;
           transition: all 0.2s;
         }
@@ -558,7 +558,7 @@ const Applications = () => {
 
         .stat-label {
           font-size: 0.875rem;
-          color: #64748b;
+          color: var(--text-secondary);
           margin-bottom: 0.5rem;
           font-weight: 500;
         }
@@ -566,7 +566,7 @@ const Applications = () => {
         .stat-value {
           font-size: 2rem;
           font-weight: 700;
-          color: #1e293b;
+          color: var(--text-primary);
         }
 
         .screening-filters {
@@ -579,7 +579,7 @@ const Applications = () => {
 
         .filter-label {
           font-weight: 600;
-          color: #475569;
+          color: var(--text-primary);
         }
 
         .screening-shortlist.active {

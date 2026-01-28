@@ -1,6 +1,6 @@
 /* Applications table styles */
 .applications-table-container {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-top: 24px;
@@ -19,13 +19,13 @@
 .applications-table td {
   padding: 16px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .applications-table th {
-  background-color: #f9fafb;
+  background-color: var(--bg-tertiary);
   font-weight: 600;
-  color: #4b5563;
+  color: var(--text-primary);
 }
 
 /* Column widths */

@@ -5,12 +5,12 @@
   margin: 0 auto;
   padding: 24px;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #fafafa;
+  background-color: var(--bg-secondary);
   min-height: 100vh;
 }
 
 .profile-main-content {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
@@ -34,24 +34,24 @@
   display: flex;
   align-items: flex-start;
   padding: 20px;
-  background: #f8fafc;
+  background: var(--bg-tertiary);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   transition: all 0.3s ease;
 }
 
 .contact-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-color: #2563eb;
+  border-color: var(--primary);
 }
 
 .contact-card-icon {
-  background: white;
+  background: var(--card-bg);
   padding: 12px;
   border-radius: 12px;
   margin-right: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
 }
 
 .contact-icon {
@@ -65,21 +65,21 @@
 }
 
 .contact-label {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 4px;
 }
 
 .contact-value {
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
 }
 
 .contact-role {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin-top: 4px;
 }
@@ -98,12 +98,12 @@
 /* Header Section */
 .profile-header {
   padding: 32px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--card-border);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 32px;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  background: var(--card-bg);
 }
 
 .profile-company-info {
@@ -120,7 +120,7 @@
   width: 80px;
   height: 80px;
   border-radius: 16px;
-  background: #2563eb;
+  background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,7 +157,7 @@
 .profile-company-name {
   font-size: 32px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.2;
 }
@@ -208,7 +208,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 16px;
   font-weight: 500;
 }
@@ -249,7 +249,7 @@
 .profile-stat-number {
   font-size: 28px;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--primary);
   line-height: 1;
   margin-bottom: 4px;
 }
@@ -257,7 +257,7 @@
 .profile-stat-label {
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 2px;
@@ -265,7 +265,7 @@
 
 .profile-stat-sublabel {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -307,7 +307,7 @@
 }
 
 .profile-about-tabs {
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--card-border);
   margin-bottom: 32px;
 }
 
@@ -316,15 +316,15 @@
   padding: 16px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #6b7280;
+  color: white;
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all 0.2s ease;
 }
 
 .profile-tab-active {
-  color: #2563eb;
-  border-bottom-color: #2563eb;
+  color: var(--primary);
+  border-bottom-color: var(--primary);
 }
 
 .profile-about-content {
@@ -334,7 +334,7 @@
 .profile-about-title {
   font-size: 24px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin: 32px 0 16px 0;
 }
 
@@ -345,7 +345,7 @@
 .profile-about-description {
   font-size: 16px;
   line-height: 1.7;
-  color: #374151;
+  color: var(--text-primary);
   margin: 0 0 24px 0;
 }
 
@@ -353,37 +353,37 @@
 .profile-website-link {
   display: inline-block;
   padding: 10px 20px;
-  background: #f8fafc;
-  color: #2563eb;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
   font-size: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--card-border);
   margin-bottom: 16px;
   margin-right: 12px;
   transition: all 0.2s ease;
 }
 
 .profile-website-link:hover {
-  background: #2563eb;
+  background: var(--primary);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Contact Information */
 .profile-contact-section {
-  background: #f8fafc;
+  background: var(--bg-tertiary);
   border-radius: 12px;
   padding: 28px;
   margin-top: 32px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--card-border);
 }
 
 .profile-contact-section .profile-about-title {
   margin-top: 0;
-  color: #2563eb;
+  color: var(--text-primary);
 }
 
 .profile-contact-details p {
@@ -397,7 +397,7 @@
 .profile-contact-details strong {
   min-width: 120px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 /* Loading and Error States */
@@ -410,7 +410,7 @@
 
 .profile-loading {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .profile-error {
@@ -423,7 +423,7 @@
 }
 
 .profile-no-data {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .profile-no-data p {

@@ -307,30 +307,6 @@ class SecurityService {
   // 6. SESSION MANAGEMENT
   // ============================================
   
-  /**
-   * Setup auto-logout on inactivity
-   */
-  setupInactivityTimeout(minutesOfInactivity = 30) {
-    const TIMEOUT_MS = minutesOfInactivity * 60 * 1000;
-    let inactivityTimer;
-    
-    const resetTimer = () => {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-      }, TIMEOUT_MS);
-    };
-    
-    // Listen for user activity
-    ['mousemove', 'keypress', 'click', 'touchstart', 'scroll'].forEach(event => {
-      document.addEventListener(event, resetTimer, { passive: true });
-    });
-    
-    // Initial timer
-    resetTimer();
-  }
-  
   // ============================================
   // 7. ENCRYPTION UTILITIES
   // ============================================
