@@ -49,14 +49,35 @@ const OrganizationLogin = () => {
       console.log("Organization login result:", result);
 
       if (result.success) {
-        const successMsg = "Login successful! Redirecting to dashboard...";
+        const successMsg = "Login successful! Redirecting...";
         setSuccess(successMsg);
         toast.success(successMsg);
 
-        // Navigate to dashboard overview
-        setTimeout(() => {
-          navigate("/dashboard-overview");
-        }, 1500);
+        // Check if organization profile exists
+        try {
+          const { default: organizationProfileService } = await import("../lib/OrganizationProfileService.js");
+          const orgData = await organizationProfileService.getOrganizationByUserId(result.user.id);
+          
+          // If no organization profile exists, it's a first login - redirect to profile edit (onboarding)
+          if (!orgData) {
+            console.log("First login detected - redirecting to profile onboarding");
+            setTimeout(() => {
+              navigate("/organization-profile-edit");
+            }, 1500);
+          } else {
+            // Organization profile exists - redirect to dashboard
+            console.log("Existing organization - redirecting to dashboard");
+            setTimeout(() => {
+              navigate("/dashboard-overview");
+            }, 1500);
+          }
+        } catch (profileCheckError) {
+          console.error("Error checking organization profile:", profileCheckError);
+          // Default to dashboard if profile check fails
+          setTimeout(() => {
+            navigate("/dashboard-overview");
+          }, 1500);
+        }
       } else {
         setError(result.message);
         toast.error(result.message || "Login failed");
