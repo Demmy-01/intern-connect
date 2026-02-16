@@ -17,6 +17,12 @@ import {
   User,
   GraduationCap,
   Briefcase,
+  Building,
+  DollarSign,
+  Clock,
+  MapPin,
+  Lightbulb,
+  ArrowUpRight,
 } from "lucide-react";
 
 const MultiStepApplyForm = () => {
@@ -85,8 +91,8 @@ const MultiStepApplyForm = () => {
         try {
           toast.error(
             `Your profile isn't complete. Please add the following: ${missingFields.join(
-              ", "
-            )}`
+              ", ",
+            )}`,
           );
         } catch (e) {}
         // Redirect to edit-profile page so users can complete their profile
@@ -126,13 +132,19 @@ const MultiStepApplyForm = () => {
   const loadInternshipDetails = async () => {
     try {
       setLoading(true);
-      const { data, error } = await studentService.getInternshipById(
-        internshipId
-      );
+      const { data, error } =
+        await studentService.getInternshipById(internshipId);
 
       if (error) {
         setError(error);
       } else {
+        console.log("Loaded internship data:", data);
+        console.log(
+          "Is external:",
+          data?.is_external,
+          "External link:",
+          data?.external_link,
+        );
         setInternshipData(data);
       }
     } catch (err) {
@@ -173,7 +185,7 @@ const MultiStepApplyForm = () => {
     if (file && file.type !== "application/pdf") {
       try {
         toast.error(
-          "Only PDF files are allowed. Please upload a valid PDF document."
+          "Only PDF files are allowed. Please upload a valid PDF document.",
         );
       } catch (e) {}
       return;
@@ -233,7 +245,7 @@ const MultiStepApplyForm = () => {
     if (formData.cvFile.type !== "application/pdf") {
       try {
         toast.error(
-          "Only PDF files are allowed. Please upload a valid PDF document."
+          "Only PDF files are allowed. Please upload a valid PDF document.",
         );
       } catch (e) {}
       return;
@@ -258,8 +270,8 @@ const MultiStepApplyForm = () => {
         try {
           toast.error(
             `Your profile isn't complete. Please update your profile before applying: ${missingFields.join(
-              ", "
-            )}`
+              ", ",
+            )}`,
           );
         } catch (e) {}
         navigate("/edit-profile");
@@ -279,7 +291,7 @@ const MultiStepApplyForm = () => {
         const uploadResult = await studentService.uploadDocument(
           formData.cvFile,
           user.id,
-          internshipId
+          internshipId,
         );
 
         if (uploadResult.data) {
@@ -318,9 +330,8 @@ const MultiStepApplyForm = () => {
         applicantEmail: formData.email,
       };
 
-      const { data, error } = await studentService.submitApplication(
-        applicationData
-      );
+      const { data, error } =
+        await studentService.submitApplication(applicationData);
       if (error) {
         throw new Error(error);
       }
@@ -336,7 +347,7 @@ const MultiStepApplyForm = () => {
                 studentId: user?.id,
                 application: data?.[0] || data,
               },
-            })
+            }),
           );
         } catch (e) {
           // ignore event dispatch errors
@@ -760,6 +771,880 @@ const MultiStepApplyForm = () => {
     );
   }
 
+  // Handle external internships
+  if (internshipData?.is_external === true && internshipData?.external_link) {
+    return (
+      <>
+        <Navbar />
+        <div className="external-page-wrapper">
+          <div className="external-page-content">
+            {/* Hero Section with gradient */}
+            <div className="external-hero-section">
+              <div className="hero-background"></div>
+              <div className="hero-inner">
+                <div className="external-logo-hero">
+                  <img
+                    src={internshipData?.organizations?.logo_url || logo}
+                    alt="company logo"
+                  />
+                </div>
+                <div className="hero-text">
+                  <h1 className="hero-title">
+                    {internshipData?.position_title}
+                  </h1>
+                  <p className="hero-company">
+                    {internshipData?.external_company_name ||
+                      internshipData?.organizations?.organization_name}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="external-content-grid">
+              {/* Left Column - Details */}
+              <div className="external-details-column">
+                {/* Quick Stats */}
+                <div className="stats-section">
+                  <div className="stat-item">
+                    <div className="stat-icon building-icon">
+                      <Building size={24} />
+                    </div>
+                    <div className="stat-content">
+                      <span className="stat-label">Work Type</span>
+                      <span className="stat-value">
+                        {internshipData?.work_type}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="stat-item">
+                    <div className="stat-icon salary-icon">
+                      <DollarSign size={24} />
+                    </div>
+                    <div className="stat-content">
+                      <span className="stat-label">Compensation</span>
+                      <span className="stat-value">
+                        {internshipData?.compensation}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="stat-item">
+                    <div className="stat-icon duration-icon">
+                      <Clock size={24} />
+                    </div>
+                    <div className="stat-content">
+                      <span className="stat-label">Duration</span>
+                      <span className="stat-value">
+                        {internshipData?.min_duration}-
+                        {internshipData?.max_duration} mo
+                      </span>
+                    </div>
+                  </div>
+
+                  {internshipData?.location && (
+                    <div className="stat-item">
+                      <div className="stat-icon location-icon">
+                        <MapPin size={24} />
+                      </div>
+                      <div className="stat-content">
+                        <span className="stat-label">Location</span>
+                        <span className="stat-value">
+                          {internshipData?.location}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* About Section */}
+                {internshipData?.description && (
+                  <div className="content-section">
+                    <h2 className="section-title">About This Opportunity</h2>
+                    <p className="section-text">
+                      {internshipData?.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Requirements Section */}
+                {internshipData?.requirements && (
+                  <div className="content-section">
+                    <h2 className="section-title">What We're Looking For</h2>
+                    <p className="section-text">
+                      {internshipData?.requirements}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column - CTA */}
+              <div className="external-cta-section">
+                <div className="cta-card">
+                  <div className="cta-badge">External Opportunity</div>
+                  <h2 className="cta-title">Ready to Apply?</h2>
+                  <p className="cta-description">
+                    Click below to visit the company's application portal and
+                    submit your application directly.
+                  </p>
+
+                  <button
+                    className="btn-apply-primary"
+                    onClick={() => {
+                      window.open(internshipData?.external_link, "_blank");
+                    }}
+                  >
+                    <span>Go to Application Portal</span>
+                    <ArrowUpRight size={20} className="arrow-icon" />
+                  </button>
+
+                  <div className="cta-footer">
+                    <p className="footer-text">Opens in a new tab</p>
+                  </div>
+                </div>
+
+                <div className="cta-info-box">
+                  <p>
+                    <Lightbulb size={20} className="info-box-icon" />{" "}
+                    <strong>Tip:</strong> Have your CV and cover letter ready
+                    before applying!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Back Button */}
+            <div className="external-footer">
+              <button
+                className="btn-back-external"
+                onClick={() => navigate("/internships")}
+              >
+                ← Back to Opportunities
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+
+        <style jsx>{`
+          /* Light Mode (Default) */
+          .external-page-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(
+              180deg,
+              #f8fafc 0%,
+              #f1f5f9 50%,
+              #e8ecf1 100%
+            );
+            padding-top: 80px;
+            padding-bottom: 100px;
+            transition: background 0.3s ease;
+          }
+
+          /* Dark Mode */
+          [data-theme="dark"] .external-page-wrapper {
+            background: linear-gradient(
+              180deg,
+              #0f172a 0%,
+              #1e293b 50%,
+              #334155 100%
+            );
+          }
+
+          .external-page-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px;
+          }
+
+          /* Hero Section */
+          .external-hero-section {
+            position: relative;
+            margin-bottom: 4rem;
+            overflow: hidden;
+            border-radius: 24px;
+          }
+
+          .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+              135deg,
+              #1070e5 0%,
+              #0c5ec7 50%,
+              #1070e5 100%
+            );
+            opacity: 0.95;
+            transition: opacity 0.3s ease;
+          }
+
+          [data-theme="dark"] .hero-background {
+            opacity: 0.88;
+          }
+
+          .hero-inner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            padding: 3rem 2.5rem;
+            color: white;
+          }
+
+          .external-logo-hero {
+            flex-shrink: 0;
+          }
+
+          .external-logo-hero img {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+          }
+
+          .hero-text {
+            flex: 1;
+          }
+
+          .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+          }
+
+          .hero-company {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin: 0;
+            font-weight: 500;
+          }
+
+          /* Content Grid */
+          .external-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+          }
+
+          .external-details-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+          }
+
+          /* Stats Section */
+          .stats-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+          }
+
+          .stat-item {
+            background: white;
+            padding: 1.75rem;
+            border-radius: 16px;
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(229, 231, 235, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+          }
+
+          [data-theme="dark"] .stat-item {
+            background: #1e293b;
+            border-color: rgba(148, 163, 184, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          }
+
+          .stat-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1070e5, #0c5ec7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+          }
+
+          .stat-item:hover {
+            box-shadow: 0 8px 24px rgba(16, 112, 229, 0.15);
+            border-color: #1070e5;
+            transform: translateY(-4px);
+          }
+
+          [data-theme="dark"] .stat-item:hover {
+            box-shadow: 0 8px 24px rgba(16, 112, 229, 0.25);
+          }
+
+          .stat-item:hover::before {
+            opacity: 1;
+          }
+
+          .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 600;
+          }
+
+          .building-icon {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #0c63e4;
+          }
+
+          [data-theme="dark"] .building-icon {
+            background: linear-gradient(135deg, #0c4a6e, #0369a1);
+            color: #93c5fd;
+          }
+
+          .salary-icon {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            color: #16a34a;
+          }
+
+          [data-theme="dark"] .salary-icon {
+            background: linear-gradient(135deg, #14532d, #166534);
+            color: #86efac;
+          }
+
+          .duration-icon {
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+            color: #db2777;
+          }
+
+          [data-theme="dark"] .duration-icon {
+            background: linear-gradient(135deg, #500724, #831843);
+            color: #f472b6;
+          }
+
+          .location-icon {
+            background: linear-gradient(135deg, #fed7aa, #fdba74);
+            color: #d97706;
+          }
+
+          [data-theme="dark"] .location-icon {
+            background: linear-gradient(135deg, #7c2d12, #9a3412);
+            color: #fdba74;
+          }
+
+          .stat-content {
+            flex: 1;
+          }
+
+          .stat-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 0.45rem;
+          }
+
+          [data-theme="dark"] .stat-label {
+            color: #94a3b8;
+          }
+
+          .stat-value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+          }
+
+          [data-theme="dark"] .stat-value {
+            color: #f1f5f9;
+          }
+
+          /* Content Sections */
+          .content-section {
+            background: white;
+            padding: 2.25rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(229, 231, 235, 0.6);
+          }
+
+          [data-theme="dark"] .content-section {
+            background: #1e293b;
+            border-color: rgba(148, 163, 184, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          }
+
+          .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+
+          [data-theme="dark"] .section-title {
+            color: #f1f5f9;
+          }
+
+          .section-title::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #1070e5, #0c5ec7);
+            border-radius: 2px;
+          }
+
+          .section-text {
+            color: #475569;
+            line-height: 1.8;
+            margin: 0;
+            font-size: 0.975rem;
+          }
+
+          [data-theme="dark"] .section-text {
+            color: #cbd5e1;
+          }
+
+          /* CTA Section */
+          .external-cta-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+          }
+
+          .cta-card {
+            background: linear-gradient(135deg, #1070e5 0%, #0c5ec7 100%);
+            padding: 2.25rem;
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(16, 112, 229, 0.25);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+          }
+
+          [data-theme="dark"] .cta-card {
+            box-shadow: 0 12px 32px rgba(16, 112, 229, 0.35);
+            border-color: rgba(147, 197, 253, 0.2);
+          }
+
+          .cta-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(
+              circle,
+              rgba(255, 255, 255, 0.1),
+              transparent
+            );
+            border-radius: 50%;
+          }
+
+          .cta-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+          }
+
+          .cta-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            margin: 0 0 0.75rem 0;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.3px;
+          }
+
+          .cta-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 0 1.75rem 0;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+          }
+
+          .btn-apply-primary {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding: 1.1rem 1.5rem;
+            background: white;
+            color: #1070e5;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            letter-spacing: 0.3px;
+          }
+
+          [data-theme="dark"] .btn-apply-primary {
+            background: #f1f5f9;
+            color: #1070e5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          }
+
+          .btn-apply-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+          }
+
+          [data-theme="dark"] .btn-apply-primary:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+          }
+
+          .btn-apply-primary:active {
+            transform: translateY(-1px);
+          }
+
+          .arrow-icon {
+            transition: transform 0.3s ease;
+          }
+
+          .btn-apply-primary:hover .arrow-icon {
+            transform: translate(3px, -3px);
+          }
+
+          .cta-footer {
+            position: relative;
+            z-index: 1;
+            margin-top: 1rem;
+          }
+
+          .footer-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.75);
+            margin: 0;
+            text-align: center;
+            letter-spacing: 0.3px;
+          }
+
+          .cta-info-box {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1.25rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+          }
+
+          [data-theme="dark"] .cta-info-box {
+            background: rgba(0, 0, 0, 0.35);
+            border-color: rgba(147, 197, 253, 0.2);
+          }
+
+          .cta-info-box p {
+            margin: 0;
+            font-size: 1rem;
+            color: #ffffff;
+            line-height: 1.6;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+
+          .info-box-icon {
+            flex-shrink: 0;
+            color: #fff;
+          }
+
+          .cta-info-box strong {
+            font-weight: 800;
+            display: inline;
+          }
+
+          /* Back Button */
+          .external-footer {
+            text-align: center;
+            margin-top: 3rem;
+          }
+
+          .btn-back-external {
+            background: white;
+            color: #1070e5;
+            border: 2px solid #1070e5;
+            padding: 1rem 2.25rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(16, 112, 229, 0.1);
+          }
+
+          [data-theme="dark"] .btn-back-external {
+            background: transparent;
+            color: #60a5fa;
+            border-color: #60a5fa;
+            box-shadow: 0 2px 8px rgba(16, 112, 229, 0.2);
+          }
+
+          .btn-back-external:hover {
+            background: #1070e5;
+            color: white;
+            transform: translateX(-6px);
+            box-shadow: 0 6px 16px rgba(16, 112, 229, 0.2);
+          }
+
+          [data-theme="dark"] .btn-back-external:hover {
+            background: #1070e5;
+            color: white;
+            border-color: #1070e5;
+            box-shadow: 0 6px 16px rgba(16, 112, 229, 0.3);
+          }
+
+          .btn-back-external:active {
+            transform: translateX(-3px);
+          }
+
+          /* Mobile Responsive */
+          @media (max-width: 1024px) {
+            .external-content-grid {
+              grid-template-columns: 1fr;
+            }
+
+            .external-cta-section {
+              position: static;
+            }
+
+            .hero-title {
+              font-size: 2rem;
+            }
+
+            .stats-section {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+          @media (max-width: 768px) {
+            .external-page-wrapper {
+              padding-top: 70px;
+              padding-bottom: 60px;
+            }
+
+            .external-page-content {
+              padding: 0 16px;
+            }
+
+            .external-hero-section {
+              margin-bottom: 2.5rem;
+              border-radius: 16px;
+            }
+
+            .hero-inner {
+              flex-direction: column;
+              text-align: center;
+              padding: 2.5rem 1.5rem;
+              gap: 1.5rem;
+            }
+
+            .external-logo-hero img {
+              width: 100px;
+              height: 100px;
+            }
+
+            .hero-title {
+              font-size: 1.75rem;
+            }
+
+            .hero-company {
+              font-size: 1rem;
+            }
+
+            .stats-section {
+              grid-template-columns: 1fr;
+              gap: 1rem;
+            }
+
+            .stat-item {
+              padding: 1.5rem;
+            }
+
+            .section-title {
+              font-size: 1.2rem;
+            }
+
+            .cta-card {
+              padding: 1.75rem;
+            }
+
+            .cta-title {
+              font-size: 1.35rem;
+            }
+
+            .cta-description {
+              font-size: 0.9rem;
+              margin-bottom: 1.25rem;
+            }
+
+            .btn-apply-primary {
+              padding: 1rem 1.25rem;
+              font-size: 0.95rem;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .external-page-wrapper {
+              padding-top: 65px;
+              padding-bottom: 40px;
+            }
+
+            .external-hero-section {
+              margin-bottom: 2rem;
+              border-radius: 12px;
+            }
+
+            .hero-inner {
+              padding: 2rem 1.25rem;
+              gap: 1rem;
+            }
+
+            .external-logo-hero img {
+              width: 80px;
+              height: 80px;
+              border-radius: 12px;
+            }
+
+            .hero-title {
+              font-size: 1.4rem;
+            }
+
+            .hero-company {
+              font-size: 0.9rem;
+            }
+
+            .external-content-grid {
+              gap: 1.5rem;
+            }
+
+            .stats-section {
+              grid-template-columns: 1fr;
+              gap: 0.75rem;
+            }
+
+            .stat-item {
+              padding: 1rem;
+              gap: 1rem;
+            }
+
+            .stat-icon {
+              width: 40px;
+              height: 40px;
+            }
+
+            .stat-label {
+              font-size: 0.7rem;
+              margin-bottom: 0.3rem;
+            }
+
+            .stat-value {
+              font-size: 1rem;
+            }
+
+            .content-section {
+              padding: 1.5rem;
+              margin-bottom: 1rem;
+            }
+
+            .section-title {
+              font-size: 1.1rem;
+              margin-bottom: 0.75rem;
+            }
+
+            .section-title::before {
+              width: 3px;
+              height: 20px;
+            }
+
+            .section-text {
+              font-size: 0.9rem;
+              line-height: 1.6;
+            }
+
+            .cta-card {
+              padding: 1.5rem;
+            }
+
+            .cta-badge {
+              padding: 0.4rem 0.8rem;
+              font-size: 0.75rem;
+            }
+
+            .cta-title {
+              font-size: 1.25rem;
+              margin-bottom: 0.5rem;
+            }
+
+            .cta-description {
+              font-size: 0.85rem;
+              margin-bottom: 1rem;
+            }
+
+            .btn-apply-primary {
+              padding: 0.95rem 1rem;
+              font-size: 0.9rem;
+            }
+
+            .cta-info-box {
+              padding: 1rem;
+            }
+
+            .cta-info-box p {
+              font-size: 0.8rem;
+            }
+
+            .btn-back-external {
+              padding: 0.85rem 1.5rem;
+              font-size: 0.9rem;
+            }
+          }
+        `}</style>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -801,8 +1686,8 @@ const MultiStepApplyForm = () => {
                         currentStep === step.id
                           ? "active"
                           : currentStep > step.id
-                          ? "completed"
-                          : "inactive"
+                            ? "completed"
+                            : "inactive"
                       }`}
                     >
                       <IconComponent size={20} />

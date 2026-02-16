@@ -9,6 +9,110 @@
   font-weight: 500;
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.modal-content p {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0 0 2rem 0;
+}
+
+.modal-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.modal-btn {
+  padding: 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-btn:hover {
+  border-color: #1070e5;
+  box-shadow: 0 8px 16px rgba(16, 112, 229, 0.15);
+  transform: translateY(-2px);
+}
+
+.modal-btn.internal-btn:hover {
+  background: rgba(16, 112, 229, 0.05);
+}
+
+.modal-btn.external-btn:hover {
+  background: rgba(16, 112, 229, 0.05);
+}
+
+.btn-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+.btn-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.type-selection-message {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 2rem;
+  }
+
+  .modal-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .modal-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Navigation Styles */
 .sidebar {
   background-color: var(--card-bg);
@@ -756,6 +860,50 @@
   font-weight: 500;
   padding-bottom: 12px;
   white-space: nowrap;
+}
+
+/* Checkbox Label Styles */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.checkbox-label:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+  background-color: #3b82f6;
+}
+
+/* Form Help Text */
+.form-help {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-weight: 400;
 }
 
 /* Form Actions */

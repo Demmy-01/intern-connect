@@ -18,6 +18,8 @@ const PostInternship = () => {
   const [success, setSuccess] = useState(false);
   const [profileStatus, setProfileStatus] = useState(null);
   const [checkingProfile, setCheckingProfile] = useState(true);
+  const [showInternshipTypeModal, setShowInternshipTypeModal] = useState(true);
+  const [internshipType, setInternshipType] = useState(null); // "internal" or "external"
 
   useEffect(() => {
     checkProfileCompletion();
@@ -45,7 +47,9 @@ const PostInternship = () => {
     location: "",
     minDuration: "",
     maxDuration: "",
-    applicationDeadline: "", // NEW FIELD
+    applicationDeadline: "",
+    externalLink: "",
+    externalCompanyName: "",
   });
 
   // Check verification status
@@ -69,21 +73,29 @@ const PostInternship = () => {
   };
 
   const validateForm = () => {
-    const required = [
-      "positionTitle",
-      "department",
-      "description",
-      "workType",
-      "compensation",
-      "minDuration",
-      "maxDuration",
-      "applicationDeadline", // NEW VALIDATION
-    ];
+    // Common required fields for both internal and external
+    const commonRequired = ["positionTitle", "department", "description"];
+    let required = [...commonRequired];
+
+    // Add type-specific required fields
+    if (internshipType === "internal") {
+      required = [
+        ...required,
+        "workType",
+        "compensation",
+        "minDuration",
+        "maxDuration",
+        "applicationDeadline",
+      ];
+    } else if (internshipType === "external") {
+      required = [...required, "externalLink", "externalCompanyName"];
+    }
+
     const missing = required.filter((field) => !formData[field].trim());
 
     if (missing.length > 0) {
       const message = `Please fill in all required fields: ${missing.join(
-        ", "
+        ", ",
       )}`;
       try {
         toast.error(message);
@@ -92,30 +104,48 @@ const PostInternship = () => {
       return false;
     }
 
-    const minDur = parseInt(formData.minDuration);
-    const maxDur = parseInt(formData.maxDuration);
-
-    if (minDur >= maxDur) {
-      const message = "Maximum duration must be greater than minimum duration";
+    // Validate external link if provided
+    if (formData.externalLink) {
       try {
-        toast.error(message);
-      } catch (e) {}
-      setError(message);
-      return false;
+        new URL(formData.externalLink);
+      } catch (err) {
+        const message = "Please enter a valid URL for the external link";
+        try {
+          toast.error(message);
+        } catch (e) {}
+        setError(message);
+        return false;
+      }
     }
 
-    // Validate deadline is in the future
-    const deadlineDate = new Date(formData.applicationDeadline);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Only validate internal fields if it's an internal internship
+    if (internshipType === "internal") {
+      const minDur = parseInt(formData.minDuration);
+      const maxDur = parseInt(formData.maxDuration);
 
-    if (deadlineDate < today) {
-      const message = "Application deadline must be in the future";
-      try {
-        toast.error(message);
-      } catch (e) {}
-      setError(message);
-      return false;
+      if (minDur >= maxDur) {
+        const message =
+          "Maximum duration must be greater than minimum duration";
+        try {
+          toast.error(message);
+        } catch (e) {}
+        setError(message);
+        return false;
+      }
+
+      // Validate deadline is in the future
+      const deadlineDate = new Date(formData.applicationDeadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (deadlineDate < today) {
+        const message = "Application deadline must be in the future";
+        try {
+          toast.error(message);
+        } catch (e) {}
+        setError(message);
+        return false;
+      }
     }
 
     return true;
@@ -128,11 +158,11 @@ const PostInternship = () => {
     if (!isVerified) {
       try {
         toast.error(
-          "Your organization must be verified before posting internships."
+          "Your organization must be verified before posting internships.",
         );
       } catch (e) {}
       setError(
-        "Your organization must be verified before posting internships."
+        "Your organization must be verified before posting internships.",
       );
       return;
     }
@@ -148,14 +178,15 @@ const PostInternship = () => {
       const profileStatus = await organizationService.checkProfileCompletion();
       if (!profileStatus || !profileStatus.isComplete) {
         setError(
-          "Please complete your organization profile before posting internships."
+          "Please complete your organization profile before posting internships.",
         );
         return;
       }
 
-      const { data, error } = await internshipService.createInternship(
-        formData
-      );
+      const { data, error } = await internshipService.createInternship({
+        ...formData,
+        isExternal: internshipType === "external",
+      });
 
       if (error) {
         setError(error);
@@ -176,7 +207,13 @@ const PostInternship = () => {
           minDuration: "",
           maxDuration: "",
           applicationDeadline: "",
+          externalLink: "",
+          externalCompanyName: "",
         });
+
+        // Reset internship type for next posting
+        setInternshipType(null);
+        setShowInternshipTypeModal(true);
 
         // Show success message briefly then redirect
         try {
@@ -231,6 +268,47 @@ const PostInternship = () => {
 
   return (
     <DashboardLayout>
+      {/* Internship Type Modal */}
+      {showInternshipTypeModal && !internshipType && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>What type of internship are you posting?</h2>
+            <p>
+              Choose whether this is a platform internship or an external
+              opportunity
+            </p>
+
+            <div className="modal-buttons">
+              <button
+                className="modal-btn internal-btn"
+                onClick={() => {
+                  setInternshipType("internal");
+                  setShowInternshipTypeModal(false);
+                }}
+              >
+                <span className="btn-title">Platform Internship</span>
+                <span className="btn-desc">
+                  Post on our platform, students apply here
+                </span>
+              </button>
+
+              <button
+                className="modal-btn external-btn"
+                onClick={() => {
+                  setInternshipType("external");
+                  setShowInternshipTypeModal(false);
+                }}
+              >
+                <span className="btn-title">External Link</span>
+                <span className="btn-desc">
+                  Direct students to your website
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="post-internship-container">
         <div className="post-internship-header">
           <h1>Post New Internship</h1>
@@ -448,6 +526,45 @@ const PostInternship = () => {
               Specify education level, skills, experience, etc.
             </small>
           </div>
+
+          {internshipType === "external" && (
+            <>
+              <div className="form-group">
+                <label htmlFor="externalLink">External Internship Link *</label>
+                <input
+                  type="url"
+                  id="externalLink"
+                  name="externalLink"
+                  placeholder="https://example.com/apply-now"
+                  value={formData.externalLink}
+                  onChange={handleInputChange}
+                  required={internshipType === "external"}
+                  disabled={loading || !isVerified}
+                />
+                <small className="form-help">
+                  Enter the full URL where students can apply for this
+                  internship
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="externalCompanyName">Company Name *</label>
+                <input
+                  type="text"
+                  id="externalCompanyName"
+                  name="externalCompanyName"
+                  placeholder="e.g. Google, Microsoft, Acme Corp"
+                  value={formData.externalCompanyName}
+                  onChange={handleInputChange}
+                  required={internshipType === "external"}
+                  disabled={loading || !isVerified}
+                />
+                <small className="form-help">
+                  Enter the name of the company offering this internship
+                </small>
+              </div>
+            </>
+          )}
 
           <div className="form-actions">
             <button

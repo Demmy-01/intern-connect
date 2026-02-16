@@ -66,7 +66,10 @@ class InternshipService {
         location: internshipData.location || null,
         min_duration: parseInt(internshipData.minDuration),
         max_duration: parseInt(internshipData.maxDuration),
-        application_deadline: internshipData.applicationDeadline, // NEW FIELD
+        application_deadline: internshipData.applicationDeadline,
+        is_external: internshipData.isExternal || false,
+        external_link: internshipData.externalLink || null,
+        external_company_name: internshipData.externalCompanyName || null,
         is_active: true
       };
 
