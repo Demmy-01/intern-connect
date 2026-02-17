@@ -33,7 +33,6 @@ import { Toaster } from "./components/ui/sonner";
 import EmailVerification from "./auth/EmailVerification";
 import ForgotPassword from "./auth/ForgotPassword";
 import AuthCallback from "./pages/AuthCallback";
-import CVGenerator from "./pages/cv-generator.jsx";
 import OrganizationLogin from "./auth/organization-login.jsx";
 import OrganizationSignup from "./auth/organization-signup.jsx";
 import ResetPassword from "./auth/ResetPassword.jsx";
@@ -46,7 +45,8 @@ import Terms from "./pages/terms.jsx";
 import OnboardingPage from "./pages/student-onboarding.jsx";
 import AdminLogin from "./auth/admin-login.jsx";
 import AdminDashboard from "./admin/admin-dashboard.jsx";
-import AdminRoute from "./components/AdminRoute.jsx"; // Import AdminRoute
+import AdminRoute from "./components/AdminRoute.jsx";
+import CVGeneratorPage from './pages/cv-generator.jsx';
 
 function App() {
   // VERY AGGRESSIVE CHECK: Run before render
@@ -110,7 +110,7 @@ function App() {
           <Route path="/team" element={<Team />} />
           <Route path="/welcome" element={<OnboardingPage />} />
           <Route path="/student-onboarding" element={<OnboardingPage />} />
-          <Route path="/cv-generator" element={<CVGenerator />} />
+          <Route path="/cv-generator" element={<CVGeneratorPage />} />
           <Route
             path="/internship-opportunities"
             element={<InternshipOpportunities />}

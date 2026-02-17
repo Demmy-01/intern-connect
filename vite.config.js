@@ -9,5 +9,15 @@ export default defineConfig({
   // This ensures the worker file is properly handled
   worker: {
     format: 'es'
+  },
+  // Proxy API requests to backend server in development
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
+    }
   }
 });
