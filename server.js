@@ -1,6 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const PORT = 3001;
@@ -8,6 +9,48 @@ const PORT = 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// ==================== Supabase Configuration ====================
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://hzawfhjzpvxqfgfdkjyb.supabase.co';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YXdmaGp6cHZ4cWZnZmRranliIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMjYyMzA5MCwiZXhwIjoxNzQ4Mjc1MDkwfQ.7B7PmpPQl1gfJTGpCZZRDKuMPYz2VIX9ew8eAQGxhWs';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+// ==================== In-Memory Token Store ====================
+// In production, this would be in a database
+const userTokens = {};
+const userTokenTransactions = {};
+
+function getUserTokens(email) {
+  const normalizedEmail = (email || 'default@user.com').toLowerCase().trim();
+  if (!userTokens[normalizedEmail]) {
+    userTokens[normalizedEmail] = 100; // Initial free tokens
+  }
+  return parseInt(userTokens[normalizedEmail], 10) || 100;
+}
+
+function setUserTokens(email, amount) {
+  const normalizedEmail = (email || 'default@user.com').toLowerCase().trim();
+  const numAmount = parseInt(amount, 10) || 0;
+  userTokens[normalizedEmail] = numAmount;
+  if (!userTokenTransactions[normalizedEmail]) {
+    userTokenTransactions[normalizedEmail] = [];
+  }
+  userTokenTransactions[normalizedEmail].push({
+    timestamp: new Date().toISOString(),
+    amount: numAmount,
+    note: 'Token purchase'
+  });
+  console.log(`💾 Set tokens for ${normalizedEmail}: ${numAmount}`);
+  return numAmount;
+}
+
+function addUserTokens(email, amount) {
+  const normalizedEmail = (email || 'default@user.com').toLowerCase().trim();
+  const currentTokens = getUserTokens(normalizedEmail);
+  const newBalance = currentTokens + amount;
+  return setUserTokens(normalizedEmail, newBalance);
+}
 
 // ==================== Token Endpoints ====================
 
@@ -60,11 +103,17 @@ app.get('/api/tokens/pricing', (req, res) => {
  */
 app.get('/api/tokens/balance', (req, res) => {
   try {
-    // For development/testing, return a default balance
-    console.log('✅ Token balance requested - returning default balance');
+    // Get email from query or header - normalize it
+    const email = (req.query.email || req.headers['x-user-email'] || 'default@user.com').toLowerCase().trim();
+    
+    const balance = getUserTokens(email);
+    console.log(`💰 Token balance for ${email}: ${balance}`);
+    console.log(`📊 Current token store:`, userTokens);
+    
     return res.status(200).json({ 
       success: true, 
-      balance: 100 // Default free tokens for new users
+      balance,
+      email
     });
   } catch (error) {
     console.error('Error fetching token balance:', error);
@@ -82,7 +131,7 @@ app.get('/api/tokens/balance', (req, res) => {
  */
 app.post('/api/payment/initialize', async (req, res) => {
   try {
-    const { email, packageIndex, callbackUrl } = req.body;
+    const { email, packageIndex, callbackUrl, userId } = req.body;
 
     if (!email || packageIndex === undefined) {
       return res.status(400).json({ 
@@ -106,10 +155,10 @@ app.post('/api/payment/initialize', async (req, res) => {
       });
     }
 
-    // Get Paystack secret key from environment
-    const payStackSecretKey = process.env.PAYSTACK_SECRET_KEY;
+    // Get Paystack secret key from environment or use test key
+    const payStackSecretKey = process.env.PAYSTACK_SECRET_KEY || 'sk_test_ca9f1c6bf19131cf466b8bf045f829b6806ea272';
     
-    console.log(`💳 Payment initialization for ${email}: ${selectedPackage.name}`);
+    console.log(`💳 Payment initialization for ${email}: ${selectedPackage.name} (${selectedPackage.price} NGN)`);
 
     if (!payStackSecretKey) {
       // Return mock response for development
@@ -134,8 +183,9 @@ app.post('/api/payment/initialize', async (req, res) => {
             packageIndex,
             packageName: selectedPackage.name,
             tokens: selectedPackage.tokens,
+            userId, // Store userId in metadata for later use
           },
-          callback_url: callbackUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/cv-generator`,
+          callback_url: callbackUrl || `${process.env.FRONTEND_URL || 'https://localhost:5173'}/cv-generator`,
         },
         {
           headers: {
@@ -158,14 +208,10 @@ app.post('/api/payment/initialize', async (req, res) => {
         message: 'Payment initialized successfully',
       });
     } catch (paystackError) {
-      console.error('Paystack error:', paystackError.message);
-      // Fallback to mock mode
-      return res.status(200).json({
-        success: true,
-        mock: true,
-        tokensAdded: selectedPackage.tokens,
-        newBalance: 100 + selectedPackage.tokens,
-        message: 'Operating in mock payment mode (Paystack not available)',
+      console.error('❌ Paystack error:', paystackError.response?.data?.message || paystackError.message);
+      return res.status(400).json({
+        success: false,
+        error: paystackError.response?.data?.message || 'Payment initialization failed. Please try again.',
       });
     }
   } catch (error) {
@@ -193,19 +239,7 @@ app.post('/api/payment/verify', async (req, res) => {
 
     console.log(`🔍 Verifying payment reference: ${reference}`);
 
-    const payStackSecretKey = process.env.PAYSTACK_SECRET_KEY;
-    
-    if (!payStackSecretKey) {
-      // Return mock response for development
-      console.warn('⚠️ PAYSTACK_SECRET_KEY not configured, returning mock verification');
-      return res.status(200).json({
-        success: true,
-        tokensAdded: 60,
-        newBalance: 160,
-        reference,
-        message: 'Mock verification - payment assumed successful',
-      });
-    }
+    const payStackSecretKey = process.env.PAYSTACK_SECRET_KEY || 'sk_test_ca9f1c6bf19131cf466b8bf045f829b6806ea272';
 
     try {
       // Verify payment with Paystack
@@ -219,6 +253,7 @@ app.post('/api/payment/verify', async (req, res) => {
       );
 
       if (!verifyResponse.data.status) {
+        console.error('❌ Paystack verification failed:', verifyResponse.data.message);
         return res.status(400).json({
           success: false,
           error: verifyResponse.data.message || 'Payment verification failed',
@@ -228,6 +263,7 @@ app.post('/api/payment/verify', async (req, res) => {
       const transactionData = verifyResponse.data.data;
       
       if (transactionData.status !== 'success') {
+        console.warn(`⚠️ Payment not successful, status: ${transactionData.status}`);
         return res.status(400).json({
           success: false,
           error: 'Payment was not completed successfully',
@@ -236,25 +272,88 @@ app.post('/api/payment/verify', async (req, res) => {
       }
 
       const tokensAdded = transactionData.metadata?.tokens || 60;
+      const email = (transactionData.customer?.email || '').toLowerCase().trim();
+      const userId = transactionData.metadata?.userId; // Get userId from metadata
       
-      console.log(`✅ Payment verified! Tokens: ${tokensAdded}`);
+      // Update user's token balance (in-memory for backward compatibility)
+      let newBalance = 100 + tokensAdded; // Default for non-auth users
+      if (email) {
+        newBalance = addUserTokens(email, tokensAdded);
+      }
+      
+      // Save to Supabase if userId is available
+      if (userId) {
+        try {
+          // Get current balance
+          const { data: existingTokens, error: selectError } = await supabase
+            .from('user_tokens')
+            .select('balance, total_purchased')
+            .eq('user_id', userId)
+            .single();
+          
+          let currentBalance = existingTokens?.balance || 0;
+          let currentPurchased = existingTokens?.total_purchased || 0;
+          const newTokenBalance = currentBalance + tokensAdded;
+          const newPurchased = currentPurchased + tokensAdded;
+          
+          // Upsert the user_tokens record (insert or update)
+          const { data: upsertData, error: upsertError } = await supabase
+            .from('user_tokens')
+            .upsert({
+              user_id: userId,
+              balance: newTokenBalance,
+              total_purchased: newPurchased,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' })
+            .select();
+          
+          if (upsertError) {
+            console.error('❌ Error upserting tokens:', upsertError);
+            throw upsertError;
+          }
+          
+          // Log transaction
+          const { error: transactionError } = await supabase
+            .from('token_transactions')
+            .insert([{
+              user_id: userId,
+              transaction_type: 'purchase',
+              amount: tokensAdded,
+              description: `Payment for ${transactionData.metadata?.packageName || 'tokens'}`,
+              reference: reference,
+              balance_after: newTokenBalance,
+            }]);
+          
+          if (transactionError) {
+            console.error('❌ Error logging transaction:', transactionError);
+            throw transactionError;
+          }
+          
+          // Update newBalance variable to send back to frontend
+          newBalance = newTokenBalance;
+          console.log(`✅ Tokens saved to Supabase for user ${userId}: ${currentBalance} + ${tokensAdded} = ${newTokenBalance}`);
+        } catch (supabaseError) {
+          console.warn('⚠️ Failed to save tokens to Supabase (continuing anyway):', supabaseError);
+        }
+      }
+      
+      console.log(`✅ Payment verified! Email: ${email}, Tokens added: ${tokensAdded}, New balance: ${newBalance}`);
+      console.log(`💰 User tokens state:`, userTokens);
       
       return res.status(200).json({
         success: true,
         tokensAdded,
-        newBalance: 100 + tokensAdded,
+        newBalance,
         reference,
+        email,
         message: 'Payment verified successfully',
+        debugInfo: { userTokenState: userTokens[email] }
       });
     } catch (paystackError) {
-      console.error('Paystack verification error:', paystackError.message);
-      // Fallback to mock mode
-      return res.status(200).json({
-        success: true,
-        tokensAdded: 60,
-        newBalance: 160,
-        reference,
-        message: 'Payment processed (mock mode)',
+      console.error('❌ Payment verification error:', paystackError.response?.data?.message || paystackError.message);
+      return res.status(400).json({
+        success: false,
+        error: paystackError.response?.data?.message || 'Payment verification failed',
       });
     }
   } catch (error) {
@@ -271,9 +370,9 @@ app.post('/api/payment/verify', async (req, res) => {
 /**
  * POST /api/ai/suggest - Get AI suggestions for CV content
  */
-app.post('/api/ai/suggest', (req, res) => {
+app.post('/api/ai/suggest', async (req, res) => {
   try {
-    const { content, section = 'general' } = req.body;
+    const { content, section = 'general', userId = null, email = 'default@user.com' } = req.body;
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ 
@@ -283,15 +382,93 @@ app.post('/api/ai/suggest', (req, res) => {
     }
 
     const tokenCost = 20;
+    let currentBalance = 0;
+    let supabaseError = false;
+
+    // Try to get balance from Supabase if userId is provided
+    if (userId) {
+      try {
+        const { data, error } = await supabase
+          .from('user_tokens')
+          .select('balance')
+          .eq('user_id', userId)
+          .single();
+
+        if (!error && data) {
+          currentBalance = data.balance || 0;
+          console.log(`💰 Loaded balance from Supabase for user ${userId}: ${currentBalance}`);
+        } else {
+          // Fall back to in-memory
+          supabaseError = true;
+          currentBalance = getUserTokens(email);
+          console.warn(`⚠️ Failed to load from Supabase, using in-memory: ${currentBalance}`);
+        }
+      } catch (err) {
+        supabaseError = true;
+        currentBalance = getUserTokens(email);
+        console.warn(`⚠️ Supabase error, falling back to in-memory: ${err.message}`);
+      }
+    } else {
+      // Fall back to email-based in-memory tracking
+      currentBalance = getUserTokens(email);
+    }
+    
+    // Check if user has enough tokens
+    if (currentBalance < tokenCost) {
+      return res.status(402).json({ 
+        success: false, 
+        error: 'Insufficient tokens',
+        currentBalance
+      });
+    }
+
+    // Deduct tokens
+    const remainingTokens = currentBalance - tokenCost;
+    
+    // Update balance in Supabase if userId is available
+    if (userId && !supabaseError) {
+      try {
+        const { error: updateError } = await supabase
+          .from('user_tokens')
+          .update({ balance: remainingTokens, updated_at: new Date().toISOString() })
+          .eq('user_id', userId);
+
+        if (updateError) {
+          console.warn(`⚠️ Failed to update balance in Supabase: ${updateError.message}`);
+          // Still continue with in-memory backup
+          setUserTokens(email, remainingTokens);
+        } else {
+          // Log transaction
+          await supabase
+            .from('token_transactions')
+            .insert([{
+              user_id: userId,
+              transaction_type: 'usage',
+              amount: -tokenCost,
+              description: `AI suggestion for ${section}`,
+              balance_after: remainingTokens,
+            }]);
+
+          console.log(`✅ Tokens deducted in Supabase for user ${userId}: ${currentBalance} → ${remainingTokens}`);
+        }
+      } catch (err) {
+        console.warn(`⚠️ Error updating Supabase: ${err.message}, falling back to in-memory`);
+        setUserTokens(email, remainingTokens);
+      }
+    } else {
+      // Fallback to in-memory
+      setUserTokens(email, remainingTokens);
+    }
+    
     const suggestions = generateSuggestions(content, section);
 
-    console.log(`✨ Generated ${suggestions.length} AI suggestions for ${section}`);
+    console.log(`✨ Generated ${suggestions.length} AI suggestions for ${section} (${currentBalance} → ${remainingTokens} tokens)`);
 
     return res.status(200).json({
       success: true,
       suggestions,
       tokensUsed: tokenCost,
-      remainingTokens: 80, // This should be fetched from DB in production
+      remainingTokens,
     });
   } catch (error) {
     console.error('AI suggestion error:', error);

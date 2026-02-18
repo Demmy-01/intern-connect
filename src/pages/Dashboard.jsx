@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar.jsx";
 import Footer from "../components/footer.jsx";
 import PageTransition from "../components/PageTransition";
@@ -140,11 +141,14 @@ const Dashboard = () => {
     }));
   };
 
+  const navigate = useNavigate();
+
   const quickActions = [
     {
       icon: <img src={cv} alt="CV Icon" />,
       title: "Update Your CV",
       description: "Keep your CV updated with our CV builder",
+      onClick: () => navigate("/cv-generator"),
     },
     {
       icon: <img src={bulb} alt="Bulb Icon" />,

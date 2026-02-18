@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FileText,
   Download,
@@ -31,8 +31,22 @@ import AISuggestionModal from "../components/AISuggestionModal";
 import DatePicker from "../components/DatePicker";
 import DateRangePicker from "../components/DateRangePicker";
 import ATSAnalysisSection from "../components/ATSAnalysisSection";
-import toast, { Toaster } from 'react-hot-toast';
-import { getTokenBalance, getAISuggestion, verifyPayment, getATSRecommendation, calculateATSScore } from "../lib/api";
+import Navbar from "../components/navbar";
+import toast, { Toaster } from "react-hot-toast";
+import { supabase } from "../lib/supabase";
+import {
+  getCVData,
+  saveCVData,
+  getTokenBalance as getSupabaseTokenBalance,
+  initializeTokenBalance,
+} from "../lib/cvDataService";
+import {
+  getTokenBalance,
+  getAISuggestion,
+  verifyPayment,
+  getATSRecommendation,
+  calculateATSScore,
+} from "../lib/api";
 
 function CVGenerator() {
   const [darkMode, setDarkMode] = useState(false);
@@ -52,9 +66,8 @@ function CVGenerator() {
   const [showAISuggestionModal, setShowAISuggestionModal] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [currentField, setCurrentField] = useState(null);
-  const [originalContent, setOriginalContent] = useState('');
+  const [originalContent, setOriginalContent] = useState("");
   const [atsScore, setAtsScore] = useState(0);
-
 
   // Handle window resize for responsive design
   React.useEffect(() => {
@@ -66,19 +79,84 @@ function CVGenerator() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Load token balance on mount and check for payment callback
+  // Load token balance on mount, check payment callback, and load CV data from Supabase
   useEffect(() => {
-    loadTokenBalance();
-    checkPaymentCallback();
+    const initializeApp = async () => {
+      try {
+        // Check if user is authenticated
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          console.warn("⚠️ User not authenticated, using local storage/cache");
+          // Load from local storage if available
+          const savedCV = localStorage.getItem("cvData");
+          if (savedCV) {
+            try {
+              setFormData(JSON.parse(savedCV));
+            } catch (e) {
+              console.error("Failed to parse saved CV data:", e);
+            }
+          }
+
+          // For non-authenticated users, load balance from cache or API
+          const cachedEmail = localStorage.getItem("lastPurchaseEmail");
+          const cachedBalance = localStorage.getItem("cachedTokenBalance");
+          if (cachedBalance) {
+            setTokenBalance(parseInt(cachedBalance, 10));
+            console.log(`💰 Loaded cached balance: ${cachedBalance}`);
+          }
+        } else {
+          console.log("✅ User authenticated:", user.email);
+          // Load CV data from Supabase for authenticated user
+          const cvData = await getCVData();
+          if (cvData) {
+            console.log("📥 Loaded CV data from Supabase");
+            setFormData({
+              fullName: cvData.full_name || "",
+              email: cvData.email || user.email || "",
+              phone: cvData.phone || "",
+              linkedin: cvData.linkedin || "",
+              location: cvData.location || "",
+              summary: cvData.summary || "",
+              education: cvData.education || [],
+              experiences: cvData.experiences || [],
+              projects: cvData.projects || [],
+              skills: cvData.skills || "",
+              languages: cvData.languages || "",
+              certifications: cvData.certifications || "",
+            });
+          } else {
+            // Pre-fill email from authenticated user
+            setFormData((prev) => ({ ...prev, email: user.email || "" }));
+          }
+
+          // Initialize token balance in Supabase if needed (100 free tokens for new users)
+          await initializeTokenBalance(100);
+
+          // Load token balance from Supabase
+          const balance = await getSupabaseTokenBalance();
+          setTokenBalance(balance);
+          console.log(`💰 Loaded Supabase balance: ${balance}`);
+        }
+      } catch (error) {
+        console.error("Error initializing app:", error);
+      }
+
+      // Check for payment callback
+      checkPaymentCallback();
+    };
+
+    initializeApp();
   }, []);
 
   const checkPaymentCallback = async () => {
     // Check if we're returning from Paystack
     const urlParams = new URLSearchParams(window.location.search);
-    const reference = urlParams.get('reference');
+    const reference = urlParams.get("reference");
 
     if (reference) {
-      console.log('🔵 Payment reference detected:', reference);
+      console.log("🔵 Payment reference detected:", reference);
 
       // Clean up URL immediately to prevent repeated verification attempts
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -88,45 +166,100 @@ function CVGenerator() {
         const result = await verifyPayment(reference);
 
         if (result.success) {
-          console.log('✅ Payment verified successfully:', result);
+          console.log("✅ Payment verified successfully:", result);
 
           // Update token balance immediately from verification response
           setTokenBalance(result.newBalance);
 
-          // Show success message
-          toast.success(`Payment Successful!\n\n${result.tokensAdded} tokens have been added to your account.\nNew balance: ${result.newBalance} tokens`, {
-            duration: 5000
-          });
-
-          // Also refresh token balance from server to ensure sync
-          try {
-            await loadTokenBalance();
-          } catch (balanceError) {
-            console.warn('⚠️ Failed to refresh balance, but using verified balance:', balanceError);
+          // Cache the purchase email and balance for persistence
+          if (result.email) {
+            localStorage.setItem("lastPurchaseEmail", result.email);
+            console.log(`✅ Saved purchase email: ${result.email}`);
           }
+          localStorage.setItem("cachedTokenBalance", result.newBalance);
+
+          // Show success message
+          toast.success(
+            `Payment Successful!\n\n${result.tokensAdded} tokens have been added to your account.\nNew balance: ${result.newBalance} tokens`,
+            {
+              duration: 5000,
+            },
+          );
+
+          // Wait for backend to update Supabase, then refresh from database
+          setTimeout(async () => {
+            try {
+              await loadTokenBalance(result.email);
+              console.log("✅ Token balance refreshed using purchase email");
+            } catch (balanceError) {
+              console.warn(
+                "⚠️ Failed to refresh balance but using verified balance:",
+                balanceError,
+              );
+            }
+          }, 500); // Wait 500ms for backend to write to Supabase
         } else {
-          console.error('❌ Payment verification failed:', result);
-          toast.error('Payment verification failed.\n\nThis may be due to network connectivity issues.\n\nIf you completed the payment on Paystack, your tokens will be added once the connection is restored.\n\nPlease refresh the page in a few moments or contact support if the issue persists.');
+          console.error("❌ Payment verification failed:", result);
+          toast.error(
+            "Payment verification failed.\n\nThis may be due to network connectivity issues.\n\nIf you completed the payment on Paystack, your tokens will be added once the connection is restored.\n\nPlease refresh the page in a few moments or contact support if the issue persists.",
+          );
         }
       } catch (error) {
-        console.error('❌ Payment verification error:', error);
+        console.error("❌ Payment verification error:", error);
 
         // Check if it's a network timeout
-        if (error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.message.includes('Network Error')) {
-          toast.error('Network Timeout\n\nUnable to verify payment due to network connectivity issues.\n\nIf you completed the payment on Paystack:\n1. Your payment was likely successful\n2. Tokens will be added once connection is restored\n3. Try refreshing the page in a few moments\n\nIf tokens don\'t appear, please contact support with your payment reference.');
+        if (
+          error.code === "ECONNABORTED" ||
+          error.message.includes("timeout") ||
+          error.message.includes("Network Error")
+        ) {
+          toast.error(
+            "Network Timeout\n\nUnable to verify payment due to network connectivity issues.\n\nIf you completed the payment on Paystack:\n1. Your payment was likely successful\n2. Tokens will be added once connection is restored\n3. Try refreshing the page in a few moments\n\nIf tokens don't appear, please contact support with your payment reference.",
+          );
         } else {
-          toast.error('Failed to verify payment.\n\nPlease contact support if you were charged.\nPayment reference: ' + reference);
+          toast.error(
+            "Failed to verify payment.\n\nPlease contact support if you were charged.\nPayment reference: " +
+              reference,
+          );
         }
       }
     }
   };
 
-  const loadTokenBalance = async () => {
+  const loadTokenBalance = async (emailOverride = null) => {
     try {
-      const data = await getTokenBalance();
-      setTokenBalance(data.balance);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        // Load from Supabase for authenticated users
+        const balance = await getSupabaseTokenBalance();
+        setTokenBalance(balance);
+        console.log(
+          `💰 Loaded token balance from Supabase for ${user.email}: ${balance}`,
+        );
+      } else {
+        // Fallback to API for non-authenticated users
+        // Use override email from payment, fallback to form email, then default
+        const userEmail =
+          emailOverride ||
+          formData.email ||
+          localStorage.getItem("lastPurchaseEmail") ||
+          "default@user.com";
+        const data = await getTokenBalance(userEmail);
+        setTokenBalance(data.balance);
+        console.log(
+          `💰 Loaded token balance for ${userEmail}: ${data.balance}`,
+        );
+      }
     } catch (error) {
-      console.error('Failed to load token balance:', error);
+      console.error("Failed to load token balance:", error);
+      // Fallback to localStorage cache if fetch fails
+      const cachedBalance = localStorage.getItem("cachedTokenBalance");
+      if (cachedBalance) {
+        console.log("⚠️ Using cached token balance:", cachedBalance);
+        setTokenBalance(parseInt(cachedBalance, 10));
+      }
     }
   };
 
@@ -178,7 +311,7 @@ function CVGenerator() {
     setFormData((prev) => ({
       ...prev,
       [field]: prev[field].map((item, i) =>
-        i === index ? { ...item, [key]: value } : item
+        i === index ? { ...item, [key]: value } : item,
       ),
     }));
   };
@@ -205,6 +338,33 @@ function CVGenerator() {
 
     return () => clearTimeout(timer);
   }, [formData]); // Only watch formData since it contains all CV data
+
+  // Auto-save CV data to Supabase with debounce
+  useEffect(() => {
+    const saveTimer = setTimeout(async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          // Only save to Supabase if user is authenticated
+          await saveCVData({
+            ...formData,
+            templateName: template,
+          });
+          console.log("💾 CV data auto-saved to Supabase");
+        } else {
+          // Save to local storage for unauthenticated users
+          localStorage.setItem("cvData", JSON.stringify(formData));
+          console.log("💾 CV data saved to local storage");
+        }
+      } catch (error) {
+        console.error("Error auto-saving CV data:", error);
+      }
+    }, 3000); // Auto-save 3 seconds after user stops typing
+
+    return () => clearTimeout(saveTimer);
+  }, [formData, template]);
 
   const downloadCV = async () => {
     const element = document.getElementById("cv-preview");
@@ -243,12 +403,16 @@ function CVGenerator() {
   // AI Suggestion Handler
   const handleAISuggestion = async (field, section, currentValue) => {
     if (!currentValue || currentValue.trim().length === 0) {
-      toast.error('Please enter some content first before using AI suggestions');
+      toast.error(
+        "Please enter some content first before using AI suggestions",
+      );
       return;
     }
 
     if (tokenBalance < 20) {
-      toast.error('Insufficient tokens. Please purchase more tokens to use AI features.');
+      toast.error(
+        "Insufficient tokens. Please purchase more tokens to use AI features.",
+      );
       setShowPurchaseModal(true);
       return;
     }
@@ -260,58 +424,90 @@ function CVGenerator() {
     setAiLoading({ ...aiLoading, [field]: true });
 
     try {
-      const result = await getAISuggestion(currentValue, section);
+      // Get userId for token deduction
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const userId = user?.id || null;
+
+      const result = await getAISuggestion(currentValue, section, userId);
 
       if (result.success) {
         setTokenBalance(result.remainingTokens);
 
         // Set the 3 AI suggestions for modal display
         setAiSuggestions(result.suggestions || [result.suggestion]);
-        toast.success(`${result.tokensUsed} tokens used. ${result.remainingTokens} remaining.`);
+        toast.success(
+          `${result.tokensUsed} tokens used. ${result.remainingTokens} remaining.`,
+        );
       } else {
         toast.error(`AI suggestion failed: ${result.error}`);
       }
     } catch (error) {
-      console.error('AI suggestion error:', error);
+      console.error("AI suggestion error:", error);
       if (error.response?.status === 402) {
-        toast.error('Insufficient tokens. Please purchase more tokens.');
+        toast.error("Insufficient tokens. Please purchase more tokens.");
         setShowPurchaseModal(true);
       } else {
-        toast.error('Failed to get AI suggestion. Please try again.');
+        toast.error("Failed to get AI suggestion. Please try again.");
       }
     } finally {
       setAiLoading({ ...aiLoading, [field]: false });
     }
   };
 
-  const handlePurchaseSuccess = () => {
+  const handlePurchaseSuccess = (newBalance) => {
     setShowPurchaseModal(false);
-    loadTokenBalance();
+    if (newBalance !== undefined) {
+      setTokenBalance(newBalance);
+    } else {
+      loadTokenBalance();
+    }
+  };
+
+  const handlePaymentSuccess = (newBalance) => {
+    // Update token balance immediately with the returned value
+    if (newBalance !== undefined) {
+      setTokenBalance(newBalance);
+    } else {
+      loadTokenBalance();
+    }
+    setShowPurchaseModal(false);
   };
 
   const handleSelectSuggestion = (selectedSuggestion) => {
     if (currentField) {
       // Check if this is a nested field (format: arrayName_index)
-      if (currentField.includes('_')) {
-        const parts = currentField.split('_');
+      if (currentField.includes("_")) {
+        const parts = currentField.split("_");
         const fieldType = parts[0]; // e.g., 'experience', 'project', 'education'
         const index = parseInt(parts[1]); // e.g., 0, 1, 2
 
         // Map field type to array name and key
         const fieldMapping = {
-          'experience': { array: 'experiences', key: 'description' },
-          'project': { array: 'projects', key: 'description' },
-          'education': { array: 'education', key: 'fieldOfStudy' }
+          experience: { array: "experiences", key: "description" },
+          project: { array: "projects", key: "description" },
+          education: { array: "education", key: "fieldOfStudy" },
         };
 
         const mapping = fieldMapping[fieldType];
         if (mapping && !isNaN(index)) {
           // Update nested field in array
-          updateObjectArrayField(mapping.array, index, mapping.key, selectedSuggestion);
-          console.log(`✅ Applied AI suggestion to ${mapping.array}[${index}].${mapping.key}`);
+          updateObjectArrayField(
+            mapping.array,
+            index,
+            mapping.key,
+            selectedSuggestion,
+          );
+          console.log(
+            `✅ Applied AI suggestion to ${mapping.array}[${index}].${mapping.key}`,
+          );
         } else {
           // Fallback to simple update if mapping not found
-          console.warn('⚠️ Field mapping not found, using simple update:', currentField);
+          console.warn(
+            "⚠️ Field mapping not found, using simple update:",
+            currentField,
+          );
           updateField(currentField, selectedSuggestion);
         }
       } else {
@@ -320,11 +516,11 @@ function CVGenerator() {
         console.log(`✅ Applied AI suggestion to ${currentField}`);
       }
 
-      toast.success('AI suggestion applied!');
+      toast.success("AI suggestion applied!");
     }
     setShowAISuggestionModal(false);
     setCurrentField(null);
-    setOriginalContent('');
+    setOriginalContent("");
     setAiSuggestions([]);
   };
 
@@ -338,7 +534,7 @@ function CVGenerator() {
         experience: formData.experiences || [],
         education: formData.education || [],
         projects: formData.projects || [],
-        skills: formData.skills || ""
+        skills: formData.skills || "",
       };
 
       const result = await calculateATSScore(cvData);
@@ -346,7 +542,7 @@ function CVGenerator() {
         setAtsScore(result.overallScore);
       }
     } catch (error) {
-      console.error('Failed to calculate ATS score:', error);
+      console.error("Failed to calculate ATS score:", error);
     }
   };
 
@@ -354,43 +550,47 @@ function CVGenerator() {
   const handleATSImprovement = async (section) => {
     // Check token balance
     if (tokenBalance < 20) {
-      toast.error('Insufficient tokens. You need 20 tokens to use AI improvements.');
+      toast.error(
+        "Insufficient tokens. You need 20 tokens to use AI improvements.",
+      );
       setShowPurchaseModal(true);
       return;
     }
 
     try {
       // Show loading toast
-      const loadingToast = toast.loading(`Generating AI improvements for ${section.name}...`);
+      const loadingToast = toast.loading(
+        `Generating AI improvements for ${section.name}...`,
+      );
 
       // Get current content for the section
-      let currentContent = '';
-      let sectionKey = '';
+      let currentContent = "";
+      let sectionKey = "";
 
       switch (section.name.toLowerCase()) {
-        case 'contact info':
+        case "contact info":
           currentContent = `${formData.fullName}\n${formData.email}\n${formData.phone}\n${formData.location}`;
-          sectionKey = 'contact';
+          sectionKey = "contact";
           break;
-        case 'summary':
-          currentContent = formData.summary || '';
-          sectionKey = 'summary';
+        case "summary":
+          currentContent = formData.summary || "";
+          sectionKey = "summary";
           break;
-        case 'experience':
+        case "experience":
           currentContent = JSON.stringify(formData.experiences || []);
-          sectionKey = 'experiences';
+          sectionKey = "experiences";
           break;
-        case 'education':
+        case "education":
           currentContent = JSON.stringify(formData.education || []);
-          sectionKey = 'education';
+          sectionKey = "education";
           break;
-        case 'skills':
-          currentContent = formData.skills || '';
-          sectionKey = 'skills';
+        case "skills":
+          currentContent = formData.skills || "";
+          sectionKey = "skills";
           break;
-        case 'projects':
+        case "projects":
           currentContent = JSON.stringify(formData.projects || []);
-          sectionKey = 'projects';
+          sectionKey = "projects";
           break;
         default:
           toast.error(`Cannot improve ${section.name} section`);
@@ -399,7 +599,11 @@ function CVGenerator() {
       }
 
       // Call AI recommendation API
-      const result = await getATSRecommendation(section.name, currentContent, section.score);
+      const result = await getATSRecommendation(
+        section.name,
+        currentContent,
+        section.score,
+      );
 
       toast.dismiss(loadingToast);
 
@@ -408,23 +612,23 @@ function CVGenerator() {
         setTokenBalance(result.remainingTokens);
 
         // Show success and recommendation
-        toast.success(`AI recommendation generated! (${result.tokensUsed} tokens used)`);
+        toast.success(
+          `AI recommendation generated! (${result.tokensUsed} tokens used)`,
+        );
 
         // Display the recommendation in a modal or apply it
         toast.info(result.recommendation, { duration: 8000 });
 
         // Optionally auto-apply the recommendation
         // You could show a modal here to let user review before applying
-
       } else {
-        toast.error('Failed to generate AI recommendation');
+        toast.error("Failed to generate AI recommendation");
       }
     } catch (error) {
-      console.error('ATS improvement error:', error);
-      toast.error('Failed to generate AI recommendation. Please try again.');
+      console.error("ATS improvement error:", error);
+      toast.error("Failed to generate AI recommendation. Please try again.");
     }
   };
-
 
   const styles = {
     container: {
@@ -433,6 +637,7 @@ function CVGenerator() {
         ? "#0f1419"
         : "linear-gradient(to bottom right, #f3f4f6, #e5e7eb)",
       padding: "16px",
+      paddingTop: "80px", // 64px navbar + 16px breathing room
     },
     maxWidthContainer: {
       maxWidth: "1400px",
@@ -815,7 +1020,7 @@ function CVGenerator() {
                     </div>
                   )}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -861,55 +1066,55 @@ function CVGenerator() {
                     </div>
                   )}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
 
       {/* Projects */}
       {formData.projects.some(
-        (proj) => proj.projectName || proj.description
+        (proj) => proj.projectName || proj.description,
       ) && (
-          <div style={styles.cvSection}>
-            <h2 style={styles.cvSectionTitle}>Projects</h2>
-            {formData.projects.map(
-              (proj, idx) =>
-                (proj.projectName || proj.description) && (
-                  <div key={idx} style={styles.cvItem}>
-                    <div style={styles.cvItemTitle}>{proj.projectName}</div>
-                    {proj.technologiesUsed && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#2563eb",
-                          fontWeight: "500",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {proj.technologiesUsed}
-                      </div>
-                    )}
-                    {proj.description && (
-                      <div style={styles.cvItemDescription}>
-                        {proj.description}
-                      </div>
-                    )}
-                    {proj.projectLink && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#2563eb",
-                          marginTop: "8px",
-                        }}
-                      >
-                        {proj.projectLink}
-                      </div>
-                    )}
-                  </div>
-                )
-            )}
-          </div>
-        )}
+        <div style={styles.cvSection}>
+          <h2 style={styles.cvSectionTitle}>Projects</h2>
+          {formData.projects.map(
+            (proj, idx) =>
+              (proj.projectName || proj.description) && (
+                <div key={idx} style={styles.cvItem}>
+                  <div style={styles.cvItemTitle}>{proj.projectName}</div>
+                  {proj.technologiesUsed && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#2563eb",
+                        fontWeight: "500",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {proj.technologiesUsed}
+                    </div>
+                  )}
+                  {proj.description && (
+                    <div style={styles.cvItemDescription}>
+                      {proj.description}
+                    </div>
+                  )}
+                  {proj.projectLink && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#2563eb",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {proj.projectLink}
+                    </div>
+                  )}
+                </div>
+              ),
+          )}
+        </div>
+      )}
 
       {/* Skills */}
       {formData.skills && (
@@ -932,7 +1137,7 @@ function CVGenerator() {
                   >
                     {skill.trim()}
                   </span>
-                )
+                ),
             )}
           </div>
         </div>
@@ -948,7 +1153,7 @@ function CVGenerator() {
                 <div key={idx} style={styles.cvItemDescription}>
                   • {lang.trim()}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -963,7 +1168,7 @@ function CVGenerator() {
                 <div key={idx} style={styles.cvItemDescription}>
                   • {cert.trim()}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1061,7 +1266,7 @@ function CVGenerator() {
                     </div>
                   )}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1122,66 +1327,66 @@ function CVGenerator() {
                     </div>
                   )}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
 
       {/* Projects */}
       {formData.projects.some(
-        (proj) => proj.projectName || proj.description
+        (proj) => proj.projectName || proj.description,
       ) && (
-          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-            <h2
-              style={{
-                ...styles.cvSectionTitle,
-                borderBottom: "2px solid #1f2937",
-                color: "#1f2937",
-              }}
-            >
-              PROJECTS
-            </h2>
-            {formData.projects.map(
-              (proj, idx) =>
-                (proj.projectName || proj.description) && (
-                  <div
-                    key={idx}
-                    style={{ ...styles.cvItem, marginBottom: "16px" }}
-                  >
-                    <div style={styles.cvItemTitle}>{proj.projectName}</div>
-                    {proj.technologiesUsed && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {proj.technologiesUsed}
-                      </div>
-                    )}
-                    {proj.description && (
-                      <div style={styles.cvItemDescription}>
-                        {proj.description}
-                      </div>
-                    )}
-                    {proj.projectLink && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#1f2937",
-                          marginTop: "8px",
-                        }}
-                      >
-                        {proj.projectLink}
-                      </div>
-                    )}
-                  </div>
-                )
-            )}
-          </div>
-        )}
+        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
+          <h2
+            style={{
+              ...styles.cvSectionTitle,
+              borderBottom: "2px solid #1f2937",
+              color: "#1f2937",
+            }}
+          >
+            PROJECTS
+          </h2>
+          {formData.projects.map(
+            (proj, idx) =>
+              (proj.projectName || proj.description) && (
+                <div
+                  key={idx}
+                  style={{ ...styles.cvItem, marginBottom: "16px" }}
+                >
+                  <div style={styles.cvItemTitle}>{proj.projectName}</div>
+                  {proj.technologiesUsed && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#1f2937",
+                        fontWeight: "500",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {proj.technologiesUsed}
+                    </div>
+                  )}
+                  {proj.description && (
+                    <div style={styles.cvItemDescription}>
+                      {proj.description}
+                    </div>
+                  )}
+                  {proj.projectLink && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#1f2937",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {proj.projectLink}
+                    </div>
+                  )}
+                </div>
+              ),
+          )}
+        </div>
+      )}
 
       {/* Skills */}
       {formData.skills && (
@@ -1213,7 +1418,7 @@ function CVGenerator() {
                   >
                     {skill.trim()}
                   </span>
-                )
+                ),
             )}
           </div>
         </div>
@@ -1237,7 +1442,7 @@ function CVGenerator() {
                 <div key={idx} style={styles.cvItemDescription}>
                   • {lang.trim()}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1260,7 +1465,7 @@ function CVGenerator() {
                 <div key={idx} style={styles.cvItemDescription}>
                   • {cert.trim()}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1374,7 +1579,7 @@ function CVGenerator() {
                     </div>
                   )}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1438,71 +1643,71 @@ function CVGenerator() {
                     </div>
                   )}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
 
       {/* Projects */}
       {formData.projects.some(
-        (proj) => proj.projectName || proj.description
+        (proj) => proj.projectName || proj.description,
       ) && (
-          <div style={{ marginBottom: "20px" }}>
-            <h2
-              style={{
-                fontSize: "14px",
-                fontWeight: "600",
-                color: "#1f2937",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: "12px",
-              }}
-            >
-              Projects
-            </h2>
-            {formData.projects.map(
-              (proj, idx) =>
-                (proj.projectName || proj.description) && (
-                  <div key={idx} style={{ marginBottom: "12px" }}>
-                    <div style={styles.cvItemTitle}>{proj.projectName}</div>
-                    {proj.technologiesUsed && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#9ca3af",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {proj.technologiesUsed}
-                      </div>
-                    )}
-                    {proj.description && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#6b7280",
-                          marginTop: "8px",
-                        }}
-                      >
-                        {proj.description}
-                      </div>
-                    )}
-                    {proj.projectLink && (
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#2563eb",
-                          marginTop: "8px",
-                        }}
-                      >
-                        {proj.projectLink}
-                      </div>
-                    )}
-                  </div>
-                )
-            )}
-          </div>
-        )}
+        <div style={{ marginBottom: "20px" }}>
+          <h2
+            style={{
+              fontSize: "14px",
+              fontWeight: "600",
+              color: "#1f2937",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              marginBottom: "12px",
+            }}
+          >
+            Projects
+          </h2>
+          {formData.projects.map(
+            (proj, idx) =>
+              (proj.projectName || proj.description) && (
+                <div key={idx} style={{ marginBottom: "12px" }}>
+                  <div style={styles.cvItemTitle}>{proj.projectName}</div>
+                  {proj.technologiesUsed && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#9ca3af",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {proj.technologiesUsed}
+                    </div>
+                  )}
+                  {proj.description && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#6b7280",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {proj.description}
+                    </div>
+                  )}
+                  {proj.projectLink && (
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#2563eb",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {proj.projectLink}
+                    </div>
+                  )}
+                </div>
+              ),
+          )}
+        </div>
+      )}
 
       {/* Skills */}
       {formData.skills && (
@@ -1536,7 +1741,7 @@ function CVGenerator() {
                   >
                     {skill.trim()}
                   </span>
-                )
+                ),
             )}
           </div>
         </div>
@@ -1570,7 +1775,7 @@ function CVGenerator() {
                 >
                   • {lang.trim()}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1603,7 +1808,7 @@ function CVGenerator() {
                 >
                   • {cert.trim()}
                 </div>
-              )
+              ),
           )}
         </div>
       )}
@@ -1686,7 +1891,9 @@ function CVGenerator() {
           onChange={(e) => updateField("summary", e.target.value)}
         />
         <AISuggestionButton
-          onClick={() => handleAISuggestion('summary', 'summary', formData.summary)}
+          onClick={() =>
+            handleAISuggestion("summary", "summary", formData.summary)
+          }
           loading={aiLoading.summary}
           disabled={tokenBalance < 20}
           darkMode={darkMode}
@@ -1724,7 +1931,7 @@ function CVGenerator() {
                   "education",
                   idx,
                   "institution",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -1740,7 +1947,7 @@ function CVGenerator() {
                   "education",
                   idx,
                   "degree",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -1756,7 +1963,7 @@ function CVGenerator() {
                   "education",
                   idx,
                   "fieldOfStudy",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -1780,7 +1987,7 @@ function CVGenerator() {
                       "education",
                       idx,
                       "startDate",
-                      e.target.value
+                      e.target.value,
                     )
                   }
                 />
@@ -1797,7 +2004,7 @@ function CVGenerator() {
                       "education",
                       idx,
                       "endDate",
-                      e.target.value
+                      e.target.value,
                     )
                   }
                 />
@@ -1866,7 +2073,7 @@ function CVGenerator() {
                   "experiences",
                   idx,
                   "company",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -1882,7 +2089,7 @@ function CVGenerator() {
                   "experiences",
                   idx,
                   "position",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -1905,16 +2112,11 @@ function CVGenerator() {
                       "experiences",
                       idx,
                       "startDate",
-                      date
+                      date,
                     )
                   }
                   onEndChange={(date) =>
-                    updateObjectArrayField(
-                      "experiences",
-                      idx,
-                      "endDate",
-                      date
-                    )
+                    updateObjectArrayField("experiences", idx, "endDate", date)
                   }
                   darkMode={darkMode}
                 />
@@ -1938,7 +2140,7 @@ function CVGenerator() {
                     "experiences",
                     idx,
                     "currentlyWorking",
-                    e.target.checked
+                    e.target.checked,
                   )
                 }
                 style={{ cursor: "pointer" }}
@@ -1965,12 +2167,18 @@ function CVGenerator() {
                   "experiences",
                   idx,
                   "description",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
             <AISuggestionButton
-              onClick={() => handleAISuggestion(`experience_${idx}`, 'experience', exp.description)}
+              onClick={() =>
+                handleAISuggestion(
+                  `experience_${idx}`,
+                  "experience",
+                  exp.description,
+                )
+              }
               loading={aiLoading[`experience_${idx}`]}
               disabled={tokenBalance < 20}
               darkMode={darkMode}
@@ -2027,7 +2235,7 @@ function CVGenerator() {
                   "projects",
                   idx,
                   "projectName",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -2042,7 +2250,7 @@ function CVGenerator() {
                   "projects",
                   idx,
                   "description",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -2058,7 +2266,7 @@ function CVGenerator() {
                   "projects",
                   idx,
                   "technologiesUsed",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -2074,7 +2282,7 @@ function CVGenerator() {
                   "projects",
                   idx,
                   "projectLink",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -2148,8 +2356,10 @@ function CVGenerator() {
   ];
 
   return (
-    <div style={styles.container}>
-      <div style={styles.maxWidthContainer}>
+    <>
+      <Navbar />
+      <div style={styles.container}>
+        <div style={styles.maxWidthContainer}>
         {/* Header */}
         <div
           style={{
@@ -2219,18 +2429,20 @@ function CVGenerator() {
 
         {/* Main Content - ATS Analysis Page */}
         {atsView ? (
-          <div style={{
-            padding: isMobile ? "16px" : "24px",
-            maxWidth: "1400px",
-            margin: "0 auto"
-          }}>
+          <div
+            style={{
+              padding: isMobile ? "16px" : "24px",
+              maxWidth: "1400px",
+              margin: "0 auto",
+            }}
+          >
             <ATSAnalysisSection
               cvData={{
                 ...formData,
                 experience: formData.experiences || [],
                 education: formData.education || [],
                 projects: formData.projects || [],
-                skills: formData.skills || ""
+                skills: formData.skills || "",
               }}
               darkMode={darkMode}
               onImproveSection={handleATSImprovement}
@@ -2258,7 +2470,7 @@ function CVGenerator() {
                   { id: "experience", label: "Experience", icon: Briefcase },
                   { id: "projects", label: "Projects", icon: Code },
                   { id: "skills", label: "Skills", icon: Award },
-                  { id: "additional", label: "Additional", icon: Plus }
+                  { id: "additional", label: "Additional", icon: Plus },
                 ];
 
                 return (
@@ -2623,15 +2835,13 @@ function CVGenerator() {
         userEmail={formData.email}
       />
 
-
-
       {/* AI Suggestion Modal */}
       <AISuggestionModal
         isOpen={showAISuggestionModal}
         onClose={() => {
           setShowAISuggestionModal(false);
           setCurrentField(null);
-          setOriginalContent('');
+          setOriginalContent("");
           setAiSuggestions([]);
         }}
         suggestions={aiSuggestions}
@@ -2648,28 +2858,29 @@ function CVGenerator() {
         toastOptions={{
           duration: 5000,
           style: {
-            background: darkMode ? '#1f2937' : '#ffffff',
-            color: darkMode ? '#ffffff' : '#1f2937',
-            fontSize: '14px',
-            padding: '16px',
-            borderRadius: '8px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+            background: darkMode ? "#1f2937" : "#ffffff",
+            color: darkMode ? "#ffffff" : "#1f2937",
+            fontSize: "14px",
+            padding: "16px",
+            borderRadius: "8px",
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
           },
           success: {
             iconTheme: {
-              primary: '#10b981',
-              secondary: '#ffffff',
+              primary: "#10b981",
+              secondary: "#ffffff",
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#ffffff',
+              primary: "#ef4444",
+              secondary: "#ffffff",
             },
           },
         }}
       />
-    </div>
+      </div>
+    </>
   );
 }
 

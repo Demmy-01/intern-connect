@@ -119,6 +119,14 @@ const Navbar = ({ textColor }) => {
                   >
                     Internships
                   </Link>
+                  <Link
+                    to="/cv-generator"
+                    className={`nav-link ${
+                      isActive("/cv-generator") ? "active" : ""
+                    }`}
+                  >
+                    CV Generator
+                  </Link>
                 </>
               )}
             </div>
@@ -230,6 +238,14 @@ const Navbar = ({ textColor }) => {
                         }`}
                       >
                         Internships
+                      </Link>
+                      <Link
+                        to="/cv-generator"
+                        className={`mobile-nav-link ${
+                          isActive("/cv-generator") ? "active" : ""
+                        }`}
+                      >
+                        CV Generator
                       </Link>
                     </>
                   )}

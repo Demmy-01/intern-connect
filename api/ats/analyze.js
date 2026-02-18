@@ -206,7 +206,7 @@ function generateSectionAnalysis(cvData, scores) {
     },
   ];
 }
-
+x
 function generateRecommendations(cvData, scores) {
   const recommendations = [];
   
