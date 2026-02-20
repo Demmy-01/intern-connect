@@ -636,12 +636,17 @@ function CVGenerator() {
       background: darkMode
         ? "#0f1419"
         : "linear-gradient(to bottom right, #f3f4f6, #e5e7eb)",
-      padding: "16px",
+      padding: isMobile ? "8px" : "16px",
       paddingTop: "80px", // 64px navbar + 16px breathing room
+      overflowX: "hidden",
+      boxSizing: "border-box",
+      width: "100%",
     },
     maxWidthContainer: {
       maxWidth: "1400px",
       margin: "0 auto",
+      width: "100%",
+      boxSizing: "border-box",
     },
     header: {
       display: "flex",
@@ -720,11 +725,15 @@ function CVGenerator() {
       display: "grid",
       gridTemplateColumns: "1fr 1.5fr",
       gap: "24px",
+      width: "100%",
+      boxSizing: "border-box",
     },
     mainGridMobile: {
       display: "grid",
       gridTemplateColumns: "1fr",
-      gap: "24px",
+      gap: "16px",
+      width: "100%",
+      boxSizing: "border-box",
     },
     leftPanel: {
       backgroundColor: darkMode ? "#1f2937" : "white",
@@ -734,6 +743,9 @@ function CVGenerator() {
       height: "fit-content",
       maxHeight: "90vh",
       overflowY: "auto",
+      overflowX: "hidden",
+      boxSizing: "border-box",
+      width: "100%",
     },
     panelTitle: {
       fontSize: "18px",
@@ -748,12 +760,16 @@ function CVGenerator() {
       gridTemplateColumns: "repeat(2, 1fr)",
       gap: "8px",
       marginBottom: "16px",
+      width: "100%",
+      boxSizing: "border-box",
     },
     tabNavMobile: {
       display: "grid",
       gridTemplateColumns: "repeat(2, 1fr)",
       gap: "6px",
       marginBottom: "16px",
+      width: "100%",
+      boxSizing: "border-box",
     },
     tabButton: {
       padding: "10px 12px",
@@ -766,6 +782,13 @@ function CVGenerator() {
       alignItems: "center",
       gap: "6px",
       transition: "all 0.2s",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      minWidth: 0,
+      width: "100%",
+      boxSizing: "border-box",
+      justifyContent: "flex-start",
     },
     tabButtonActive: {
       backgroundColor: "#2563eb",
@@ -780,6 +803,9 @@ function CVGenerator() {
       borderRadius: "8px",
       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
       padding: "24px",
+      overflowX: "hidden",
+      boxSizing: "border-box",
+      width: "100%",
     },
     formSection: {
       marginBottom: "24px",
