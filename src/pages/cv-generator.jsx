@@ -368,36 +368,65 @@ function CVGenerator() {
 
   const downloadCV = async () => {
     const element = document.getElementById("cv-preview");
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
 
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
+    // ── Fixed-width clone so the PDF always matches A4 regardless of screen ──
+    const A4_PX = 794; // 210 mm at 96 dpi
+    const SCALE  = 2;  // balanced: crisp text, small file size
 
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
+    // Create a hidden wrapper forced to A4 width
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = `
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: ${A4_PX}px;
+      background: white;
+      z-index: -1;
+    `;
 
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    // Clone the CV element into the wrapper
+    const clone = element.cloneNode(true);
+    clone.style.width  = `${A4_PX}px`;
+    clone.style.minWidth = `${A4_PX}px`;
+    clone.style.boxSizing = "border-box";
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
 
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    try {
+      const canvas = await html2canvas(wrapper, {
+        scale: SCALE,
+        useCORS: true,
+        logging: false,
+        width: A4_PX,
+        windowWidth: A4_PX,
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.82);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // Side margins — MARGIN_Y adds breathing room at the top of each page
+      const MARGIN_X  = 15;  
+      const MARGIN_Y  = 12;
+      const PAGE_H    = 297;
+      const CONTENT_W = 210 - MARGIN_X * 2; // 180 mm usable width
+      const imgHeight = (canvas.height * CONTENT_W) / canvas.width;
+      const totalPages = Math.ceil((imgHeight + MARGIN_Y) / PAGE_H);
+
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) pdf.addPage();
+        // Each page: image starts at MARGIN_Y on page 0, then shifts up by PAGE_H per page
+        const yOffset = MARGIN_Y - page * PAGE_H;
+        pdf.addImage(imgData, "JPEG", MARGIN_X, yOffset, CONTENT_W, imgHeight);
+      }
+
+      pdf.save(`${formData.fullName || "CV"}.pdf`);
+    } finally {
+      document.body.removeChild(wrapper);
     }
-
-    pdf.save(`${formData.fullName || "CV"}.pdf`);
   };
 
   // AI Suggestion Handler
@@ -914,63 +943,69 @@ function CVGenerator() {
     cvPreview: {
       backgroundColor: "white",
       borderRadius: "8px",
-      padding: "32px",
+      padding: "0",
       boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+      overflow: "hidden",
     },
     cvHeader: {
       background: "linear-gradient(to right, #2563eb, #1e40af)",
       color: "white",
-      padding: "32px",
+      padding: "36px 36px 28px",
       borderRadius: "8px 8px 0 0",
       marginBottom: "24px",
     },
+    cvBody: {
+      padding: "0 36px 36px",
+    },
     cvName: {
-      fontSize: "32px",
-      fontWeight: "bold",
+      fontSize: "36px",
+      fontWeight: "800",
       marginBottom: "12px",
     },
     cvContact: {
-      fontSize: "14px",
+      fontSize: "15px",
       display: "flex",
       alignItems: "center",
       gap: "8px",
-      marginBottom: "4px",
+      marginBottom: "6px",
       opacity: 0.95,
     },
     cvSection: {
       marginBottom: "24px",
     },
     cvSectionTitle: {
-      fontSize: "18px",
-      fontWeight: "bold",
+      fontSize: "20px",
+      fontWeight: "800",
       color: "#1f2937",
       borderBottom: "2px solid #2563eb",
       paddingBottom: "8px",
       marginBottom: "16px",
+      letterSpacing: "0.02em",
     },
     cvItem: {
       marginBottom: "16px",
     },
     cvItemTitle: {
-      fontSize: "16px",
-      fontWeight: "bold",
-      color: "#1f2937",
+      fontSize: "17px",
+      fontWeight: "700",
+      color: "#111827",
     },
     cvItemSubtitle: {
-      fontSize: "14px",
+      fontSize: "15px",
       color: "#2563eb",
-      fontWeight: "500",
+      fontWeight: "600",
     },
     cvItemDate: {
-      fontSize: "13px",
+      fontSize: "14px",
       color: "#6b7280",
+      fontWeight: "500",
       marginTop: "4px",
     },
     cvItemDescription: {
-      fontSize: "14px",
+      fontSize: "15px",
       color: "#374151",
       marginTop: "8px",
-      lineHeight: "1.5",
+      lineHeight: "1.65",
     },
   };
 
@@ -1005,199 +1040,173 @@ function CVGenerator() {
         )}
       </div>
 
-      {/* Summary */}
-      {formData.summary && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Professional Summary</h2>
-          <p style={styles.cvItemDescription}>{formData.summary}</p>
-        </div>
-      )}
+      {/* Body */}
+      <div style={styles.cvBody}>
 
-      {/* Experience */}
-      {formData.experiences.some((exp) => exp.company || exp.position) && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Work Experience</h2>
-          {formData.experiences.map(
-            (exp, idx) =>
-              (exp.company || exp.position) && (
-                <div key={idx} style={styles.cvItem}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <div>
-                      <div style={styles.cvItemTitle}>{exp.position}</div>
-                      <div style={styles.cvItemSubtitle}>{exp.company}</div>
+        {/* Summary */}
+        {formData.summary && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Professional Summary</h2>
+            <p style={styles.cvItemDescription}>{formData.summary}</p>
+          </div>
+        )}
+
+        {/* Experience */}
+        {formData.experiences.some((exp) => exp.company || exp.position) && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Work Experience</h2>
+            {formData.experiences.map(
+              (exp, idx) =>
+                (exp.company || exp.position) && (
+                  <div key={idx} style={styles.cvItem}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "baseline",
+                      }}
+                    >
+                      <div>
+                        <div style={styles.cvItemTitle}>{exp.position}</div>
+                        <div style={styles.cvItemSubtitle}>{exp.company}</div>
+                      </div>
+                      <div style={styles.cvItemDate}>
+                        {exp.startDate}
+                        {exp.endDate && !exp.currentlyWorking && ` - ${exp.endDate}`}
+                        {exp.currentlyWorking && " - Present"}
+                      </div>
                     </div>
-                    <div style={styles.cvItemDate}>
-                      {exp.startDate}
-                      {exp.endDate &&
-                        !exp.currentlyWorking &&
-                        ` - ${exp.endDate}`}
-                      {exp.currentlyWorking && " - Present"}
-                    </div>
+                    {exp.description && (
+                      <div style={styles.cvItemDescription}>{exp.description}</div>
+                    )}
                   </div>
-                  {exp.description && (
-                    <div style={styles.cvItemDescription}>
-                      {exp.description}
-                    </div>
-                  )}
-                </div>
-              ),
-          )}
-        </div>
-      )}
-
-      {/* Education */}
-      {formData.education.some((edu) => edu.institution || edu.degree) && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Education</h2>
-          {formData.education.map(
-            (edu, idx) =>
-              (edu.institution || edu.degree) && (
-                <div key={idx} style={styles.cvItem}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <div>
-                      <div style={styles.cvItemTitle}>{edu.degree}</div>
-                      <div style={styles.cvItemSubtitle}>{edu.institution}</div>
-                      {edu.fieldOfStudy && (
-                        <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                          {edu.fieldOfStudy}
-                        </div>
-                      )}
-                    </div>
-                    <div style={styles.cvItemDate}>
-                      {edu.startDate}
-                      {edu.endDate && ` - ${edu.endDate}`}
-                    </div>
-                  </div>
-                  {edu.gpa && (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#6b7280",
-                        marginTop: "4px",
-                      }}
-                    >
-                      GPA: {edu.gpa}
-                    </div>
-                  )}
-                </div>
-              ),
-          )}
-        </div>
-      )}
-
-      {/* Projects */}
-      {formData.projects.some(
-        (proj) => proj.projectName || proj.description,
-      ) && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Projects</h2>
-          {formData.projects.map(
-            (proj, idx) =>
-              (proj.projectName || proj.description) && (
-                <div key={idx} style={styles.cvItem}>
-                  <div style={styles.cvItemTitle}>{proj.projectName}</div>
-                  {proj.technologiesUsed && (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#2563eb",
-                        fontWeight: "500",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {proj.technologiesUsed}
-                    </div>
-                  )}
-                  {proj.description && (
-                    <div style={styles.cvItemDescription}>
-                      {proj.description}
-                    </div>
-                  )}
-                  {proj.projectLink && (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#2563eb",
-                        marginTop: "8px",
-                      }}
-                    >
-                      {proj.projectLink}
-                    </div>
-                  )}
-                </div>
-              ),
-          )}
-        </div>
-      )}
-
-      {/* Skills */}
-      {formData.skills && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Skills</h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            {formData.skills.split("\n").map(
-              (skill, idx) =>
-                skill.trim() && (
-                  <span
-                    key={idx}
-                    style={{
-                      backgroundColor: "#e0e7ff",
-                      color: "#2563eb",
-                      padding: "6px 12px",
-                      borderRadius: "20px",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {skill.trim()}
-                  </span>
                 ),
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Languages */}
-      {formData.languages && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Languages</h2>
-          {formData.languages.split("\n").map(
-            (lang, idx) =>
-              lang.trim() && (
-                <div key={idx} style={styles.cvItemDescription}>
-                  • {lang.trim()}
-                </div>
-              ),
-          )}
-        </div>
-      )}
+        {/* Education */}
+        {formData.education.some((edu) => edu.institution || edu.degree) && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Education</h2>
+            {formData.education.map(
+              (edu, idx) =>
+                (edu.institution || edu.degree) && (
+                  <div key={idx} style={styles.cvItem}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "baseline",
+                      }}
+                    >
+                      <div>
+                        <div style={styles.cvItemTitle}>{edu.degree}</div>
+                        <div style={styles.cvItemSubtitle}>{edu.institution}</div>
+                        {edu.fieldOfStudy && (
+                          <div style={{ fontSize: "14px", color: "#6b7280" }}>
+                            {edu.fieldOfStudy}
+                          </div>
+                        )}
+                      </div>
+                      <div style={styles.cvItemDate}>
+                        {edu.startDate}
+                        {edu.endDate && ` - ${edu.endDate}`}
+                      </div>
+                    </div>
+                    {edu.gpa && (
+                      <div style={{ fontSize: "14px", color: "#6b7280", marginTop: "4px" }}>
+                        GPA: {edu.gpa}
+                      </div>
+                    )}
+                  </div>
+                ),
+            )}
+          </div>
+        )}
 
-      {/* Certifications */}
-      {formData.certifications && (
-        <div style={styles.cvSection}>
-          <h2 style={styles.cvSectionTitle}>Certifications</h2>
-          {formData.certifications.split("\n").map(
-            (cert, idx) =>
-              cert.trim() && (
-                <div key={idx} style={styles.cvItemDescription}>
-                  • {cert.trim()}
-                </div>
-              ),
-          )}
-        </div>
-      )}
+        {/* Projects */}
+        {formData.projects.some((proj) => proj.projectName || proj.description) && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Projects</h2>
+            {formData.projects.map(
+              (proj, idx) =>
+                (proj.projectName || proj.description) && (
+                  <div key={idx} style={styles.cvItem}>
+                    <div style={styles.cvItemTitle}>{proj.projectName}</div>
+                    {proj.technologiesUsed && (
+                      <div style={{ fontSize: "14px", color: "#2563eb", fontWeight: "600", marginTop: "4px" }}>
+                        {proj.technologiesUsed}
+                      </div>
+                    )}
+                    {proj.description && (
+                      <div style={styles.cvItemDescription}>{proj.description}</div>
+                    )}
+                    {proj.projectLink && (
+                      <div style={{ fontSize: "14px", color: "#2563eb", marginTop: "8px" }}>
+                        {proj.projectLink}
+                      </div>
+                    )}
+                  </div>
+                ),
+            )}
+          </div>
+        )}
+
+        {/* Skills */}
+        {formData.skills && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Skills</h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {formData.skills.split("\n").map(
+                (skill, idx) =>
+                  skill.trim() && (
+                    <span
+                      key={idx}
+                      style={{
+                        backgroundColor: "#e0e7ff",
+                        color: "#2563eb",
+                        padding: "6px 14px",
+                        borderRadius: "20px",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {skill.trim()}
+                    </span>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Languages */}
+        {formData.languages && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Languages</h2>
+            {formData.languages.split("\n").map(
+              (lang, idx) =>
+                lang.trim() && (
+                  <div key={idx} style={styles.cvItemDescription}>• {lang.trim()}</div>
+                ),
+            )}
+          </div>
+        )}
+
+        {/* Certifications */}
+        {formData.certifications && (
+          <div style={styles.cvSection}>
+            <h2 style={styles.cvSectionTitle}>Certifications</h2>
+            {formData.certifications.split("\n").map(
+              (cert, idx) =>
+                cert.trim() && (
+                  <div key={idx} style={styles.cvItemDescription}>• {cert.trim()}</div>
+                ),
+            )}
+          </div>
+        )}
+
+      </div>
     </div>
   );
 
@@ -1232,274 +1241,177 @@ function CVGenerator() {
         )}
       </div>
 
-      {/* Summary */}
-      {formData.summary && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            PROFESSIONAL SUMMARY
-          </h2>
-          <p style={styles.cvItemDescription}>{formData.summary}</p>
-        </div>
-      )}
+      {/* Body */}
+      <div style={styles.cvBody}>
 
-      {/* Experience */}
-      {formData.experiences.some((exp) => exp.company || exp.position) && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            WORK EXPERIENCE
-          </h2>
-          {formData.experiences.map(
-            (exp, idx) =>
-              (exp.company || exp.position) && (
-                <div
-                  key={idx}
-                  style={{ ...styles.cvItem, marginBottom: "20px" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <div style={styles.cvItemTitle}>{exp.position}</div>
-                    <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                      {exp.startDate}
-                      {exp.endDate &&
-                        !exp.currentlyWorking &&
-                        ` - ${exp.endDate}`}
-                      {exp.currentlyWorking && " - Present"}
-                    </div>
-                  </div>
-                  <div style={{ ...styles.cvItemSubtitle, color: "#1f2937" }}>
-                    {exp.company}
-                  </div>
-                  {exp.description && (
-                    <div style={styles.cvItemDescription}>
-                      {exp.description}
-                    </div>
-                  )}
-                </div>
-              ),
-          )}
-        </div>
-      )}
+        {/* Summary */}
+        {formData.summary && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              PROFESSIONAL SUMMARY
+            </h2>
+            <p style={styles.cvItemDescription}>{formData.summary}</p>
+          </div>
+        )}
 
-      {/* Education */}
-      {formData.education.some((edu) => edu.institution || edu.degree) && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            EDUCATION
-          </h2>
-          {formData.education.map(
-            (edu, idx) =>
-              (edu.institution || edu.degree) && (
-                <div
-                  key={idx}
-                  style={{ ...styles.cvItem, marginBottom: "16px" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "start",
-                    }}
-                  >
-                    <div>
-                      <div style={styles.cvItemTitle}>{edu.degree}</div>
-                      <div
-                        style={{ ...styles.cvItemSubtitle, color: "#1f2937" }}
-                      >
-                        {edu.institution}
+        {/* Experience */}
+        {formData.experiences.some((exp) => exp.company || exp.position) && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              WORK EXPERIENCE
+            </h2>
+            {formData.experiences.map(
+              (exp, idx) =>
+                (exp.company || exp.position) && (
+                  <div key={idx} style={{ ...styles.cvItem, marginBottom: "20px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                      <div style={styles.cvItemTitle}>{exp.position}</div>
+                      <div style={{ fontSize: "14px", color: "#6b7280", fontWeight: "500" }}>
+                        {exp.startDate}
+                        {exp.endDate && !exp.currentlyWorking && ` - ${exp.endDate}`}
+                        {exp.currentlyWorking && " - Present"}
                       </div>
-                      {edu.fieldOfStudy && (
-                        <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                          {edu.fieldOfStudy}
-                        </div>
-                      )}
                     </div>
-                    <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                      {edu.startDate}
-                      {edu.endDate && ` - ${edu.endDate}`}
-                    </div>
+                    <div style={{ ...styles.cvItemSubtitle, color: "#1f2937" }}>{exp.company}</div>
+                    {exp.description && (
+                      <div style={styles.cvItemDescription}>{exp.description}</div>
+                    )}
                   </div>
-                  {edu.gpa && (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#6b7280",
-                        marginTop: "4px",
-                      }}
-                    >
-                      GPA: {edu.gpa}
-                    </div>
-                  )}
-                </div>
-              ),
-          )}
-        </div>
-      )}
-
-      {/* Projects */}
-      {formData.projects.some(
-        (proj) => proj.projectName || proj.description,
-      ) && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            PROJECTS
-          </h2>
-          {formData.projects.map(
-            (proj, idx) =>
-              (proj.projectName || proj.description) && (
-                <div
-                  key={idx}
-                  style={{ ...styles.cvItem, marginBottom: "16px" }}
-                >
-                  <div style={styles.cvItemTitle}>{proj.projectName}</div>
-                  {proj.technologiesUsed && (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {proj.technologiesUsed}
-                    </div>
-                  )}
-                  {proj.description && (
-                    <div style={styles.cvItemDescription}>
-                      {proj.description}
-                    </div>
-                  )}
-                  {proj.projectLink && (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#1f2937",
-                        marginTop: "8px",
-                      }}
-                    >
-                      {proj.projectLink}
-                    </div>
-                  )}
-                </div>
-              ),
-          )}
-        </div>
-      )}
-
-      {/* Skills */}
-      {formData.skills && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            SKILLS
-          </h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            {formData.skills.split("\n").map(
-              (skill, idx) =>
-                skill.trim() && (
-                  <span
-                    key={idx}
-                    style={{
-                      backgroundColor: "#f3f4f6",
-                      color: "#1f2937",
-                      padding: "6px 12px",
-                      borderRadius: "4px",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      border: "1px solid #d1d5db",
-                    }}
-                  >
-                    {skill.trim()}
-                  </span>
                 ),
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Languages */}
-      {formData.languages && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            LANGUAGES
-          </h2>
-          {formData.languages.split("\n").map(
-            (lang, idx) =>
-              lang.trim() && (
-                <div key={idx} style={styles.cvItemDescription}>
-                  • {lang.trim()}
-                </div>
-              ),
-          )}
-        </div>
-      )}
+        {/* Education */}
+        {formData.education.some((edu) => edu.institution || edu.degree) && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              EDUCATION
+            </h2>
+            {formData.education.map(
+              (edu, idx) =>
+                (edu.institution || edu.degree) && (
+                  <div key={idx} style={{ ...styles.cvItem, marginBottom: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                      <div>
+                        <div style={styles.cvItemTitle}>{edu.degree}</div>
+                        <div style={{ ...styles.cvItemSubtitle, color: "#1f2937" }}>{edu.institution}</div>
+                        {edu.fieldOfStudy && (
+                          <div style={{ fontSize: "14px", color: "#6b7280" }}>{edu.fieldOfStudy}</div>
+                        )}
+                      </div>
+                      <div style={{ fontSize: "14px", color: "#6b7280", fontWeight: "500" }}>
+                        {edu.startDate}{edu.endDate && ` - ${edu.endDate}`}
+                      </div>
+                    </div>
+                    {edu.gpa && (
+                      <div style={{ fontSize: "14px", color: "#6b7280", marginTop: "4px" }}>
+                        GPA: {edu.gpa}
+                      </div>
+                    )}
+                  </div>
+                ),
+            )}
+          </div>
+        )}
 
-      {/* Certifications */}
-      {formData.certifications && (
-        <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937" }}>
-          <h2
-            style={{
-              ...styles.cvSectionTitle,
-              borderBottom: "2px solid #1f2937",
-              color: "#1f2937",
-            }}
-          >
-            CERTIFICATIONS
-          </h2>
-          {formData.certifications.split("\n").map(
-            (cert, idx) =>
-              cert.trim() && (
-                <div key={idx} style={styles.cvItemDescription}>
-                  • {cert.trim()}
-                </div>
-              ),
-          )}
-        </div>
-      )}
+        {/* Projects */}
+        {formData.projects.some((proj) => proj.projectName || proj.description) && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              PROJECTS
+            </h2>
+            {formData.projects.map(
+              (proj, idx) =>
+                (proj.projectName || proj.description) && (
+                  <div key={idx} style={{ ...styles.cvItem, marginBottom: "16px" }}>
+                    <div style={styles.cvItemTitle}>{proj.projectName}</div>
+                    {proj.technologiesUsed && (
+                      <div style={{ fontSize: "14px", color: "#1f2937", fontWeight: "600", marginTop: "4px" }}>
+                        {proj.technologiesUsed}
+                      </div>
+                    )}
+                    {proj.description && (
+                      <div style={styles.cvItemDescription}>{proj.description}</div>
+                    )}
+                    {proj.projectLink && (
+                      <div style={{ fontSize: "14px", color: "#1f2937", marginTop: "8px" }}>
+                        {proj.projectLink}
+                      </div>
+                    )}
+                  </div>
+                ),
+            )}
+          </div>
+        )}
+
+        {/* Skills */}
+        {formData.skills && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              SKILLS
+            </h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {formData.skills.split("\n").map(
+                (skill, idx) =>
+                  skill.trim() && (
+                    <span
+                      key={idx}
+                      style={{
+                        backgroundColor: "#f3f4f6",
+                        color: "#1f2937",
+                        padding: "6px 14px",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        border: "1px solid #d1d5db",
+                      }}
+                    >
+                      {skill.trim()}
+                    </span>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Languages */}
+        {formData.languages && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              LANGUAGES
+            </h2>
+            {formData.languages.split("\n").map(
+              (lang, idx) =>
+                lang.trim() && (
+                  <div key={idx} style={styles.cvItemDescription}>• {lang.trim()}</div>
+                ),
+            )}
+          </div>
+        )}
+
+        {/* Certifications */}
+        {formData.certifications && (
+          <div style={{ ...styles.cvSection, borderLeft: "4px solid #1f2937", paddingLeft: "16px" }}>
+            <h2 style={{ ...styles.cvSectionTitle, borderBottom: "2px solid #1f2937", color: "#1f2937" }}>
+              CERTIFICATIONS
+            </h2>
+            {formData.certifications.split("\n").map(
+              (cert, idx) =>
+                cert.trim() && (
+                  <div key={idx} style={styles.cvItemDescription}>• {cert.trim()}</div>
+                ),
+            )}
+          </div>
+        )}
+
+      </div>
     </div>
   );
 
   const MinimalTemplate = () => (
     <div style={styles.cvPreview}>
+      <div style={styles.cvBody}>
       {/* Header */}
       <div
         style={{
@@ -1838,6 +1750,7 @@ function CVGenerator() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 
