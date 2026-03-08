@@ -22,6 +22,8 @@ const OrganizationOnboarding = () => {
     companyDescription: "",
     location: "",
     companySize: "",
+    website: "",
+    linkedinProfile: "",
 
     // Contact Person
     contactName: "",
@@ -277,6 +279,8 @@ const OrganizationOnboarding = () => {
         companyDescription: profileData.companyDescription,
         location: profileData.location,
         companySize: profileData.companySize,
+        website: profileData.website || null,
+        linkedinProfile: profileData.linkedinProfile || null,
 
         // Contact Information
         contactName: profileData.contactName,
@@ -446,6 +450,30 @@ const OrganizationOnboarding = () => {
         {errors.location && (
           <span className="org-error-text">{errors.location}</span>
         )}
+      </div>
+
+      <div className="org-form-grid">
+        <div className="org-form-field">
+          <label className="org-form-label">Website URL</label>
+          <input
+            type="url"
+            placeholder="https://www.yourcompany.com"
+            className="org-form-input"
+            value={profileData.website}
+            onChange={(e) => handleInputChange("website", e.target.value)}
+          />
+        </div>
+
+        <div className="org-form-field">
+          <label className="org-form-label">LinkedIn Profile URL</label>
+          <input
+            type="url"
+            placeholder="https://linkedin.com/company/yourcompany"
+            className="org-form-input"
+            value={profileData.linkedinProfile}
+            onChange={(e) => handleInputChange("linkedinProfile", e.target.value)}
+          />
+        </div>
       </div>
     </div>
   );

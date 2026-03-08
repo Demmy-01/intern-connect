@@ -408,8 +408,13 @@ class OrganizationProfileService {
           company_type: onboardingData.companyType,
           industry: onboardingData.industry,
           company_description: onboardingData.companyDescription,
-          location: onboardingData.location,
-          company_size: companySizeInt,
+          // location schema is jsonb — store as {city: "..."}
+          location: onboardingData.location ? { city: onboardingData.location } : null,
+          // company_size keep as text range (e.g. "11-50") — DO NOT convert to int
+          company_size: onboardingData.companySize || null,
+          website: onboardingData.website || null,
+          linkedin_profile: onboardingData.linkedinProfile || null,
+          address: onboardingData.address || null,
           verification_status: 'pending'
         }])
         .select()

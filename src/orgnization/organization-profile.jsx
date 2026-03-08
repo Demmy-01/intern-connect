@@ -101,6 +101,13 @@ const OrganizationProfiles = () => {
     }
   };
 
+  // location is stored as jsonb {city: "..."} — read safely
+  const getLocationText = (loc) => {
+    if (!loc) return null;
+    if (typeof loc === "string") return loc;
+    return loc.city || loc.location || null;
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -196,7 +203,7 @@ const OrganizationProfiles = () => {
                         className="profile-icons"
                       />
                     </span>
-                    <span>{organizationData.location || "Not specified"}</span>
+                    <span>{getLocationText(organizationData.location) || "Not specified"}</span>
                   </div>
                 </div>
               </div>
