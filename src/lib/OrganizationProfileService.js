@@ -505,20 +505,16 @@ class OrganizationProfileService {
       }
 
       // Mark onboarding as complete in the profiles table
-      try {
-        const { error: profileUpdateError } = await this.supabase
-          .from('profiles')
-          .update({ has_completed_onboarding: true })
-          .eq('id', user.id);
+      const { error: profileUpdateError } = await this.supabase
+        .from('profiles')
+        .update({ has_completed_onboarding: true })
+        .eq('id', user.id);
 
-        if (profileUpdateError) {
-          console.error('Error updating onboarding status:', profileUpdateError);
-        } else {
-          console.log('has_completed_onboarding set to true for user:', user.id);
-        }
-      } catch (profileErr) {
-        console.error('Profile update error:', profileErr);
-        // Non-fatal — onboarding data is saved even if this fails
+      if (profileUpdateError) {
+        console.error('Error updating onboarding status:', profileUpdateError);
+        throw new Error(`Failed to save onboarding completion status: ${profileUpdateError.message}`);
+      } else {
+        console.log('has_completed_onboarding set to true for user:', user.id);
       }
 
       return organization;

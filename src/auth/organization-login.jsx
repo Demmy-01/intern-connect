@@ -59,10 +59,14 @@ const OrganizationLogin = () => {
         setSuccess("Login successful! Redirecting…");
         toast.success("Login successful!");
         try {
-          const { supabase } = await import("../lib/supabase.js");
-          const { data: profile } = await supabase.from("profiles").select("has_completed_onboarding").eq("id", result.user.id).single();
-          setTimeout(() => navigate(profile?.has_completed_onboarding ? "/dashboard-overview" : "/organization-onboarding"), 1500);
-        } catch {
+          const profileData = await authService.getUserProfile();
+          const hasCompleted = profileData?.profile?.has_completed_onboarding === true;
+          
+          console.log("Organization login profile check:", profileData?.profile);
+          setTimeout(() => navigate(hasCompleted ? "/dashboard-overview" : "/organization-onboarding"), 1500);
+        } catch (e) {
+          console.error("Login redirect profile check exception:", e);
+          // Default to onboarding if we really can't determine
           setTimeout(() => navigate("/organization-onboarding"), 1500);
         }
       } else {

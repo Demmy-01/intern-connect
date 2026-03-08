@@ -278,10 +278,14 @@ const OnboardingPage = () => {
       console.log("Profile updated successfully");
 
       // Mark onboarding as completed
-      await supabase
+      const { error: profileUpdateError } = await supabase
         .from("profiles")
         .update({ has_completed_onboarding: true })
         .eq("id", currentUser.id);
+
+      if (profileUpdateError) {
+        throw new Error(`Failed to save onboarding completion status: ${profileUpdateError.message}`);
+      }
 
       console.log("Onboarding marked as complete");
 

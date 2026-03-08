@@ -83,16 +83,17 @@ const Login = () => {
       if (result.success) {
         await securityService.logAuthAttempt(formData.email, true);
         setSuccess(result.message);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          try {
-            const { data: profile } = await supabase.from("profiles").select("has_completed_onboarding").eq("id", user.id).single();
-            if (!profile?.has_completed_onboarding) {
-              toast.success(result.message || "Logged in successfully");
-              setTimeout(() => navigate("/student-onboarding"), 1500);
-              setLoading(false); return;
-            }
-          } catch {}
+        try {
+          const profileData = await authService.getUserProfile();
+          const hasCompleted = profileData?.profile?.has_completed_onboarding === true;
+          
+          if (!hasCompleted) {
+            toast.success(result.message || "Logged in successfully");
+            setTimeout(() => navigate("/student-onboarding"), 1500);
+            setLoading(false); return;
+          }
+        } catch (e) {
+          console.error("Student login profile check failed:", e);
         }
         toast.success(result.message || "Logged in successfully");
         setTimeout(() => navigate("/dashboard"), 1500);
