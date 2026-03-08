@@ -143,11 +143,11 @@ const Login = () => {
 
           <div className="auth-left-stats">
             <div className="auth-stat-card">
-              <div className="auth-stat-number">10k+</div>
+              <div className="auth-stat-number">Ambitious</div>
               <div className="auth-stat-label">Students</div>
             </div>
             <div className="auth-stat-card">
-              <div className="auth-stat-number">500+</div>
+              <div className="auth-stat-number">Trusted</div>
               <div className="auth-stat-label">Companies</div>
             </div>
             <div className="auth-stat-card">

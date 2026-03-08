@@ -90,7 +90,7 @@ const OrganizationLogin = () => {
           <h1 className="auth-left-headline">Hire the <span>Next Generation</span><br />of Talent.</h1>
           <p className="auth-left-sub">Post internships, review applications with AI-powered screening, and build your talent pipeline — all in one place.</p>
           <div className="auth-left-stats">
-            <div className="auth-stat-card"><div className="auth-stat-number">500+</div><div className="auth-stat-label">Companies</div></div>
+            <div className="auth-stat-card"><div className="auth-stat-number">Trusted</div><div className="auth-stat-label">Companies</div></div>
             <div className="auth-stat-card"><div className="auth-stat-number">AI</div><div className="auth-stat-label">Screening</div></div>
             <div className="auth-stat-card"><div className="auth-stat-number">Free</div><div className="auth-stat-label">To Post</div></div>
           </div>
