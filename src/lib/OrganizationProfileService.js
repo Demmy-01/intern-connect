@@ -45,86 +45,86 @@ class OrganizationProfileService {
   }
 
   async uploadLogo(file) {
-  try {
-    const user = await this.getCurrentUser();
-    if (!user) throw new Error('User not authenticated');
+    try {
+      const user = await this.getCurrentUser();
+      if (!user) throw new Error('User not authenticated');
 
-    // Validate file size (5MB limit for images)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      throw new Error('Image size must be less than 5MB');
-    }
+      // Validate file size (5MB limit for images)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error('Image size must be less than 5MB');
+      }
 
-    // Validate file type (only images)
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      throw new Error('File type not supported. Please upload JPG, PNG, or WebP images only.');
-    }
+      // Validate file type (only images)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('File type not supported. Please upload JPG, PNG, or WebP images only.');
+      }
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/logo.${fileExt}`;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/logo.${fileExt}`;
 
-    console.log('Uploading logo to Supabase:', fileName);
+      console.log('Uploading logo to Supabase:', fileName);
 
-    // Remove existing logo if it exists
-    const { data: existingFiles } = await this.supabase.storage
-      .from('avatars')
-      .list(`${user.id}`, { search: 'logo.' });
+      // Remove existing logo if it exists
+      const { data: existingFiles } = await this.supabase.storage
+        .from('avatars')
+        .list(`${user.id}`, { search: 'logo.' });
 
-    if (existingFiles && existingFiles.length > 0) {
-      for (const fileObj of existingFiles) {
-        if (fileObj.name.startsWith('logo.')) {
-          await this.supabase.storage.from('avatars').remove([`${user.id}/${fileObj.name}`]);
-          console.log('Removed existing logo:', fileObj.name);
+      if (existingFiles && existingFiles.length > 0) {
+        for (const fileObj of existingFiles) {
+          if (fileObj.name.startsWith('logo.')) {
+            await this.supabase.storage.from('avatars').remove([`${user.id}/${fileObj.name}`]);
+            console.log('Removed existing logo:', fileObj.name);
+          }
         }
       }
+
+      const { data, error } = await this.supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) {
+        console.error('Supabase storage error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
+      }
+
+      console.log('Logo uploaded successfully:', data);
+
+      // Get the public URL
+      const { data: { publicUrl } } = this.supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      if (!publicUrl) {
+        throw new Error('Failed to get logo URL');
+      }
+
+      console.log('Logo public URL:', publicUrl);
+
+      // Update organization record with logo URL
+      const { data: orgData, error: updateError } = await this.supabase
+        .from('organizations')
+        .update({ logo_url: publicUrl })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      return {
+        fileUrl: publicUrl,
+        fileName: file.name,
+        fileSize: file.size
+      };
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      throw error;
     }
-    
-    const { data, error } = await this.supabase.storage
-      .from('avatars')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: true
-      });
-
-    if (error) {
-      console.error('Supabase storage error:', error);
-      throw new Error(`Upload failed: ${error.message}`);
-    }
-
-    console.log('Logo uploaded successfully:', data);
-
-    // Get the public URL
-    const { data: { publicUrl } } = this.supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
-
-    if (!publicUrl) {
-      throw new Error('Failed to get logo URL');
-    }
-
-    console.log('Logo public URL:', publicUrl);
-
-    // Update organization record with logo URL
-    const { data: orgData, error: updateError } = await this.supabase
-      .from('organizations')
-      .update({ logo_url: publicUrl })
-      .eq('id', user.id)
-      .select()
-      .single();
-
-    if (updateError) throw updateError;
-
-    return {
-      fileUrl: publicUrl,
-      fileName: file.name,
-      fileSize: file.size
-    };
-  } catch (error) {
-    console.error('Error uploading logo:', error);
-    throw error;
   }
-}
 
 
   // Get organization profile by user ID
@@ -140,12 +140,12 @@ class OrganizationProfileService {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
-      
+
       // Format contact data to match expected structure
       if (data && data.organization_contacts && data.organization_contacts.length > 0) {
         data.contact = data.organization_contacts[0];
       }
-      
+
       return data;
     } catch (error) {
       console.error('Error fetching organization:', error);
@@ -217,7 +217,7 @@ class OrganizationProfileService {
       // First upload the file to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${orgId}/${documentType}_${Date.now()}.${fileExt}`;
-      
+
       const { data: uploadData, error: uploadError } = await this.supabase.storage
         .from('organization-documents')
         .upload(fileName, file);
@@ -293,7 +293,7 @@ class OrganizationProfileService {
           .eq('organization_id', orgId)
           .select()
           .single();
-        
+
         if (error) throw error;
         result = data;
       } else {
@@ -404,6 +404,7 @@ class OrganizationProfileService {
         .insert([{
           id: user.id,
           company_name: onboardingData.companyName,
+          organization_name: onboardingData.companyName, // keep both columns in sync
           company_type: onboardingData.companyType,
           industry: onboardingData.industry,
           company_description: onboardingData.companyDescription,
@@ -455,10 +456,10 @@ class OrganizationProfileService {
             .insert([{
               organization_id: organization.id,
               document_type: 'cac_certificate',
-              document_name: 'CAC Certificate',
+              document_name: onboardingData.cacDocumentName || 'CAC Certificate',
               document_url: onboardingData.cacDocument,
-              file_size: 0, // We don't have the file size here
-              mime_type: 'application/pdf' // Default assumption
+              file_size: onboardingData.cacDocumentSize || 0,
+              mime_type: onboardingData.cacDocumentMime || 'application/pdf'
             }])
             .select()
             .single();
@@ -480,10 +481,10 @@ class OrganizationProfileService {
             .insert([{
               organization_id: organization.id,
               document_type: 'business_permit',
-              document_name: 'Business Permit',
+              document_name: onboardingData.businessPermitName || 'Business Permit',
               document_url: onboardingData.businessPermit,
-              file_size: 0,
-              mime_type: 'application/pdf'
+              file_size: onboardingData.businessPermitSize || 0,
+              mime_type: onboardingData.businessPermitMime || 'application/pdf'
             }])
             .select()
             .single();
@@ -496,6 +497,23 @@ class OrganizationProfileService {
         } catch (docError) {
           console.error('Document creation error:', docError);
         }
+      }
+
+      // Mark onboarding as complete in the profiles table
+      try {
+        const { error: profileUpdateError } = await this.supabase
+          .from('profiles')
+          .update({ has_completed_onboarding: true })
+          .eq('id', user.id);
+
+        if (profileUpdateError) {
+          console.error('Error updating onboarding status:', profileUpdateError);
+        } else {
+          console.log('has_completed_onboarding set to true for user:', user.id);
+        }
+      } catch (profileErr) {
+        console.error('Profile update error:', profileErr);
+        // Non-fatal — onboarding data is saved even if this fails
       }
 
       return organization;
@@ -541,7 +559,7 @@ class OrganizationProfileService {
           }
         }
       }
-      
+
       const { data, error } = await this.supabase.storage
         .from('uploads')
         .upload(fileName, file, {
@@ -606,7 +624,7 @@ class OrganizationProfileService {
       if (query) {
         queryBuilder = queryBuilder.ilike('company_name', `%${query}%`);
       }
-      
+
       if (status) {
         queryBuilder = queryBuilder.eq('verification_status', status);
       }
@@ -616,7 +634,7 @@ class OrganizationProfileService {
       queryBuilder = queryBuilder.range(from, from + limit - 1);
 
       const { data, error, count } = await queryBuilder;
-      
+
       if (error) throw error;
 
       return {

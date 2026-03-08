@@ -53,29 +53,33 @@ const OrganizationLogin = () => {
         setSuccess(successMsg);
         toast.success(successMsg);
 
-        // Check if organization profile exists
+        // Check if onboarding has been completed using profiles.has_completed_onboarding
         try {
-          const { default: organizationProfileService } = await import("../lib/OrganizationProfileService.js");
-          const orgData = await organizationProfileService.getOrganizationByUserId(result.user.id);
-          
-          // If no organization profile exists, it's a first login - redirect to profile edit (onboarding)
-          if (!orgData) {
-            console.log("First login detected - redirecting to profile onboarding");
+          const { supabase } = await import("../lib/supabase.js");
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("has_completed_onboarding")
+            .eq("id", result.user.id)
+            .single();
+
+          if (!profile?.has_completed_onboarding) {
+            // First login — send to onboarding
+            console.log("First login detected - redirecting to onboarding");
             setTimeout(() => {
-              navigate("/organization-profile-edit");
+              navigate("/organization-onboarding");
             }, 1500);
           } else {
-            // Organization profile exists - redirect to dashboard
+            // Onboarding done — go straight to dashboard
             console.log("Existing organization - redirecting to dashboard");
             setTimeout(() => {
               navigate("/dashboard-overview");
             }, 1500);
           }
         } catch (profileCheckError) {
-          console.error("Error checking organization profile:", profileCheckError);
-          // Default to dashboard if profile check fails
+          console.error("Error checking onboarding status:", profileCheckError);
+          // Default to onboarding to be safe
           setTimeout(() => {
-            navigate("/dashboard-overview");
+            navigate("/organization-onboarding");
           }, 1500);
         }
       } else {

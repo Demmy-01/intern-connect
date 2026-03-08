@@ -132,6 +132,7 @@ const OrganizationOnboarding = () => {
           name: file.name,
           url: uploadResult.fileUrl,
           size: file.size,
+          mimeType: file.type,
         },
       }));
     } catch (error) {
@@ -285,7 +286,13 @@ const OrganizationOnboarding = () => {
 
         // Documents (file URLs from uploads)
         cacDocument: profileData.cacDocument?.url || null,
+        cacDocumentName: profileData.cacDocument?.name || null,
+        cacDocumentSize: profileData.cacDocument?.size || 0,
+        cacDocumentMime: profileData.cacDocument?.mimeType || null,
         businessPermit: profileData.businessPermit?.url || null,
+        businessPermitName: profileData.businessPermit?.name || null,
+        businessPermitSize: profileData.businessPermit?.size || 0,
+        businessPermitMime: profileData.businessPermit?.mimeType || null,
 
         // Compliance
         termsAccepted: profileData.termsAccepted,
