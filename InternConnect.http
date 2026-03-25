@@ -1,6 +1,0 @@
-@InternConnect_HostAddress = http://localhost:5053
-
-GET {{InternConnect_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
